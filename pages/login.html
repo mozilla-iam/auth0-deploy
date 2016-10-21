@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Sign In with Mozilla</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style> body,html{padding:0;margin:0}.table{display:table;position:absolute;height:100%;width:100%;background:linear-gradient(rgba(255,255,255,.3),rgba(255,255,255,0));background-color:#e8ebef}.cell{display:table-cell;vertical-align:middle}.content{padding:25px 0;margin-left:auto;margin-right:auto;width:280px}
+  </style>
+</head>
+<body>
+
+ <div class="table">
+   <div class="cell">
+     <div class="content">
+       <!-- WIDGET -->
+       <div id="widget-container"></div>
+       <!-- TOS -->
+       <p id="tos" style="padding-top:10px;visibility:hidden">
+         When using this website, you agree to the <a id="tosurl" href="https://www.mozilla.org/en-US/privacy/">terms of service</a>
+       </p>
+     </div>
+   </div>
+ </div>
+
+ <!--[if IE 8]>
+ <script src="//cdnjs.cloudflare.com/ajax/libs/ie8/0.2.5/ie8.js"></script>
+ <![endif]-->
+
+ <!--[if lte IE 9]>
+ <script src="https://cdn.auth0.com/js/base64.js"></script>
+ <script src="https://cdn.auth0.com/js/es5-shim.min.js"></script>
+ <![endif]-->
+
+ <!-- This URL is to be manually updated -->
+ <script src="https://cdn.auth0.com/js/lock/10.2/lock.min.js"></script>
+ <script>
+    var APPS_WITH_TOS = [['phonebook-dev', 'https://www.mozilla.org/en-US/privacy/']];
+    // See https://auth0.com/docs/libraries/lock/v10/api and https://auth0.com/docs/libraries/lock/v10/customization for setup
+    // Decode utf8 characters properly
+    var config = JSON.parse(decodeURIComponent(escape(window.atob('@@config@@'))));
+
+    var connection = config.connection;
+    var prompt = config.prompt;
+
+    var options = {
+      auth: {
+        redirectUrl: config.callbackURL,
+        responseType: config.callbackOnLocationHash ? 'token' : 'code',
+        params: config.internalOptions
+      },
+      container: 'widget-container',
+      rememberLastLogin: true,
+      connections: config.connection ? [config.connection] : null,
+      mustAcceptTerms: true,
+      languageDictionary: { // see https://github.com/auth0/lock/blob/master/src/i18n/en.js
+        emailInputPlaceholder: "yourname@mozilla.com",
+        title: ""
+      },
+      theme: {
+        //needs a nicer version of the logo
+        logo: "https://www.mozilla.org/media/img/styleguide/identity/mozilla/wordmark.b9f1818e8d92.png",
+        primaryColor: "#c13832"
+      },
+      closable: false,
+      socialButtonStyle: 'small'
+    };
+
+    var lock = new Auth0Lock(config.clientID, config.auth0Domain, options);
+    lock.show();
+    for (app in APPS_WITH_TOS) {
+      if (APPS_WITH_TOS[app][0] == config.dict.signin.title) {
+        tosurl.href=APPS_WITH_TOS[app][1];
+        tos.style.visibility="visible";
+      }
+    }
+</script>
+</body>
+</html>
