@@ -14,6 +14,7 @@ function (user, context, callback) {
       // Force DuoSecurity everytime this rule runs. Defaults to false.
       // If accepted by users the cookie lasts for 30 days - i.e. 30 days MFA session (this cannot be changed)
       ignoreCookie: false,
+      username: user.email,
     };
   }
   callback(null, user, context);
