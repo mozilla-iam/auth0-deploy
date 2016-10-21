@@ -4,6 +4,8 @@ You can find more information about Auth0 at https://www.auth0.com
 
 The rules are snippets of javascript code running as webtasks (https://www.webtasks.io), which modify the authentication flow of users in Auth0.
 
+See also: https://github.com/auth0-samples/github-source-control-integration
+
 ## Branches
 
 `master`:
