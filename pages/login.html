@@ -28,14 +28,16 @@
         margin-right:auto;
         width:280px;
       }
-      .auth0-lock-header-bg {
-        background: #d7d3c8 !important;
+      #widget-container .auth0-lock-header-bg {
+        background: #d7d3c8;
       }
       .auth0-label-submit {
         color:#4d4e53;
         font-weight:600;
       }
       .auth0-lock-form > div > div {display: none;}
+      #widget-container button.auth0-lock-submit {display: none;}
+
       .auth0-lock-form > div > div.auth0-lock-pane-separator {display: none;}
       .auth0-lock-form > div > div.auth-lock-social-buttons-pane {display: inherit;}
       .auth0-lock-form > div > div.auth-lock-ldap-button {display: inherit;}
@@ -44,7 +46,7 @@
         margin: 10px 0 0;
         width: 100%;
       }
-      .auth0-lock-ldap-button {
+      #widget-container .auth0-lock-ldap-button {
         border: 0;
         padding: 0;
         box-sizing: border-box;
@@ -52,8 +54,13 @@
         border-radius: 3px;
         position: relative;
         height: 40px;
-        background-color:#C13832;
+        background-color:#c13832;
         text-align: center;
+        transition:background-color 0.3s;
+        -webkit-transition:background-color 0.3s;
+      }
+      .auth0-lock-ldap-button:hover .auth0-lock-ldap-button-text, .auth0-lock-ldap-button:hover .auth0-lock-ldap-button-text:focus, .auth0-lock-ldap-button:hover .auth0-lock-ldap-button-icon, .auth0-lock-ldap-button:hover .auth0-lock-ldap-button-icon:focus {
+        background-color:rgba(0,0,0,0.3);
       }
       .auth0-lock-ldap-button-icon {
         background-color: rgba(0,0,0,0.3);
@@ -175,11 +182,13 @@
 
     var lock = new Auth0Lock(config.clientID, config.auth0Domain, options);
     var addLDAPButton = function() {
-      document.querySelector(".auth0-lock-form > div").insertAdjacentHTML('beforeend', '<button class="auth0-lock-ldap-button auth0-lock-ldap-big-button" type="button"><div class="auth0-lock-ldap-button-icon"></div><div class="auth0-lock-ldap-button-text">Log in with LDAP</div></button>');
+      document.querySelector(".auth0-lock-form > div > div.auth0-lock-pane-separator").insertAdjacentHTML('afterend', '<button class="auth0-lock-ldap-button auth0-lock-ldap-big-button" type="button"><div class="auth0-lock-ldap-button-icon"></div><div class="auth0-lock-ldap-button-text">Log in with LDAP</div></button>');
       $(".auth0-lock-form > div > div:not([class]) > p ").html("<hr />");
       $("button.auth0-lock-ldap-button").click(function() {
+        $("button.auth0-lock-submit").wrap("<div class='auth0-lock-submit-container' style='display: none;'></div>").show();
         $("button.auth0-lock-ldap-button").slideToggle();
         $(".auth0-lock-form > div > div:not([class])").slideToggle();
+        $("div.auth0-lock-submit-container").slideToggle();
       });
     };
     lock.on("signin ready", addLDAPButton);
