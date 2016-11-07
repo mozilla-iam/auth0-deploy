@@ -258,6 +258,19 @@
     };
 
     var lock = new Auth0Lock(config.clientID, config.auth0Domain, options);
+
+    // Get query parameters by name
+    function getParameterByName( name ){
+      var regexS = "[\\?&]"+name+"=([^&#]*)",
+      regex = new RegExp( regexS ),
+      results = regex.exec( window.location.search );
+      if( results == null ){
+        return "";
+      } else{
+        return decodeURIComponent(results[1].replace(/\+/g, " "));
+      }
+    }
+
     var sendEmail = function() {
       var email = $("input[name=passwordlessEmail]").val();
       const auth0 = new Auth0({
@@ -265,7 +278,8 @@
         domain: config.auth0Domain,
         callbackURL: config.callbackURL
       });
-      auth0.requestMagicLink({ email: email , send: 'link'}, function(err) {
+      var authParams = { "state": getParameterByName("state"), "nonce": getParameterByName("nonce") };
+      auth0.requestMagicLink({ email: email , send: 'link', authParams: authParams}, function(err) {
         var message;
         var icon;
         if (err) {
