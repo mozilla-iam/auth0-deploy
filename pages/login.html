@@ -359,6 +359,7 @@
           // LDAP Only because the LDAP input fields are in
           // "div.auth0-lock-form > div" instead of "div.auth0-lock-form > div > div"
           $("div.auth0-lock-submit-container").show();
+          $(".auth0-lock-input-username input").focus();
         }
         $("button.auth0-lock-passwordless-submit").click(sendEmail);
         $("input[name=passwordlessEmail]").keyup(function(event) {
@@ -449,6 +450,7 @@
         $("button.auth0-lock-ldap-button").slideUp();
         $(".auth-lock-social-buttons-pane").slideUp();
         $("button.auth0-lock-passwordless-button").slideUp();
+        $(".auth0-lock-input-email input").focus();
       });
       $("button.auth0-lock-passwordless-button").click(function() {
         $("button.auth0-lock-passwordless-submit").show();
@@ -459,6 +461,7 @@
         $("button.auth0-lock-ldap-button").slideUp();
         $(".auth-lock-social-buttons-pane").slideUp();
         $("button.auth0-lock-passwordless-button").slideUp();
+        $("input[name=passwordlessEmail]").focus();
       });
       $("button.auth0-lock-back-button").click(function() {
           $("button.auth0-lock-ldap-button").slideDown();
