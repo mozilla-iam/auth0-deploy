@@ -431,8 +431,9 @@
         var connectionListReturned = function() {
           if (typeof isEmailConnectionEnabled === 'undefined') {
             window.requestAnimationFrame(connectionListReturned);
+          } else {
+            updatePasswordlessButton();
           }
-          updatePasswordlessButton();
         };
         connectionListReturned();
       } else {
@@ -478,8 +479,9 @@
     var submitExistsYet = function() {
       if ($("button.auth0-lock-submit").length == 0) {
         window.requestAnimationFrame(submitExistsYet);
+      } else {
+        customizeSubmitButton();
       }
-      customizeSubmitButton();
     };
     submitExistsYet();
 
