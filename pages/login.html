@@ -163,6 +163,11 @@
         animation: fill .4s ease-in-out .7s forwards,scale .3s ease-in-out 1.1s both;
       }
   </style>
+  <script>
+    /*! modernizr 3.3.1 (Custom Build) | MIT *
+    * https://modernizr.com/download/?-inputtypes-setclasses !*/
+    !function(e,t,n){function a(e,t){return typeof e===t}function s(){var e,t,n,s,i,o,c;for(var u in r)if(r.hasOwnProperty(u)){if(e=[],t=r[u],t.name&&(e.push(t.name.toLowerCase()),t.options&&t.options.aliases&&t.options.aliases.length))for(n=0;n<t.options.aliases.length;n++)e.push(t.options.aliases[n].toLowerCase());for(s=a(t.fn,"function")?t.fn():t.fn,i=0;i<e.length;i++)o=e[i],c=o.split("."),1===c.length?Modernizr[c[0]]=s:(!Modernizr[c[0]]||Modernizr[c[0]]instanceof Boolean||(Modernizr[c[0]]=new Boolean(Modernizr[c[0]])),Modernizr[c[0]][c[1]]=s),l.push((s?"":"no-")+c.join("-"))}}function i(e){var t=u.className,n=Modernizr._config.classPrefix||"";if(f&&(t=t.baseVal),Modernizr._config.enableJSClass){var a=new RegExp("(^|\\s)"+n+"no-js(\\s|$)");t=t.replace(a,"$1"+n+"js$2")}Modernizr._config.enableClasses&&(t+=" "+n+e.join(" "+n),f?u.className.baseVal=t:u.className=t)}function o(){return"function"!=typeof t.createElement?t.createElement(arguments[0]):f?t.createElementNS.call(t,"http://www.w3.org/2000/svg",arguments[0]):t.createElement.apply(t,arguments)}var l=[],r=[],c={_version:"3.3.1",_config:{classPrefix:"",enableClasses:!0,enableJSClass:!0,usePrefixes:!0},_q:[],on:function(e,t){var n=this;setTimeout(function(){t(n[e])},0)},addTest:function(e,t,n){r.push({name:e,fn:t,options:n})},addAsyncTest:function(e){r.push({name:null,fn:e})}},Modernizr=function(){};Modernizr.prototype=c,Modernizr=new Modernizr;var u=t.documentElement,f="svg"===u.nodeName.toLowerCase(),p=o("input"),d="search tel url email datetime date month week time datetime-local number range color".split(" "),m={};Modernizr.inputtypes=function(e){for(var a,s,i,o=e.length,l="1)",r=0;o>r;r++)p.setAttribute("type",a=e[r]),i="text"!==p.type&&"style"in p,i&&(p.value=l,p.style.cssText="position:absolute;visibility:hidden;",/^range$/.test(a)&&p.style.WebkitAppearance!==n?(u.appendChild(p),s=t.defaultView,i=s.getComputedStyle&&"textfield"!==s.getComputedStyle(p,null).WebkitAppearance&&0!==p.offsetHeight,u.removeChild(p)):/^(search|tel)$/.test(a)||(i=/^(url|email)$/.test(a)?p.checkValidity&&p.checkValidity()===!1:p.value!=l)),m[e[r]]=!!i;return m}(d),s(),i(l),delete c.addTest,delete c.addAsyncTest;for(var h=0;h<Modernizr._q.length;h++)Modernizr._q[h]();e.Modernizr=Modernizr}(window,document);
+  </script>
 </head>
 <body>
 
@@ -372,14 +377,17 @@
 
     var customizeLDAPFields = function () {
       $(".auth0-lock-form > div > div:not([class]) > div.auth0-lock-input-password input.auth0-lock-input ").attr("placeholder", "your LDAP password");
-      $(".auth0-lock-form > div > div:not([class]) > div.auth0-lock-input-email input.auth0-lock-input ").attr("placeholder", "yourname@mozilla.com");
+      $(".auth0-lock-form > div > div:not([class]) > div.auth0-lock-input-email input.auth0-lock-input ").attr({
+        placeholder: "yourname@mozilla.org",
+        type: (Modernizr.inputtypes.email ? "email" : "text")
+      });
     };
 
     var customizeLock = function() {
       // customizeLock isn't run if LDAP is the only connection
       $(".auth0-lock-form > div > div:not([class])").hide();
       $(".auth0-lock-form > div > div.auth0-lock-pane-separator").hide();
-      $(".auth0-lock-form > div > div:not([class])").before(
+      $(".auth0-lock-form > div").append(
         '<button class="auth0-lock-passwordless-button auth0-lock-passwordless-big-button" style="display:none;" type="button">' +
         '  <div class="auth0-lock-passwordless-button-icon"></div>' +
         '  <div class="auth0-lock-passwordless-button-text">Log in with Email</div>' +
@@ -398,14 +406,13 @@
         '          </g>' +
         '        </svg>' +
         '      </span>' +
-        '      <input autocomplete="off" class="auth0-lock-input" name="passwordlessEmail" placeholder="yourname@example.com" type="text" value="">' +
+        '      <input autocomplete="off" class="auth0-lock-input" name="passwordlessEmail" placeholder="yourname@example.com" type="' + (Modernizr.inputtypes.email ? "email" : "text") + '" value="">' +
         '    </div>' +
         '  </div>' +
         '</div>' +
-        '<button class="auth0-lock-ldap-button auth0-lock-ldap-big-button" type="button">' +
+        '<button class="auth0-lock-ldap-button auth0-lock-ldap-big-button" type="button" style="display:none;">' +
         '  <div class="auth0-lock-ldap-button-icon"></div><div class="auth0-lock-ldap-button-text">Log in with LDAP</div>' +
-        '</button>');
-      $(".auth0-lock-form > div").append(
+        '</button>' +
         '<div class="auth0-lock-back" style="display: none;">' +
         '  <button class="auth0-lock-back-button" type="button">' +
         '    <span class="">' +
@@ -417,6 +424,9 @@
         '  </button>' +
         '</div>');
       $(".auth0-lock-form > div > div:not([class]) > p ").remove();
+      if ($(".auth0-lock-form > div > div:not([class])").length != 0) {
+        $(".auth0-lock-ldap-button").show();
+      }
       var updatePasswordlessButton = function() {
         // show or hide the passwordless button based on the results of the
         // auth0 getConnections call
@@ -461,19 +471,19 @@
         $("button.auth0-lock-passwordless-button").slideUp();
       });
       $("button.auth0-lock-back-button").click(function() {
-          $("button.auth0-lock-ldap-button").slideDown();
-          $("button.auth0-lock-passwordless-button").slideDown();
-          $(".auth-lock-social-buttons-pane").slideDown();
-          $("div.auth0-lock-submit-container").slideUp();
-          $(".auth0-lock-back").slideUp();
-          $(".auth0-lock-passwordless-pane").slideUp();
-          $(".auth0-lock-form > div > div:not([class])").slideUp();
+        if ($(".auth0-lock-form > div > div:not([class])").length != 0) {
+          $(".auth0-lock-ldap-button").slideDown();
+        }
+        $("button.auth0-lock-passwordless-button").slideDown();
+        $(".auth-lock-social-buttons-pane").slideDown();
+        $("div.auth0-lock-submit-container").slideUp();
+        $(".auth0-lock-back").slideUp();
+        $(".auth0-lock-passwordless-pane").slideUp();
+        $(".auth0-lock-form > div > div:not([class])").slideUp();
       });
     };
     lock.on("signin ready", customizeLock);
     // "signin ready" doesn't fire if the only connection is LDAP
-    lock.on("show", customizeLDAPFields);
-    // "show" fires regardless
     lock.show();
 
     var submitExistsYet = function() {
@@ -481,6 +491,7 @@
         window.requestAnimationFrame(submitExistsYet);
       } else {
         customizeSubmitButton();
+        customizeLDAPFields();
       }
     };
     submitExistsYet();
