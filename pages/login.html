@@ -387,7 +387,7 @@
       // customizeLock isn't run if LDAP is the only connection
       $(".auth0-lock-form > div > div:not([class])").hide();
       $(".auth0-lock-form > div > div.auth0-lock-pane-separator").hide();
-      $(".auth0-lock-form > div > div:not([class])").before(
+      $(".auth0-lock-form > div").append(
         '<button class="auth0-lock-passwordless-button auth0-lock-passwordless-big-button" style="display:none;" type="button">' +
         '  <div class="auth0-lock-passwordless-button-icon"></div>' +
         '  <div class="auth0-lock-passwordless-button-text">Log in with Email</div>' +
@@ -406,14 +406,13 @@
         '          </g>' +
         '        </svg>' +
         '      </span>' +
-        '      <input autocomplete="off" class="auth0-lock-input" name="passwordlessEmail" placeholder="yourname@example.com" type="text" value="">' +
+        '      <input autocomplete="off" class="auth0-lock-input" name="passwordlessEmail" placeholder="yourname@example.com" type="' + (Modernizr.inputtypes.email ? "email" : "text") + '" value="">' +
         '    </div>' +
         '  </div>' +
         '</div>' +
-        '<button class="auth0-lock-ldap-button auth0-lock-ldap-big-button" type="button">' +
+        '<button class="auth0-lock-ldap-button auth0-lock-ldap-big-button" type="button" style="display:none;">' +
         '  <div class="auth0-lock-ldap-button-icon"></div><div class="auth0-lock-ldap-button-text">Log in with LDAP</div>' +
-        '</button>');
-      $(".auth0-lock-form > div").append(
+        '</button>' +
         '<div class="auth0-lock-back" style="display: none;">' +
         '  <button class="auth0-lock-back-button" type="button">' +
         '    <span class="">' +
@@ -425,6 +424,9 @@
         '  </button>' +
         '</div>');
       $(".auth0-lock-form > div > div:not([class]) > p ").remove();
+      if ($(".auth0-lock-form > div > div:not([class])").length != 0) {
+        $(".auth0-lock-ldap-button").show();
+      }
       var updatePasswordlessButton = function() {
         // show or hide the passwordless button based on the results of the
         // auth0 getConnections call
@@ -469,19 +471,19 @@
         $("button.auth0-lock-passwordless-button").slideUp();
       });
       $("button.auth0-lock-back-button").click(function() {
-          $("button.auth0-lock-ldap-button").slideDown();
-          $("button.auth0-lock-passwordless-button").slideDown();
-          $(".auth-lock-social-buttons-pane").slideDown();
-          $("div.auth0-lock-submit-container").slideUp();
-          $(".auth0-lock-back").slideUp();
-          $(".auth0-lock-passwordless-pane").slideUp();
-          $(".auth0-lock-form > div > div:not([class])").slideUp();
+        if ($(".auth0-lock-form > div > div:not([class])").length != 0) {
+          $(".auth0-lock-ldap-button").slideDown();
+        }
+        $("button.auth0-lock-passwordless-button").slideDown();
+        $(".auth-lock-social-buttons-pane").slideDown();
+        $("div.auth0-lock-submit-container").slideUp();
+        $(".auth0-lock-back").slideUp();
+        $(".auth0-lock-passwordless-pane").slideUp();
+        $(".auth0-lock-form > div > div:not([class])").slideUp();
       });
     };
     lock.on("signin ready", customizeLock);
     // "signin ready" doesn't fire if the only connection is LDAP
-    lock.on("show", customizeLDAPFields);
-    // "show" fires regardless
     lock.show();
 
     var submitExistsYet = function() {
@@ -489,6 +491,7 @@
         window.requestAnimationFrame(submitExistsYet);
       } else {
         customizeSubmitButton();
+        customizeLDAPFields();
       }
     };
     submitExistsYet();
