@@ -203,7 +203,8 @@
     // Decode utf8 characters properly
     var encodedConfig = '@@config@@';
     var config;
-    if (encodedConfig.length == 10) {
+    // The compared string below is broken up to ensure auth0 doesn't replace it in the hosted page with the actual config
+    if (encodedConfig == '@@' + 'config@@') {
         config = {
             "auth0Domain":"auth-dev.mozilla.auth0.com",
             "callbackOnLocationHash":false,
