@@ -340,21 +340,41 @@
       auth0.requestMagicLink({ email: email , send: 'link', authParams: authParams}, function(err) {
         var message;
         var icon;
+        var backLink;
         if (err) {
           message = "We were unable to send the email : " + err.error_description;
           icon = '  <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56"><circle cx="225" cy="225" r="225" transform="matrix(.124 0 0 .124 0 .2)" fill="#c33"/><g fill="#fff" stroke="#fff" stroke-width="70"><path d="M13.236 13.85l29.328 29.328M13.236 43.178L42.564 13.85" stroke-width="8.68"/></g></svg>';
+          backLink = '<div class="auth0-lock-back">' +
+        '  <button class="auth0-lock-back-button" type="button">' +
+        '    <span class="">' +
+        '      <span>' +
+        '        <svg xmlns="http://www.w3.org/2000/svg" class="icon-text" height="12" viewBox="0 0 8 12" width="8"><path d="M6 0L0 6l6 6 1.4-1.4L2.8 6l4.6-4.6" fill="#4d4e53"/></svg>' +
+        '      </span>' +
+        '      Back' +
+        '    </span>' +
+        '  </button>' +
+        '</div>';
         } else {
           message = "We sent you a link to sign in";
           icon = '  <svg width="56px" height="56px" viewBox="0 0 52 52" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="checkmark"> <circle cx="26" cy="26" r="25" fill="none" class="checkmark__circle"></circle> <path fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" class="checkmark__check"></path></svg>';
+          backLink = '';
         }
-        $(".auth0-lock-form").slideToggle();
+        $(".auth0-lock-form").slideUp();
         $(".auth0-lock-content").prepend(
           '<div class="auth0-lock-passwordless-confirmation" style="display:none;">' +
           icon +
           '  <p>' + message + '</p>' +
+          backLink +
           '</div>');
-        $(".auth0-lock-content > .auth0-lock-passwordless-confirmation").slideToggle();
-        $("div.auth0-lock-submit-container").slideToggle();
+        $(".auth0-lock-content > .auth0-lock-passwordless-confirmation").slideDown();
+        $("div.auth0-lock-submit-container").slideUp();
+        $(".auth0-lock-passwordless-confirmation > .auth0-lock-back > button.auth0-lock-back-button").click(function() {
+          $(".auth0-lock-form").slideDown();
+          $("div.auth0-lock-submit-container").slideDown();
+          $(".auth0-lock-content > .auth0-lock-passwordless-confirmation").slideUp(400, function() {
+              this.remove();
+          });
+        });
       });
     };
 
@@ -469,7 +489,7 @@
       $("button.auth0-lock-ldap-button").click(function() {
         $("button.auth0-lock-submit").show();
         $("button.auth0-lock-passwordless-submit").hide();
-        $(".auth0-lock-back").slideDown();
+        $(".auth0-lock-form > div > .auth0-lock-back").slideDown();
         $(".auth0-lock-form > div > div:not([class])").slideDown();
         $("div.auth0-lock-submit-container").slideDown();
         $("button.auth0-lock-ldap-button").slideUp();
@@ -482,20 +502,20 @@
         $("button.auth0-lock-submit").hide();
         $(".auth0-lock-passwordless-pane").slideDown();
         $("div.auth0-lock-submit-container").slideDown();
-        $(".auth0-lock-back").slideDown();
+        $(".auth0-lock-form > div > .auth0-lock-back").slideDown();
         $("button.auth0-lock-ldap-button").slideUp();
         $(".auth-lock-social-buttons-pane").slideUp();
         $("button.auth0-lock-passwordless-button").slideUp();
         $("input[name=passwordlessEmail]").focus();
       });
-      $("button.auth0-lock-back-button").click(function() {
+      $(".auth0-lock-form > div > .auth0-lock-back > button.auth0-lock-back-button").click(function() {
         if ($(".auth0-lock-form > div > div:not([class])").length != 0) {
           $(".auth0-lock-ldap-button").slideDown();
         }
         $("button.auth0-lock-passwordless-button").slideDown();
         $(".auth-lock-social-buttons-pane").slideDown();
         $("div.auth0-lock-submit-container").slideUp();
-        $(".auth0-lock-back").slideUp();
+        $(".auth0-lock-form > div > .auth0-lock-back").slideUp();
         $(".auth0-lock-passwordless-pane").slideUp();
         $(".auth0-lock-form > div > div:not([class])").slideUp();
         $(".auth0-global-message").slideUp();
