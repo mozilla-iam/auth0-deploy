@@ -198,6 +198,35 @@
  <script src="https://cdn.auth0.com/js/lock/10.5/lock.min.js"></script>
  <script src="https://cdn.auth0.com/w2/auth0-7.4.min.js"></script>
  <script>
+  
+    // set up an observer to watch for auth0 nodes to trigger our customizations
+    // since not all auth0 lock states emit events when ready/seen, etc. 
+    // select a broad target node
+    var target = document.getElementById('widget-container');
+     
+    // create an observer instance to watch all subtree modifications
+    var observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.type == 'childList' && mutation.addedNodes.length > 0) {
+            //console.log(mutation.addedNodes)
+            mutation.addedNodes.forEach(function(node){
+              if (node.className=="auth0-lock-submit") {
+                customizeLock();
+                customizeSubmitButton();
+                customizeLDAPFields();
+                $("button.auth0-lock-submit").hide();
+              }
+            })
+        }
+      });    
+    });
+     
+    // configuration of the observer:
+    var config = { attributes: true, childList: true, characterData: true , subtree: true};
+     
+    // pass in the target node, as well as the observer options
+    observer.observe(target, config);
+
     var APPS_WITH_TOS = [['phonebook-dev', 'https://www.mozilla.org/en-US/privacy/']];
     // See https://auth0.com/docs/libraries/lock/v10/api and https://auth0.com/docs/libraries/lock/v10/customization for setup
     // Decode utf8 characters properly
@@ -283,6 +312,7 @@
         return decodeURIComponent(results[1].replace(/\+/g, " "));
       }
     }
+
     const auth0 = new Auth0({
       clientID: config.clientID,
       domain: config.auth0Domain,
@@ -380,9 +410,9 @@
     };
 
     var customizeSubmitButton = function () {
-      if ($("div.auth0-lock-submit-container").length == 0) {
-        $("button.auth0-lock-submit").wrap('<div class="auth0-lock-submit-container" style="display: none;"></div>');
-        $(".auth0-lock-submit-container").append(
+      if ($("div.auth0-lock-passwordless-pane").length == 1) {
+        //$("button.auth0-lock-submit").wrap('<div class="auth0-lock-submit-container" style="display: none;"></div>');
+        $("div.auth0-lock-passwordless-pane").append(
           '<button class="auth0-lock-passwordless-submit" style="display:none;" type="submit">' +
           '  <span class="auth0-label-submit">Send Email' +
           '    <span>' +
@@ -410,7 +440,7 @@
           }
         });
       }
-    };
+    };    
 
     var customizeLDAPFields = function () {
       $(".auth0-lock-form > div > div:not([class]) > div.auth0-lock-input-password input.auth0-lock-input ").attr("placeholder", "your LDAP password");
@@ -422,6 +452,7 @@
 
     var customizeLock = function() {
       // customizeLock isn't run if LDAP is the only connection
+      $(".auth0-lock-content").hide();
       $(".auth0-lock-form > div > div:not([class])").hide();
       $(".auth0-lock-form > div > div.auth0-lock-pane-separator").hide();
       $(".auth0-lock-form > div").append(
@@ -464,29 +495,12 @@
       if ($(".auth0-lock-form > div > div:not([class])").length != 0) {
         $(".auth0-lock-ldap-button").show();
       }
-      var updatePasswordlessButton = function() {
-        // show or hide the passwordless button based on the results of the
-        // auth0 getConnections call
-        if (isEmailConnectionEnabled) {
-          $(".auth0-lock-passwordless-button").show();
-        } else {
-          $(".auth0-lock-passwordless-button").remove();
-        }
-      };
-      if (typeof isEmailConnectionEnabled === 'undefined') {
-        // The auth0 getConnections call hasn't yet returned so wait
-        var connectionListReturned = function() {
-          if (typeof isEmailConnectionEnabled === 'undefined') {
-            window.requestAnimationFrame(connectionListReturned);
-          } else {
-            updatePasswordlessButton();
-          }
-        };
-        connectionListReturned();
-      } else {
-        updatePasswordlessButton();
-      }
 
+      if (isEmailConnectionEnabled ) {
+        $(".auth0-lock-passwordless-button").show();
+      } else {
+        $(".auth0-lock-passwordless-button").remove();
+      }
       $("button.auth0-lock-ldap-button").click(function() {
         $("button.auth0-lock-submit").show();
         $("button.auth0-lock-passwordless-submit").hide();
@@ -513,6 +527,7 @@
         if ($(".auth0-lock-form > div > div:not([class])").length != 0) {
           $(".auth0-lock-ldap-button").slideDown();
         }
+        $("button.auth0-lock-submit").hide();
         $("button.auth0-lock-passwordless-button").slideDown();
         $(".auth-lock-social-buttons-pane").slideDown();
         $("div.auth0-lock-submit-container").slideUp();
@@ -521,20 +536,10 @@
         $(".auth0-lock-form > div > div:not([class])").slideUp();
         $(".auth0-global-message").slideUp();
       });
+      $(".auth0-lock-content").show();
     };
-    lock.on("signin ready", customizeLock);
-    // "signin ready" doesn't fire if the only connection is LDAP
-    lock.show();
 
-    var submitExistsYet = function() {
-      if ($("button.auth0-lock-submit").length == 0) {
-        window.requestAnimationFrame(submitExistsYet);
-      } else {
-        customizeSubmitButton();
-        customizeLDAPFields();
-      }
-    };
-    submitExistsYet();
+    lock.show();
 
     for (app in APPS_WITH_TOS) {
       if (APPS_WITH_TOS[app][0] == config.dict.signin.title) {
