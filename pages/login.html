@@ -314,10 +314,8 @@
     }
     function customizeLDAPFields() {
       $(".auth0-lock-form > div > div:not([class]) > div.auth0-lock-input-password input.auth0-lock-input ").attr("placeholder", "your LDAP password");
-      $(".auth0-lock-form > div > div:not([class]) > div.auth0-lock-input-email input.auth0-lock-input ").attr({
-        placeholder: "yourname@mozilla.org",
-        type: (Modernizr.inputtypes.email ? "email" : "text")
-      });
+      $(".auth0-lock-form > div > div:not([class])").prepend('<p>Note : To log in with an <span title="For example John Doe\'s alias might be merlin@mozilla.com as opposed to jdoe@mozilla.com" style="text-decoration: underline dotted;">LDAP email alias</span>, please click BACK and choose LOG IN WITH EMAIL.</p>');
+      $(".auth0-lock-form > div > div:not([class]) > div.auth0-lock-input-email input.auth0-lock-input ").attr("type", (Modernizr.inputtypes.email ? "email" : "text"));
     }
     function customizeLock() {
       // customizeLock isn't run if LDAP is the only connection
@@ -440,8 +438,13 @@
       connections: config.connection ? [config.connection] : null,
       mustAcceptTerms: true,
       languageDictionary: { // see https://github.com/auth0/lock/blob/master/src/i18n/en.js
-        emailInputPlaceholder: "yourname@mozilla.com",
-        title: ""
+        emailInputPlaceholder: "jdoe@mozilla.com",
+        title: "",
+        error: {
+          login: {
+            "lock.invalid_email_password": "Wrong email or password. Did you use your primary Mozilla email and correct LDAP password?"
+          }
+        }
       },
       theme: {
         logo: 'data:image/svg+xml;base64,' + window.btoa(logo),
