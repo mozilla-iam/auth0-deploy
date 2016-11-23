@@ -331,8 +331,9 @@
           $(".auth0-lock-input-username input").focus();
         }
         $("button.auth0-lock-passwordless-submit").click(sendEmail);
-        $("input[name=passwordlessEmail]").keyup(function(event) {
+        $("input[name=passwordlessEmail]").keydown(function(event) {
           if (event.keyCode == 13) {
+            event.preventDefault();
             sendEmail();
             return false;
           }
