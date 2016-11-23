@@ -346,7 +346,6 @@
       $(".auth0-lock-form > div > div:not([class]) > div.auth0-lock-input-email input.auth0-lock-input ").attr("type", (Modernizr.inputtypes.email ? "email" : "text"));
     }
     function customizeLock() {
-      // customizeLock isn't run if LDAP is the only connection
       $(".auth0-lock-form > div > div:not([class])").hide();
       $(".auth0-lock-form > div > div.auth0-lock-pane-separator").hide();
       $(".auth0-lock-form > div").append(
@@ -539,8 +538,6 @@
         options['rememberLastLogin'] = false;
       }
       var lock = new Auth0Lock(config.clientID, config.auth0Domain, options);
-      lock.on("signin ready", customizeLock);
-      // "signin ready" doesn't fire if the only connection is LDAP
       lock.show();
     });
 
@@ -548,6 +545,7 @@
       if ($("button.auth0-lock-submit").length == 0) {
         window.requestAnimationFrame(submitExistsYet);
       } else {
+        customizeLock();
         customizeSubmitButton();
         customizeLDAPFields();
       }
