@@ -264,6 +264,15 @@
     }
     function sendEmail() {
       var email = $("input[name=passwordlessEmail]").val();
+	  
+	  //in case of an empty input field, .val() returns "" (empty string)
+	  //re-enable the submit button because the auth0.requestMagicLink() won't execute normally with an empty string
+	  if (email == "") {
+	        if ($("button.auth0-lock-passwordless-submit").is(':disabled')) {
+	            $("button.auth0-lock-passwordless-submit").prop("disabled", false);
+	        }
+	    }
+	  
       var authParams = { "state": getParameterByName("state"), "nonce": getParameterByName("nonce") };
       auth0.requestMagicLink({ email: email , send: 'link', authParams: authParams}, function(err) {
         var message;
@@ -304,6 +313,11 @@
           $(".auth0-lock-content > .auth0-lock-passwordless-confirmation").slideUp(400, function() {
             this.remove();
           });
+		
+		//allow the submit button to be clicked again, if previously disabled
+	    if ($("button.auth0-lock-passwordless-submit").is(':disabled')) {
+	        $("button.auth0-lock-passwordless-submit").prop("disabled", false);
+	    }
         });
       });
     }
@@ -330,11 +344,16 @@
           $("div.auth0-lock-submit-container").show();
           $(".auth0-lock-input-username input").focus();
         }
-        $("button.auth0-lock-passwordless-submit").click(sendEmail);
+        $("button.auth0-lock-passwordless-submit").on("click", function() {
+		    //prevent the submit button from being clicked again until the sendEmail function re-enables it
+		    $("button.auth0-lock-passwordless-submit").prop("disabled", true);
+			sendEmail();
+	    });
         $("input[name=passwordlessEmail]").keydown(function(event) {
           if (event.keyCode == 13) {
             event.preventDefault();
-            sendEmail();
+			$("button.auth0-lock-passwordless-submit").focus();    //move focus from the input box to the submit button
+            $("button.auth0-lock-passwordless-submit").click();    //trigger a click on the submit button, activating the button disabling code
             return false;
           }
         });
