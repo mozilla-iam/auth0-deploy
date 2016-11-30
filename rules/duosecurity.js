@@ -3,7 +3,7 @@ function (user, context, callback) {
   // Please use http://github.com/mozilla-iam/auth0-rules instead
 
   // LDAP group okta_mfa requires MFA authentication everywhere.
-  if (user.groups && user.groups.indexOf("okta_mfa") !== -1) {
+  if (user.groups && user.groups.indexOf("okta_mfa") >= 0) {
     context.multifactor = {
       provider: 'duo',
       ikey: configuration.duo_ikey_mozilla,

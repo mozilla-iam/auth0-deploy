@@ -7,7 +7,7 @@ function (user, context, callback) {
   // LDAP groups allowed to access these applications
   var ALLOWED_GROUPS = ['vpn_mozdef'];
 
-  if (APPS.indexOf(context.clientName) !== -1) {
+  if (APPS.indexOf(context.clientName) >= 0) {
     var groupHasAccess = ALLOWED_GROUPS.some(
       function (group) {
         if (!user.groups)
