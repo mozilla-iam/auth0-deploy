@@ -3,11 +3,11 @@ function (user, context, callback) {
   // Please use http://github.com/mozilla-iam/auth0-rules instead
 
   // Applications that are restricted
-  var MOCO_MOFO_APPS = ['phonebook.mozilla.com', 'phonebook-dev.mozilla.com', 'login.mozilla.com', 'passwordreset.mozilla.com'];
+  var APPS = ['mozdefqa1.private.scl3.mozilla.com'];
   // LDAP groups allowed to access these applications
-  var ALLOWED_GROUPS = ['team_moco', 'team_mofo'];
+  var ALLOWED_GROUPS = ['vpn_mozdef'];
 
-  if (MOCO_MOFO_APPS.indexOf(context.clientName) >= 0) {
+  if (APPS.indexOf(context.clientName) >= 0) {
     var groupHasAccess = ALLOWED_GROUPS.some(
       function (group) {
         if (!user.groups)
