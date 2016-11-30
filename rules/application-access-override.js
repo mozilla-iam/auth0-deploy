@@ -7,7 +7,7 @@ function (user, context, callback) {
   // LDAP groups allowed to access these applications
   var ALLOWED_GROUPS = ['team_moco', 'team_mofo'];
 
-  if (MOCO_MOFO_APPS.indexOf(context.clientName) !== -1) {
+  if (MOCO_MOFO_APPS.indexOf(context.clientName) >= 0) {
     var groupHasAccess = ALLOWED_GROUPS.some(
       function (group) {
         if (!user.groups)
