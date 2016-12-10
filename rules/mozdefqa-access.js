@@ -18,7 +18,7 @@ function (user, context, callback) {
      return callback(null, user, context);
     } else {
      context.redirect = {
-       url: "https://sso.mozilla.com"
+       url: "https://sso.mozilla.com/forbidden"
      };
      return callback(null, null, context);
     }
