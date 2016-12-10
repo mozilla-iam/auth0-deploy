@@ -3,11 +3,13 @@ function (user, context, callback) {
   // Please use http://github.com/mozilla-iam/auth0-rules instead
 
   // Applications that are restricted
-  var APPS = ['mozdefqa1.private.scl3.mozilla.com'];
+  var APPS = [
+    'S4W4NbHEgIF4EpzQsR1FcxErn3rjdadN'  // auth : mozdefqa1.private.scl3.mozilla.com
+  ];
   // LDAP groups allowed to access these applications
   var ALLOWED_GROUPS = ['vpn_mozdef'];
 
-  if (APPS.indexOf(context.clientName) >= 0) {
+  if (APPS.indexOf(context.clientID) >= 0) {
     var groupHasAccess = ALLOWED_GROUPS.some(
       function (group) {
         if (!user.groups)
