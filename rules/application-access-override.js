@@ -3,16 +3,17 @@ function (user, context, callback) {
   // Please use http://github.com/mozilla-iam/auth0-rules instead
 
   // Applications that are restricted
+  // The rule must cover both dev and prod client_ids as the rule is merged from dev to prod.
   var MOCO_MOFO_APPS = [
-    '0123456789abcdefghijKLMNOPQRSTuv',  // auth : phonebook.mozilla.com
-    '123456789abcdefghijKLMNOPQRSTuvw',  // auth-dev : phonebook-dev.mozilla.com
-    '23456789abcdefghijKLMNOPQRSTuvwx',  // auth : login.mozilla.com
-    '3456789abcdefghijKLMNOPQRSTuvwxy',  // auth-dev : login.mozilla.com
-    '456789abcdefghijKLMNOPQRSTuvwxyz',  // auth : passwordreset.mozilla.com
-    '56789abcdefghijKLMNOPQRSTuvwxyz0'   // auth-dev : passwordreset.mozilla.com
+    // Examples:
+    //'0123456789abcdefghijKLMNOPQRSTuv',  // auth : phonebook.mozilla.com
+    //'123456789abcdefghijKLMNOPQRSTuvw',  // auth-dev : phonebook-dev.mozilla.com
   ];
   // LDAP groups allowed to access these applications
-  var ALLOWED_GROUPS = ['team_moco', 'team_mofo'];
+  var ALLOWED_GROUPS = [
+    // Examples:
+    //'team_moco', 'team_mofo'
+  ];
 
   if (MOCO_MOFO_APPS.indexOf(context.clientID) >= 0) {
     var groupHasAccess = ALLOWED_GROUPS.some(
