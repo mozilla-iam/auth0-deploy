@@ -7,7 +7,7 @@ function (user, context, callback) {
     'S4W4NbHEgIF4EpzQsR1FcxErn3rjdadN'  // auth : mozdefqa1.private.scl3.mozilla.com
   ];
   // LDAP groups allowed to access these applications
-  var ALLOWED_GROUPS = ['vpn_mozdef'];
+  var ALLOWED_GROUPS = ['vpn_opsec_mozdef'];
 
   if (APPS.indexOf(context.clientID) >= 0) {
     var groupHasAccess = ALLOWED_GROUPS.some(
