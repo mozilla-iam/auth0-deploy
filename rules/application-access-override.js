@@ -25,6 +25,9 @@ function (user, context, callback) {
     if (groupHasAccess) {
      return callback(null, user, context);
     } else {
+     // We use a redirect instead of UnauthorizedError() here as this ensure we can
+     // tell the user what happened. Otherwise, if the RP does not handle the error message
+     // there is no chance to tell the user why they're not getting logged in.
      context.redirect = {
        url: "https://sso.mozilla.com/forbidden"
      };
