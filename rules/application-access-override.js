@@ -6,8 +6,8 @@ function (user, context, callback) {
   // The rule must cover both dev and prod client_ids as the rule is merged from dev to prod.
   var MOCO_MOFO_APPS = [
     // Examples:
-    //'0123456789abcdefghijKLMNOPQRSTuv',  // auth : phonebook.mozilla.com
-    //'123456789abcdefghijKLMNOPQRSTuvw',  // auth-dev : phonebook-dev.mozilla.com
+    //'0123456789abcdefghijKLMNOPQRSTuv',  // auth : egencia.com
+    //'123456789abcdefghijKLMNOPQRSTuvw',  // auth-dev : egencia.com
   ];
   // LDAP groups allowed to access these applications
   var ALLOWED_GROUPS = [
