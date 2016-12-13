@@ -19,9 +19,13 @@ function (user, context, callback) {
     if (groupHasAccess) {
      return callback(null, user, context);
     } else {
-     // We use a redirect instead of UnauthorizedError() here as this ensure we can
-     // tell the user what happened. Otherwise, if the RP does not handle the error message
-     // there is no chance to tell the user why they're not getting logged in.
+     // Since this rule should only be used for RPs which can not do the
+     // authorization check themselves, and these types of RPs will likely
+     // also be unable to interpret the UnauthorizedError() `error` and
+     // `error_description` arguments passed back and will consequently
+     // not show the user why their login failed, the user is redirected
+     // instead of using UnauthorizedError() [1]
+     // 1: https://auth0.com/docs/rules#deny-access-based-on-a-condition
      context.redirect = {
        url: "https://sso.mozilla.com/forbidden"
      };
