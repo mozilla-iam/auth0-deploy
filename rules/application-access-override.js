@@ -3,11 +3,19 @@ function (user, context, callback) {
   // Please use http://github.com/mozilla-iam/auth0-rules instead
 
   // Applications that are restricted
-  var MOCO_MOFO_APPS = ['phonebook.mozilla.com', 'phonebook-dev.mozilla.com', 'login.mozilla.com', 'passwordreset.mozilla.com'];
+  // The rule must cover both dev and prod client_ids as the rule is merged from dev to prod.
+  var MOCO_MOFO_APPS = [
+    // Examples:
+    //'0123456789abcdefghijKLMNOPQRSTuv',  // auth : egencia.com
+    //'123456789abcdefghijKLMNOPQRSTuvw',  // auth-dev : egencia.com
+  ];
   // LDAP groups allowed to access these applications
-  var ALLOWED_GROUPS = ['team_moco', 'team_mofo'];
+  var ALLOWED_GROUPS = [
+    // Examples:
+    //'team_moco', 'team_mofo'
+  ];
 
-  if (MOCO_MOFO_APPS.indexOf(context.clientName) >= 0) {
+  if (MOCO_MOFO_APPS.indexOf(context.clientID) >= 0) {
     var groupHasAccess = ALLOWED_GROUPS.some(
       function (group) {
         if (!user.groups)
@@ -17,8 +25,15 @@ function (user, context, callback) {
     if (groupHasAccess) {
      return callback(null, user, context);
     } else {
+     // Since this rule should only be used for RPs which can not do the
+     // authorization check themselves, and these types of RPs will likely
+     // also be unable to interpret the UnauthorizedError() `error` and
+     // `error_description` arguments passed back and will consequently
+     // not show the user why their login failed, the user is redirected
+     // instead of using UnauthorizedError() [1]
+     // 1: https://auth0.com/docs/rules#deny-access-based-on-a-condition
      context.redirect = {
-       url: "https://sso.mozilla.com"
+       url: "https://sso.mozilla.com/forbidden"
      };
      return callback(null, null, context);
     }
