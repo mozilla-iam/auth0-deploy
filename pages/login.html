@@ -29,7 +29,7 @@
         width:280px;
       }
       #widget-container .auth0-lock-header-bg {
-        background: #d7d3c8;
+        background: #fff;
       }
       .auth0-label-submit {
         color:#4d4e53;
@@ -63,11 +63,17 @@
       }
 
       #widget-container .auth0-lock-ldap-button {
-          background-color: #c13832;
+          background-color: #000;
       }
+
       #widget-container .auth0-lock-passwordless-button {
-          background-color: #667761;
+          background-color: #87d200;
       }
+
+      .auth0-lock-social-button[data-provider^="google"] {
+          background-color: #82D1F5;
+      }
+
       #widget-container .auth0-lock-ldap-button, #widget-container .auth0-lock-passwordless-button {
         border: 0;
         padding: 0;
@@ -80,12 +86,20 @@
         transition:background-color 0.3s;
         -webkit-transition:background-color 0.3s;
       }
-      .auth0-lock-ldap-button:hover .auth0-lock-ldap-button-text, .auth0-lock-ldap-button:hover .auth0-lock-ldap-button-text:focus, .auth0-lock-ldap-button:hover .auth0-lock-ldap-button-icon, .auth0-lock-ldap-button:hover .auth0-lock-ldap-button-icon:focus, .auth0-lock-passwordless-button:hover .auth0-lock-passwordless-button-text, .auth0-lock-passwordless-button:hover .auth0-lock-passwordless-button-text:focus, .auth0-lock-passwordless-button:hover .auth0-lock-passwordless-button-icon, .auth0-lock-passwordless-button:hover .auth0-lock-passwordless-button-icon:focus {
+      .auth0-lock-passwordless-button:hover .auth0-lock-passwordless-button-text, .auth0-lock-passwordless-button:hover .auth0-lock-passwordless-button-text:focus, .auth0-lock-passwordless-button:hover .auth0-lock-passwordless-button-icon, .auth0-lock-passwordless-button:hover .auth0-lock-passwordless-button-icon:focus {
         background-color:rgba(0,0,0,0.3);
       }
 
+      .auth0-lock-ldap-button:hover .auth0-lock-ldap-button-text, .auth0-lock-ldap-button:hover .auth0-lock-ldap-button-text:focus {
+          background-color: #444;
+      }
+
+      .auth0-lock-ldap-button:hover .auth0-lock-ldap-button-icon, .auth0-lock-ldap-button:hover .auth0-lock-ldap-button-icon:focus {
+          background-color: #222;
+      }
+
       .auth0-lock-ldap-button-icon {
-        background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTQuOTk2IiBoZWlnaHQ9IjE5Ny41NjMiPjxwYXRoIGQ9Ik00NS45NjggMGMzLjM4IDUuMjIgNC44NzIgOS44NzYgNi43NiAxOS43QzY1Ljk1NCA2Ljc5MiA4Mi4yNiAwIDEwMC4wNTcgMGMxNi4wNzQgMCAyOS4yNjUgNS4yMiAzOS40NzMgMTUuODc0IDIuNzUgMi42NyA1LjQgNi4xMTUgNy42OSA5LjQ5NkMxNjQuOTggNy4xNzYgMTgwLjg5IDAgMjAyLjIgMGMxNS4xOCAwIDI5LjU2NCA0LjU0IDM4LjM0OCAxMi4wOTYgMTAuOTcgOS40OCAxNC40NDggMjAuODc4IDE0LjQ0OCA0Ny40MTN2MTM4LjA1M0gyMDUuNjhWNjkuNGMwLTIzLjIzMy0yLjc1LTI3LjcyNS0xNS45NzQtMjcuNzI1LTkuNDc4IDAtMjIuOCA2LjQ2NS0zMy43MzggMTYuMzI0djEzOS41NjNoLTQ4LjEyNFY3MS4yMmMwLTI0LjIyNC0zLjUxLTI5LjkxLTE3LjYzLTI5LjkxLTkuMzggMC0yMi4zNzMgNC44NTctMzMuMzEgMTQuNzY2djE0MS40ODdINy4yNThWNjIuMTRDNy4yNTggMzQuMSA1LjMzNiAyMS45OSAwIDEyLjQ2Mkw0NS45NjggMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPgo=");
+        background-image: url("data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgNTAwIDUwMCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTQyOC4yIDMxNGgyOS4xdjQ3LjVoLTkxLjdWMjM4LjRjMC0zNy44LTEyLjYtNTIuNC0zNy4zLTUyLjQtMzAuMSAwLTQyLjIgMjEuMy00Mi4yIDUxLjlWMzE0aDI5LjF2NDcuNWgtOTEuN1YyMzguNGMwLTM3LjgtMTIuNi01Mi40LTM3LjQtNTIuNC0zMC4xIDAtNDIuMiAyMS4zLTQyLjIgNTEuOVYzMTRoNDEuN3Y0Ny41SDUyLjNWMzE0aDI5LjFWMTkwLjNINTIuM3YtNDcuNUgxNDR2MzNjMTMuMS0yMy4zIDM1LjktMzcuMyA2Ni40LTM3LjMgMzEuNSAwIDYwLjYgMTUgNzEuMyA0NyAxMi4xLTI5LjEgMzYuOS00NyA3MS4zLTQ3IDM5LjMgMCA3NS4yIDIzLjggNzUuMiA3NS43VjMxNHoiLz48L3N2Zz4=");
       }
 
       .auth0-lock-passwordless-button-icon {
@@ -468,7 +482,7 @@
     }
 
     var config = getConfig('@@config@@');
-    var logo = '<svg xmlns="http://www.w3.org/2000/svg" width="1412.487" height="571.237"><g fill="#4e4f57"><path d="M194.407 214.46c3.382 5.22 4.873 9.876 6.762 19.7 13.223-12.908 29.53-19.7 47.326-19.7 16.074 0 29.265 5.22 39.473 15.874 2.75 2.67 5.4 6.115 7.69 9.496 17.76-18.194 33.67-25.37 54.98-25.37 15.18 0 29.564 4.54 38.348 12.096 10.97 9.48 14.448 20.878 14.448 47.413V412.02H354.12V283.86c0-23.233-2.75-27.725-15.974-27.725-9.48 0-22.8 6.465-33.74 16.324l.002 139.563h-48.124V285.68c0-24.224-3.51-29.91-17.63-29.91-9.38 0-22.373 4.858-33.31 14.766v141.487H155.7V276.6c0-28.04-1.923-40.15-7.258-49.678l45.968-12.462M493.62 271.297c-3.483 10.275-5.336 23.914-5.336 43.27 0 22.32 2.285 39.092 6.427 48.917 4.575 10.624 16.01 15.926 25.785 15.926 22.01 0 31.42-19.703 31.42-65.588 0-26.186-3.414-43.286-10.206-52.033-4.876-6.4-12.795-10.21-21.943-10.21-12.162 0-22.04 7.555-26.148 19.717zm91.37-28.036c15.51 18.196 22.44 39.422 22.44 70.894 0 33.373-7.656 56.172-24.395 75.098-14.714 16.672-34.102 26.947-63.997 26.947-52.795 0-87.23-39.46-87.23-100.49 0-61.085 34.798-101.683 87.23-101.683 27.673 0 49.283 9.514 65.952 29.234M770.885 217.84v34.896l-85.77 124.005h89.12l-12.165 35.282H619.162v-31.468l91.308-127.05h-83.688V217.84h144.103M850.862 213.266v198.756h-50.81v-190.77l50.81-7.986zm5.964-48.886c0 17.47-13.887 31.42-31.45 31.42-17.005 0-30.988-13.95-30.988-31.42 0-17.433 14.45-31.5 31.845-31.5 17.037 0 30.593 14.067 30.593 31.5M943.394 181.85v151.294c0 33.422.398 37.915 3.448 43.217 1.922 3.446 6.03 5.305 10.274 5.305 1.823 0 2.915 0 5.666-.7l8.684 30.31c-8.684 3.396-19.32 5.29-30.322 5.29-21.678 0-39.11-10.213-45.145-26.485-3.81-9.875-4.64-15.973-4.64-43.646V201.5c0-25.388-.66-40.9-2.554-58.414l51.97-11.75c1.823 10.61 2.618 23.135 2.618 50.514M1048.785 181.85v151.294c0 33.422.434 37.915 3.55 43.217 1.788 3.446 5.896 5.305 10.14 5.305 1.923 0 3.083 0 5.766-.7l8.654 30.31c-8.653 3.396-19.293 5.29-30.33 5.29-21.638 0-39.104-10.213-45.17-26.485-3.876-9.875-4.508-15.973-4.508-43.646V201.5c0-25.388-.76-40.9-2.717-58.414l51.9-11.75c2.09 10.61 2.715 23.135 2.715 50.514M1194.38 327.08c-35.13 0-47.458 6.395-47.458 29.627 0 15.112 9.612 25.353 22.502 25.353 9.446 0 18.993-4.938 26.517-13.256l.83-41.725h-2.39zm-65.854-102.016c18.894-7.988 35.136-11.37 53.03-11.37 32.68 0 55.018 12.1 62.67 33.74 2.52 7.957 3.68 14.022 3.45 34.898l-1.228 65.195v3.444c0 20.85 3.448 28.836 18.302 39.81l-26.983 31.15c-11.868-4.97-22.437-13.72-27.378-23.548-3.745 3.83-7.955 7.542-11.8 10.225-9.41 6.83-23.164 10.64-39.075 10.64-43.248 0-66.745-22.04-66.745-60.65 0-45.587 31.55-66.85 93.325-66.85 3.714 0 7.226 0 11.436.432v-7.92c0-21.66-4.21-28.87-22.9-28.87-16.108 0-35.23 7.92-56.046 21.99l-21.642-36.422c10.308-6.465 17.9-10.225 31.584-15.894"/></g></svg>';
+    var logo = '<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 102.8"><style>.st0{fill:#FFFFFF;}</style><path d="M0-.2h360v102.9H0z"/><path class="st0" d="M343.8 73.7c-.7.2-1.3.3-1.9.3-2.1 0-3.1-.9-3.1-3.5V51c0-10.3-8.2-15.3-17.9-15.3-7.4 0-11.4.9-19.3 4.1L300 50.2l10.3 1.1 1.5-5.1c2.1-1.1 4.2-1.3 6.9-1.3 7.3 0 7.4 5.5 7.4 10.1v1.5c-2.3-.3-4.9-.4-7.4-.4-10.3 0-21 2.6-21 13.7 0 9.4 7.4 12.9 13.9 12.9 7.3 0 11.9-4.4 14.5-9 .6 5.5 3.9 9 9.9 9 2.8 0 5.7-.8 8.1-2.1l-.3-6.9zm-27.6-.3c-3.9 0-5.3-2.3-5.3-5.2 0-4.9 4-6.2 8.6-6.2 2.1 0 4.4.3 6.5.6-.3 7.5-5.2 10.8-9.8 10.8zm-17.3-60.5l-19.5 68.7h-12.7l19.5-68.7h12.7zm-26.2 0l-19.5 68.7h-12.7L260 12.9h12.7zm-54 23.7h13.5v16.2h-13.5V36.6zm0 28.9h13.5v16.2h-13.5V65.5zm-19.7-.6l10.2 1-2.8 15.8h-39.3l-1.3-6.8 24.8-28.5h-14.1l-2 7-9.3-1 1.6-15.8h39.5l1 6.8-25 28.5h14.6l2.1-7zm-64.5-29.2c-16.2 0-24.2 10.9-24.2 24.1 0 14.4 9.6 22.9 23.5 22.9 14.4 0 24.8-9.1 24.8-23.5 0-12.6-7.9-23.5-24.1-23.5zm-.3 37c-7 0-10.6-6-10.6-13.8 0-8.5 4.1-13.4 10.7-13.4 6.1 0 11 4.1 11 13.2 0 8.7-4.4 14-11.1 14zm-35.5-.9h6v9.8H85.9V56.3c0-7.8-2.6-10.8-7.7-10.8-6.2 0-8.7 4.4-8.7 10.7v15.7h6v9.8H56.6V56.3c0-7.8-2.6-10.8-7.7-10.8-6.2 0-8.7 4.4-8.7 10.7v15.7h8.6v9.8H21.4v-9.8h6V46.4h-6v-9.8h18.9v6.8c2.7-4.8 7.4-7.7 13.7-7.7 6.5 0 12.5 3.1 14.7 9.7 2.5-6 7.6-9.7 14.7-9.7 8.1 0 15.5 4.9 15.5 15.6v20.5z"/></svg>';
     var options = {
       allowForgotPassword: false,
       allowSignUp: false,
@@ -496,7 +510,7 @@
       },
       theme: {
         logo: 'data:image/svg+xml;base64,' + window.btoa(logo),
-        primaryColor: "#d7d3c8"
+        primaryColor: "#fff"
       },
       closable: false
     };
