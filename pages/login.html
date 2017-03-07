@@ -30,6 +30,10 @@
       }
       #widget-container .auth0-lock-header-bg {
         background: #fff;
+        display: none;
+      }
+      #widget-container .auth0-lock-header-logo {
+        margin: 29px 0 0 0;
       }
       .auth0-label-submit {
         color:#4d4e53;
@@ -278,7 +282,7 @@
     }
     function sendEmail() {
       var email = $("input[name=passwordlessEmail]").val();
-	  
+
 	  //in case of an empty input field, .val() returns "" (empty string)
 	  //re-enable the submit button because the auth0.requestMagicLink() won't execute normally with an empty string
 	  if (email == "") {
@@ -286,7 +290,7 @@
 	            $("button.auth0-lock-passwordless-submit").prop("disabled", false);
 	        }
 	    }
-	  
+
       var authParams = { "state": getParameterByName("state"), "nonce": getParameterByName("nonce") };
       auth0.requestMagicLink({ email: email , send: 'link', authParams: authParams}, function(err) {
         var message;
@@ -327,7 +331,7 @@
           $(".auth0-lock-content > .auth0-lock-passwordless-confirmation").slideUp(400, function() {
             this.remove();
           });
-        
+
         //allow the submit button to be clicked again, if previously disabled
         if ($("button.auth0-lock-passwordless-submit").is(':disabled')) {
           $("button.auth0-lock-passwordless-submit").prop("disabled", false);
