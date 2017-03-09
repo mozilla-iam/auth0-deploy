@@ -16,6 +16,13 @@ function (user, context, callback) {
       ignoreCookie: false,
       username: user.email,
     };
+  } else {
+    // If user does not have Duo, clear context.multifactor as a work-around for the situation where Auth0
+    // somehow loads a user session with attributes set that do not belong to the same user_uid and connection
+    // See also https://github.com/mozilla-iam/auth0-deploy/issues/82
+    context.multifactor = {
+      provider: ''
+    };
   }
   callback(null, user, context);
 }
