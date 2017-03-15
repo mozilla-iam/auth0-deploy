@@ -1,0 +1,9 @@
+{
+  "users": {
+    "ldap": {
+      "email": "",
+      "password": "",
+      "secret_seed" : ""
+    }
+  }
+}
