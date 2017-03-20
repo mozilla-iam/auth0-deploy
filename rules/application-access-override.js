@@ -4,18 +4,20 @@ function (user, context, callback) {
 
   // Applications that are restricted
   // The rule must cover both dev and prod client_ids as the rule is merged from dev to prod.
-  var MOCO_MOFO_APPS = [
+  var STAFF_APPS = [
     // Examples:
     //'0123456789abcdefghijKLMNOPQRSTuv',  // auth : egencia.com
     //'123456789abcdefghijKLMNOPQRSTuvw',  // auth-dev : egencia.com
+    'WXVdgVoCca11OtpGlK8Ir3pR9CBAlSA5', // auth : https://mozilla.slack.com
   ];
   // LDAP groups allowed to access these applications
   var ALLOWED_GROUPS = [
     // Examples:
     //'team_moco', 'team_mofo'
+    'team_moco', 'team_mofo', 'team_mozillajapan', 'team_mozillaonline', 'team_nda'
   ];
 
-  if (MOCO_MOFO_APPS.indexOf(context.clientID) >= 0) {
+  if (STAFF_APPS.indexOf(context.clientID) >= 0) {
     var groupHasAccess = ALLOWED_GROUPS.some(
       function (group) {
         if (!user.groups)
