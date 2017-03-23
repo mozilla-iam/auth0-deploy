@@ -38,3 +38,13 @@ def login_link(username):
     for link in mail_content:
         if link.startswith("https"):
             return link
+
+
+@pytest.fixture
+def github_user(stored_users):
+    return stored_users['github']
+
+
+@pytest.fixture
+def google_user(stored_users):
+    return stored_users['google']

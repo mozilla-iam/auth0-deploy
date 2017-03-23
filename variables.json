@@ -7,6 +7,14 @@
     },
     "passwordless":{
       "email": ""
+    },
+    "github": {
+      "username": "",
+      "password": ""
+    },
+    "google": {
+      "email": "",
+      "password": ""
     }
   }
 }

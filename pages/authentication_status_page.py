@@ -14,4 +14,5 @@ class AuthenticationStatusPage(Base):
         self.wait_for_element_visible(*self._logout_button_locator)
 
     def click_logout(self):
+        self.wait_for_page_loaded()
         self.selenium.find_element(*self._logout_button_locator).click()

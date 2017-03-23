@@ -1,6 +1,7 @@
 import time
 
 from selenium.common.exceptions import NoSuchElementException, ElementNotVisibleException
+from selenium.webdriver.support.wait import WebDriverWait
 
 
 class Base(object):
@@ -23,3 +24,11 @@ class Base(object):
             count += 1
             if count == self.timeout:
                 raise Exception(':'.join(locator) + " is not visible")
+
+    @property
+    def is_page_loaded(self):
+        page_state = self.selenium.execute_script('return document.readyState;')
+        return page_state == 'complete'
+
+    def wait_for_page_loaded(self):
+        WebDriverWait(self.selenium, self.timeout).until(lambda s: self.is_page_loaded)

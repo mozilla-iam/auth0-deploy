@@ -40,3 +40,26 @@ class Homepage(Base):
         login_link = conftest.login_link(email_address)
         self.selenium.get(login_link)
         return AuthenticationStatusPage(self.base_url, self.selenium)
+
+    def login_with_github(self, username, password):
+        self.click_sign_in_button()
+        auth0 = Auth0(self.base_url, self.selenium)
+        auth0.click_login_with_github()
+        auth0.enter_github_username(username)
+        auth0.enter_github_password(password)
+        auth0.click_github_sign_in()
+        authentication_status_page = AuthenticationStatusPage(self.base_url, self.selenium)
+        authentication_status_page.wait_for_logout_button()
+        return authentication_status_page
+
+    def login_with_google(self, email, password):
+        self.click_sign_in_button()
+        auth0 = Auth0(self.base_url, self.selenium)
+        auth0.click_login_with_google()
+        auth0.enter_google_email(email)
+        auth0.click_next()
+        auth0.enter_google_password(password)
+        auth0.click_google_sign_in()
+        authentication_status_page = AuthenticationStatusPage(self.base_url, self.selenium)
+        authentication_status_page.wait_for_logout_button()
+        return authentication_status_page
