@@ -21,10 +21,10 @@ class Homepage(Base):
 
     def click_sign_in_button(self):
         self.selenium.find_element(*self._sign_in_button).click()
+        return Auth0(self.base_url, self.selenium)
 
     def login_with_ldap(self, email_address, password):
-        self.click_sign_in_button()
-        auth0 = Auth0(self.base_url, self.selenium)
+        auth0 = self.click_sign_in_button()
         auth0.click_login_with_ldap()
         auth0.enter_ldap_email(email_address)
         auth0.enter_ldap_password(password)
@@ -32,8 +32,7 @@ class Homepage(Base):
         return TwoFactorAuthenticationPage(self.base_url, self.selenium)
 
     def login_passwordless(self, email_address):
-        self.click_sign_in_button()
-        auth0 = Auth0(self.base_url, self.selenium)
+        auth0 = self.click_sign_in_button()
         auth0.click_login_with_email()
         auth0.enter_email(email_address)
         auth0.click_send_email()
@@ -42,8 +41,7 @@ class Homepage(Base):
         return AuthenticationStatusPage(self.base_url, self.selenium)
 
     def login_with_github(self, username, password):
-        self.click_sign_in_button()
-        auth0 = Auth0(self.base_url, self.selenium)
+        auth0 = self.click_sign_in_button()
         auth0.click_login_with_github()
         auth0.enter_github_username(username)
         auth0.enter_github_password(password)
@@ -53,8 +51,7 @@ class Homepage(Base):
         return authentication_status_page
 
     def login_with_google(self, email, password):
-        self.click_sign_in_button()
-        auth0 = Auth0(self.base_url, self.selenium)
+        auth0 = self.click_sign_in_button()
         auth0.click_login_with_google()
         auth0.enter_google_email(email)
         auth0.click_next()

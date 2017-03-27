@@ -20,6 +20,12 @@ class Auth0(Base):
     _google_password_field_locator = (By.ID, 'Passwd')
     _next_button_locator = (By.ID, 'next')
     _google_sign_in_button_locator = (By.ID, 'signIn')
+    _passwordless_login_confirmation_message = (By.CSS_SELECTOR, '.auth0-lock-passwordless-confirmation p')
+
+    @property
+    def passwordless_login_confirmation_message(self):
+        self.wait_for_element_visible(*self._passwordless_login_confirmation_message)
+        return self.selenium.find_element(*self._passwordless_login_confirmation_message).text
 
     def click_login_with_ldap(self):
         self.wait_for_element_visible(*self._login_with_ldap_button_locator)

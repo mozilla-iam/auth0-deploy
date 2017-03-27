@@ -38,3 +38,15 @@ class TestAccount:
         assert authentication_status_page.is_logout_button_displayed
         authentication_status_page.click_logout()
         assert homepage.is_sign_in_button_displayed
+
+    @pytest.mark.nondestructive
+    def test_cannot_login_passwordless_if_email_in_invalid_format(self, base_url, selenium):
+        homepage = Homepage(base_url, selenium)
+        auth0 = homepage.click_sign_in_button()
+        auth0.click_login_with_email()
+        invalid_email = "invalidmail"
+        auth0.enter_email(invalid_email)
+        auth0.click_send_email()
+        error_login_confirmation_message = 'We were unable to send the email : error in email - email format validation failed: {0}'\
+            .format(invalid_email)
+        assert error_login_confirmation_message == auth0.passwordless_login_confirmation_message
