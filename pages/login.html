@@ -198,6 +198,17 @@
 </head>
 <body>
 
+ <!-- From https://www.owasp.org/index.php/Clickjacking_Defense_Cheat_Sheet until HTTP headers are set -->
+ <style id="antiClickjack">body{display:none !important;}</style>
+ <script type="text/javascript">
+   if (self === top) {
+       var antiClickjack = document.getElementById("antiClickjack");
+       antiClickjack.parentNode.removeChild(antiClickjack);
+   } else {
+       top.location = self.location;
+   }
+ </script>
+
  <div class="table">
    <div class="cell">
      <div class="content">
