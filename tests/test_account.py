@@ -50,3 +50,16 @@ class TestAccount:
         error_login_confirmation_message = 'We were unable to send the email : error in email - email format validation failed: {0}'\
             .format(invalid_email)
         assert error_login_confirmation_message == auth0.passwordless_login_confirmation_message
+
+    @pytest.mark.nondestructive
+    def test_cannot_login_with_ldap_if_email_or_password_empty(self, base_url, selenium, ldap_user):
+        homepage = Homepage(base_url, selenium)
+        auth0 = homepage.click_sign_in_button()
+        auth0.click_login_with_ldap()
+        auth0.enter_ldap_email(ldap_user['email'])
+        auth0.click_login_button()
+        assert "Can't be blank" == auth0.ldap_password_input_error_message
+        auth0.delete_ldap_email()
+        auth0.enter_ldap_password(ldap_user['password'])
+        auth0.click_login_button()
+        assert "Can't be blank" == auth0.ldap_email_input_error_message

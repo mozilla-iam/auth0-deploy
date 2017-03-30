@@ -1,4 +1,5 @@
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 
 from pages.base import Base
 
@@ -21,11 +22,23 @@ class Auth0(Base):
     _next_button_locator = (By.ID, 'next')
     _google_sign_in_button_locator = (By.ID, 'signIn')
     _passwordless_login_confirmation_message = (By.CSS_SELECTOR, '.auth0-lock-passwordless-confirmation p')
+    _ldap_password_input_error_message = (By.CSS_SELECTOR, '.auth0-lock-input-password.auth0-lock-error .auth0-lock-error-msg')
+    _ldap_email_input_error_message = (By.CSS_SELECTOR, '.auth0-lock-input-email.auth0-lock-error .auth0-lock-error-msg')
 
     @property
     def passwordless_login_confirmation_message(self):
         self.wait_for_element_visible(*self._passwordless_login_confirmation_message)
         return self.selenium.find_element(*self._passwordless_login_confirmation_message).text
+
+    @property
+    def ldap_password_input_error_message(self):
+        self.wait_for_element_visible(*self._ldap_password_input_error_message)
+        return self.selenium.find_element(*self._ldap_password_input_error_message).text
+
+    @property
+    def ldap_email_input_error_message(self):
+        self.wait_for_element_visible(*self._ldap_email_input_error_message)
+        return self.selenium.find_element(*self._ldap_email_input_error_message).text
 
     def click_login_with_ldap(self):
         self.wait_for_element_visible(*self._login_with_ldap_button_locator)
@@ -36,6 +49,14 @@ class Auth0(Base):
 
     def enter_ldap_password(self, ldap_password):
         self.selenium.find_element(*self._ldap_password_field_locator).send_keys(ldap_password)
+
+    def delete_ldap_email(self):
+        ldap_input_field = self.selenium.find_element(*self._ldap_email_field_locator)
+        while ldap_input_field.get_attribute('value'):
+            ldap_input_field.send_keys(Keys.BACKSPACE)
+
+    def delete_ldap_password(self):
+        self.selenium.find_element(*self._ldap_password_field_locator).clear()
 
     def click_login_button(self):
         self.selenium.find_element(*self._login_button_locator).click()
