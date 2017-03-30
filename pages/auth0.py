@@ -1,5 +1,6 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
 
 from pages.base import Base
 
@@ -24,6 +25,7 @@ class Auth0(Base):
     _passwordless_login_confirmation_message = (By.CSS_SELECTOR, '.auth0-lock-passwordless-confirmation p')
     _ldap_password_input_error_message = (By.CSS_SELECTOR, '.auth0-lock-input-password.auth0-lock-error .auth0-lock-error-msg')
     _ldap_email_input_error_message = (By.CSS_SELECTOR, '.auth0-lock-input-email.auth0-lock-error .auth0-lock-error-msg')
+    _ldap_error_message = (By.CSS_SELECTOR, '.auth0-global-message-error .animated.fadeInUp')
 
     @property
     def passwordless_login_confirmation_message(self):
@@ -39,6 +41,11 @@ class Auth0(Base):
     def ldap_email_input_error_message(self):
         self.wait_for_element_visible(*self._ldap_email_input_error_message)
         return self.selenium.find_element(*self._ldap_email_input_error_message).text
+
+    def wait_for_error_message_shown(self, message):
+        self.wait_for_element_visible(*self._ldap_error_message)
+        WebDriverWait(self.selenium, self.timeout).until(
+            lambda s: self.selenium.find_element(*self._ldap_error_message).text == message)
 
     def click_login_with_ldap(self):
         self.wait_for_element_visible(*self._login_with_ldap_button_locator)
