@@ -14,7 +14,7 @@ function (user, context, callback) {
     context.samlConfiguration = context.samlConfiguration || {};
     //Remap SAML attributes as SAML cannot show Javascript objects
     for(var value in user._HRData){
-      var nname = "http://schemas.security.allizom.org/claims/HRData/"+value;
+      var nname = "http://schemas.security.allizom.org/claims/HRData/"+encodeURIComponent(value);
       var nvalue = "_HRData."+value;
       var obj = {};
       obj[nname] = nvalue;
