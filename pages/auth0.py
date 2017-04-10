@@ -26,6 +26,9 @@ class Auth0(Base):
     _ldap_password_input_error_message = (By.CSS_SELECTOR, '.auth0-lock-input-password.auth0-lock-error .auth0-lock-error-msg')
     _ldap_email_input_error_message = (By.CSS_SELECTOR, '.auth0-lock-input-email.auth0-lock-error .auth0-lock-error-msg')
     _ldap_error_message = (By.CSS_SELECTOR, '.auth0-global-message-error .animated.fadeInUp')
+    _github_login_error_message_locator = (By.CSS_SELECTOR, '.flash-error > div')
+    _google_email_input_error_message_locator = (By.ID, 'errormsg_0_Email')
+    _google_password_input_error_message_locator = (By.ID, 'errormsg_0_Passwd')
 
     @property
     def passwordless_login_confirmation_message(self):
@@ -41,6 +44,21 @@ class Auth0(Base):
     def ldap_email_input_error_message(self):
         self.wait_for_element_visible(*self._ldap_email_input_error_message)
         return self.selenium.find_element(*self._ldap_email_input_error_message).text
+
+    @property
+    def github_login_error_message(self):
+        self.wait_for_element_visible(*self._github_login_error_message_locator)
+        return self.selenium.find_element(*self._github_login_error_message_locator).text
+
+    @property
+    def google_email_input_error_message(self):
+        self.wait_for_element_visible(*self._google_email_input_error_message_locator)
+        return self.selenium.find_element(*self._google_email_input_error_message_locator).text
+
+    @property
+    def google_password_input_error_message(self):
+        self.wait_for_element_visible(*self._google_password_input_error_message_locator)
+        return self.selenium.find_element(*self._google_password_input_error_message_locator).text
 
     def wait_for_error_message_shown(self, message):
         self.wait_for_element_visible(*self._ldap_error_message)
@@ -99,7 +117,9 @@ class Auth0(Base):
 
     def enter_google_email(self, email):
         self.wait_for_element_visible(*self._google_email_field_locator)
-        self.selenium.find_element(*self._google_email_field_locator).send_keys(email)
+        google_email_field = self.selenium.find_element(*self._google_email_field_locator)
+        google_email_field.clear()
+        google_email_field.send_keys(email)
 
     def click_next(self):
         self.selenium.find_element(*self._next_button_locator).click()
