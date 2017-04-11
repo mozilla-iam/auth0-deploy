@@ -79,3 +79,27 @@ class TestAccount:
         auth0.enter_ldap_password(ldap_user['password'])
         auth0.click_login_button()
         auth0.wait_for_error_message_shown(ldap_global_error_message)
+
+    @pytest.mark.nondestructive
+    def test_cannot_login_with_github_if_password_incorrect(self, base_url, selenium, github_user):
+        homepage = Homepage(base_url, selenium)
+        auth0 = homepage.click_sign_in_button()
+        auth0.click_login_with_github()
+        auth0.enter_github_username(github_user['username'])
+        auth0.enter_github_password("invalid")
+        auth0.click_github_sign_in()
+        assert "Incorrect username or password." == auth0.github_login_error_message
+
+    @pytest.mark.nondestructive
+    def test_cannot_login_with_gmail_if_email_or_password_incorrect(self, base_url, selenium, google_user):
+        homepage = Homepage(base_url, selenium)
+        auth0 = homepage.click_sign_in_button()
+        auth0.click_login_with_google()
+        auth0.enter_google_email("invalid_email")
+        auth0.click_next()
+        assert "Sorry, Google doesn't recognize that email." == auth0.google_email_input_error_message
+        auth0.enter_google_email(google_user['email'])
+        auth0.click_next()
+        auth0.enter_google_password('invalid')
+        auth0.click_google_sign_in()
+        assert "Wrong password. Try again." == auth0.google_password_input_error_message
