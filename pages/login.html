@@ -213,9 +213,18 @@
     }
     WebAnalytics();
   </script>
+  <!-- From https://www.owasp.org/index.php/Clickjacking_Defense_Cheat_Sheet until HTTP headers are set -->
+  <style id="antiClickjack">body{display:none !important;}</style>
+  <script type="text/javascript">
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
+  </script>
 </head>
 <body>
-
  <div class="table">
    <div class="cell">
      <div class="content">
@@ -297,7 +306,9 @@
         var icon;
         var backLink;
         if (err) {
-          message = "We were unable to send the email : " + err.error_description;
+        message = "We were unable to send the email. Please ensure you submitted a correctly formatted e-mail address.";
+
+        //  message = "We were unable to send the email : " + err.error_description;
           icon = '  <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56"><circle cx="225" cy="225" r="225" transform="matrix(.124 0 0 .124 0 .2)" fill="#c33"/><g fill="#fff" stroke="#fff" stroke-width="70"><path d="M13.236 13.85l29.328 29.328M13.236 43.178L42.564 13.85" stroke-width="8.68"/></g></svg>';
           backLink = '<div class="auth0-lock-back">' +
             '  <button class="auth0-lock-back-button" type="button">' +
