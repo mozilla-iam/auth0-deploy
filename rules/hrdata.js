@@ -22,8 +22,8 @@ function (user, context, callback) {
     }
     callback(null, user, context);
   } else {
-    // Wipe _HRData
-    user._HRData = undefined;
+    // Wipe _HRData (do use non-dot notation)
+    user['_HRData'] = {"placeholder": "empty"};
     callback(null, user, context);
   }
 }

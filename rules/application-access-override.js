@@ -9,8 +9,6 @@ function (user, context, callback) {
     //'0123456789abcdefghijKLMNOPQRSTuv',  // auth : egencia.com
     //'123456789abcdefghijKLMNOPQRSTuvw',  // auth-dev : egencia.com
     'WXVdgVoCca11OtpGlK8Ir3pR9CBAlSA5', // auth : https://mozilla.slack.com
-    'smKTjsVVxUJDEkjIftOsP0bop2NWjysa', // auth : Google (mozilla.com)
-    'q0tFB9QyFIKqPOOKvkFnHMj2VwrLjX46', // auth : Google (test.mozilla.com)
     'AL3fXafFNeSp83gZmuR7ZXm5DI70TZyG', // auth : phonebook-dev.allizom.org
     '00fgOKsjo530sIxfhsved8jyTjAD0av2', // auth : phonebook.allizom.org
     'K7vKewjQHKe45mmOo5cRae6yyOvnmg74', // auth : phonebook.mozilla.org
