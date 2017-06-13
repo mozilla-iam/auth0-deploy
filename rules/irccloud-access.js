@@ -4,23 +4,17 @@ function (user, context, callback) {
 
   // Applications that are restricted
   // The rule must cover both dev and prod client_ids as the rule is merged from dev to prod.
-  var STAFF_APPS = [
-    // Examples:
-    //'0123456789abcdefghijKLMNOPQRSTuv',  // auth : egencia.com
-    //'123456789abcdefghijKLMNOPQRSTuvw',  // auth-dev : egencia.com
-    'WXVdgVoCca11OtpGlK8Ir3pR9CBAlSA5', // auth : https://mozilla.slack.com
-    'AL3fXafFNeSp83gZmuR7ZXm5DI70TZyG', // auth : phonebook-dev.allizom.org
-    '00fgOKsjo530sIxfhsved8jyTjAD0av2', // auth : phonebook.allizom.org
-    'K7vKewjQHKe45mmOo5cRae6yyOvnmg74', // auth : phonebook.mozilla.org
+  var IRCCLOUD_APP = [
+    'D4hqwOVDV2UUJBW2FwD1RxnguPm14Mv3', // auth : irccloud.mozilla.com
   ];
   // LDAP groups allowed to access these applications
   var ALLOWED_GROUPS = [
     // Examples:
     //'team_moco', 'team_mofo'
-    'team_moco', 'team_mofo', 'team_mozillajapan', 'team_mozillaonline', 'team_nda'
+    'irccloud'
   ];
 
-  if (STAFF_APPS.indexOf(context.clientID) >= 0) {
+  if (IRCCLOUD_APP.indexOf(context.clientID) >= 0) {
     var groupHasAccess = ALLOWED_GROUPS.some(
       function (group) {
         if (!user.groups)
