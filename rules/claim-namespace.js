@@ -2,6 +2,7 @@ function (user, context, callback) {
   // Auth0 in the "OIDC-Conformant" mode will only allow these claims. That mode
   // enforces more than the OIDC spec in at least one regard:
   // Auth0 forbids the use of optional claims UNLESS these are namespaced by a URL.
+  // See also https://auth0.com/docs/api-auth/tutorials/adoption/scope-custom-claims
 
   // This is the namespace we used for our own claims
   var namespace = 'https://sso.mozilla.com/claim/';
@@ -53,7 +54,7 @@ function (user, context, callback) {
   // Re-map old and new profile claims to namespaced claims
   old_authzero_claims.forEach(function(claim) {
     try {
-      user[namespace+claim] = user[claim];
+      context.idToken[namespace+claim] = user[claim];
     } catch (e) {
       console.log("Undefined claim (non-fatal): "+e);
     }
