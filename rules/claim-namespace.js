@@ -6,6 +6,7 @@ function (user, context, callback) {
 
   // This is the namespace we used for our own claims
   var namespace = 'https://sso.mozilla.com/claim/';
+  var whitelist = ['IU80mVpKPtIZyUZtya9ZnSTs6fKLt3JO']; //biztera.com
 
   // These claims can be used directly and/or are preserved if integrated by Auth0
   // See also: https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
@@ -54,7 +55,9 @@ function (user, context, callback) {
   // Re-map old and new profile claims to namespaced claims
   old_authzero_claims.forEach(function(claim) {
     try {
-      context.idToken[namespace+claim] = user[claim];
+      if (whitelist.indexOf(context.clientID) < 0) {
+        context.idToken[namespace+claim] = user[claim];
+      }
     } catch (e) {
       console.log("Undefined claim (non-fatal): "+e);
     }
