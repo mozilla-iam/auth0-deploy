@@ -6,6 +6,48 @@
   <title>Mozilla | Log in</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
+
+    .alert {
+        padding: 20px;
+        background-color: #f44336;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        display: none;
+        text-align: center;
+        line-height: 2;
+        font-family:"Avenir Next", Avenir, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, sans-serif;
+    }
+    #download {
+      background-color: #66bb6a;
+      padding: 10px;
+      margin-top: 25px;
+      margin-left: 10px;
+      color: #fff;
+      border: 2px solid #4aa84a;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+
+    .alert.success {background-color: #4CAF50;}
+    .alert.info {background-color: #2196F3;}
+    .alert.warning {background-color: #ff9800;}
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .closebtn:hover {
+        color: black;
+    }
       body,html {
         padding:0;
         margin:0;
@@ -225,6 +267,63 @@
   </script>
 </head>
 <body>
+  <div class="alert info" id="fxalert">
+    <img style="width:20px; vertical-align:middle;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAC/VBMVEUAAAAAAAgAAAcAAAAAAAAA
+AAAAPz8AAAAAAAAABQUAAAUDAwcACAgAAwoEBAkAAAYABgwACAsCChcABBRvv+d2x+wEFjgDFjkB
+F0AAG0h5yvF4yvB5zPF5zPN4zPMCGEQDG0QCGUV5y/IUKFtfq9cZOGdAeqlMhrVnrdU3WYMTEjYX
+Fj4UG0UPGkQNH0wTHEkVF0AUfL4RFDoOJlgOG0YNIE8NR4sUhcUVebwTEjcQI1QQGEASEzgXbbET
+VJgMNG4LRYgUGUIOSo4MMWsLNXEPTpINK2AMIlEOHUgRFjwNHUoaYacVd7kTk9ERUJUWWZ4SH0wK
+N3UWdLcMLGINKl0RIE8MMGgLJFQWcbYUVpwKQ4UNJ1oUgsMUh8cWb7QYmtcVFTwOJ1wIPoARFj0Q
+IlEML2YUfsAJPHwZaa4MLWRfve0PTZAQFz8UissUickVmNYfntsJQIMZXqUaZqkjoN0aY6kQGUIX
+arAUFDoQU5YZZqwTjcwTl9MekdEOJlQnot4JOnkTkNAjiMkEHUsejMwXW6EQGEETj80WIUkQQ38Y
+XaIUgMIOO3UPP3obndoJPX4VNWUJOXcQTIwXJU8ghMUQSol9zvUkd7gSXJ4TOmwPIUwQWJkRSYYW
+KVQQRoQqfb0eba8XL1wTX6IicrNWt+kUYqYRK1ktpeFEpNwemtdLr+QpjswbSn1PseYRZqkZRHcr
+m9hDquEUFz5IrOIwndo9otsvk9E0odwcT4URMGArRW8lk9EiNF4WQHIshMM9p+A2nNdauuweW5US
+aq0ymNQyTXcbPWw4pN4yiMUnPGZLqN0efb4fY587ntgfLFUomNUjgME6k84QGD9HbpcYUow0jstE
+n9c5WYEkbKggVoxBZItOeaAweLA+mdI2grlVhKsrU4BStOhdj7VVs+Yub6QnY5l4yvIzX4tvxO86
+aZVto8dlmb4+dqQ+jcOYzeql1/Fnv+t5rc+03/Zft+SFyuxFga9Vrt+MwN6Bt9dNjbpZoMxSl8Rk
+qtNwtdt6v+KTJka3AAAAAXRSTlMAQObYZgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCa
+nBgAAAAHdElNRQfhBh0SFDrL/2GcAAAHiklEQVRYw92X6VNTZxTG81+005lOlw/9cG8SQhZCSBDD
+mqRGgQSChEiURTAQg0RICiYsEUHCUhMLFEEWAVFEVEQUEVRUoNaxWK3aVttai3a1Ot3Gcabnfe9N
+uJCq9FunZ2AYGH7Pec55z3vuDYv1n43XPrg3O7v/k59+uoPiyb+kX990b/bB8cmR69Nnzuxtauq4
+f+d+9xdvLxv/YNOh/R9PTo0cPHP1alNTd0dO4eWey6Ojo7eeLBufODE0Nubyej9qSgS8q3lNq318
+/PDhgYFnL+c37Tt2fMrav22by2xIqw1elRJefH7QHrNr957klpaWgYFlpJ+csPaXlgfnG9KyQxPX
+hb/X09XcardHNuh7tScbWy7eemH6swf2T049Pi5WB+/IF1P5C3u2r7XHRIasTOWKHI7ezsbxF9uf
+HDloNoyJ1TvM4jQkkLN1y5oVq03AbzgZqxCqkhy9jS/gJyZHXK7+9PTNanCABd57d+caMAB8dIJe
+L+RUCeM9nc/lL01ObXNZLWkgUI5LWFcMAmvtppDUDQm6hGiHwyHNy2NXtz2PH360zeWqsD6u31zK
+FIAKUgviRNy6cW5jZp6Sn8H2BPIPzh64NPwznN7vXqelPp0hsB0LNICA6qFCofpQyZfJ5J7A4T0w
+MfzgBDJQ4bRQPUCnWFyIBCJDUk1IQCHkcIQKvoSQyAMKODRxZGjI2eeareizYgEzEghHAitWR64s
+aChLiEgWcIqkc1UcCUEQSxQe7TtyYmjI6uzrO+R0WqECdYkhLTiUPkU4hIKN70dHJGt+EYQlBc3J
+QEDCXmzg2JMhi8Xp7KvwXrXSFdT6TnFFTMjKDSAQlaVZL8iMD2IrCcJGfL+4gEtDY/39FmeF14r4
+0vISapCpFqBT3JgAArHrw0BATnrAAsks4uyR4bHy9H6LxWoF/5tLUQdqF+YwMgS3ICo3Vh+WFM/m
+kd8gASPjCA+cGHPlmw319fUWikdjiAxQFUALdHEOfbJGi1oAAqSEQF8MA09cLrN4czoE4MCjAigD
+VAU6OMSLXLoFPBIM8EjegsDXHx+sMJSqS1Go1eUlsAmy8U2kDRQIkIBIMU+1gMBhI/0CD44NV3jN
+2eXl6kR1+Y6SfIMY8agA6AAY0J7U6UQwRkIOrgA6iCwQpF9h3/4Rrzg/P7+kJHxVqNkgpnkoAI4A
+d6DhHDWGVagCG+WAIXDo+Jgr22yAOG8YxHgoze/ER5CKhgAMCDnSPCVbTgYIHJs6aBAHp6XNDg5m
+12YDHpoI9dM8rJKCjWWaiKh5MCDN4KMW3vYp0AJQgbf2RmIwjlDInrIO+of4tatxAdBBd/JdbIAv
+55FGwufhTWqR3rjuTcse7OlahQPwXcU5CzwUAAKf/4YNKPnGU8QFmpeQPOoifTl9tTa0pznxRmtK
+SkpiOGxwwLdsB/8xuAFlVAeLkAEZ8ZkvP/ErXcO9L880wepY17rabooxAd6+812U3s8ncLl3cztx
+B2AVENd8AtW0wO+f7G0KTSkuzjHtMu0GvL0GpQfehP2XJcA9Vjh8BiCUtADP5+D63u7E8J1bt259
+tqd9V03N/Zvb6fQ+PuqxBvEZfJmEZq+hs5TRAo+mmzpSWk2FT7c8/bbm07q6O2sRbgK+gOazNNr1
+VXNQgIzmPRIPYxBem+7OGbTvbj/387d1dW63+xaNpzJ4fRg6gRlMwxR8R88yh5qD6e7CrpvtNXXu
+p253CwBRo4BD+oaN71N87HpB2PdK/hwaoCsYpSfxLVqgo6e5C/joiIiWiOjkrFyNRovwsgTUP+Qf
+LlF80AzP5p+gxaM83dHV2lzn/jEqKhnoP2JjtXoBuMfpk3PBP+apNeAP8vQiAXtzzGgUSh2r1er1
+Op3OATiynwtqDppfLEAu3AXWzWZ7SOSzLAzrBTpdXJwI45AelZ9J82S1b4axf6OvhyxW95qYPW7Y
+eDqUG+iHot5zgKP0TJ60MfIjB/6V9sXlT9vdWVoBsCLRYxGXy32GcJQel0/zCyUY4ZcLDAEWCAg0
+WgdCIVQqrlZ/CnA9nV6Oef8tniGOIjfGykUCf2WBgApYlUoBMSBEOKT38wwDt+WkxEgyDLDeudXu
+FiEBxAqFwrucawjH6dkyX82n/2TLGcfAYz7bzu1xZwodcbD3YPN1cjhFVVJVEq5ezvM1jdHFu2ir
+L348jx5uGRXEcTnAFlVVSaVzv2VkYJxHMAQIRhsrAwRiBY554YdSiLy8DLg6/KOAk8yAEb5Ct9FI
+Ln3DGGg5GZaZqShCMKL5M20yglwSPNhGbSTQgTyLNd7YG//V/HweguHmyyRXbA9J41KJvwjqb5WB
+Am819iadCsq8zVcelcklniJC8oNsKU4ePY1/GKv+6T3vYqeHLbe1Zcj8nbq2BCco/B8LQNHYVo0a
+rfQtPuIXP6pcuANGkiSf966ra6u2IQWfB7aP72ReIlL6/LftVzxsfNgy6nvBOyGR+RUqX/iBASmg
+J4eNkDOKx08jmxGOkCRffclHjkrKAwlPPoYB/BfypempCELP38XdJ3x+lvmxTQX/OhMwAwsbbDnB
+C8Ar//Vn1zcq/Wwl6/8cfwO7+9oQfZdlAgAAAABJRU5ErkJggg=="/>
+    <span class="closebtn"  onclick="this.parentElement.style.display='none';">&times;</span>
+    <strong>Want to help test Firefox?</strong> Give Firefox Nightly a try!
+    <span style="clear:both; margin: 100px; padding-top:200px"></span>
+    <a id="download" href="https://nightly.mozilla.org">Download</a>
+  </div>
+
  <div class="table">
    <div class="cell">
      <div class="content">
@@ -238,6 +337,14 @@
    </div>
  </div>
 
+<script>
+    /* Nightly alert */
+    var isChrome = /Chrome/.test(navigator.userAgent);
+    if (isChrome == true && window.innerWidth > 770) {
+      var malert = document.getElementById("fxalert");
+      malert.style.display='block';
+    }
+</script>
  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
  <!--[if IE 8]>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/ie8/0.2.5/ie8.js"></script>
