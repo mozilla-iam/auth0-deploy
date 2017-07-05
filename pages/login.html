@@ -6,51 +6,45 @@
   <title>Mozilla | Log in</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-
-    .alert {
-        padding: 20px;
-        background-color: #f44336;
-        color: white;
-        opacity: 1;
-        transition: opacity 0.6s;
-        margin-bottom: 15px;
-        display: none;
+      body,html {
+        padding:0;
+        margin:0;
+      }
+      .alert {
+        padding: 18px 18px 18px 50px;
         text-align: center;
-        line-height: 2;
-        font-family:"Avenir Next", Avenir, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, sans-serif;
-    }
-    #download {
-      background-color: #66bb6a;
-      padding: 10px;
-      margin-top: 25px;
-      margin-left: 10px;
-      color: #fff;
-      border: 2px solid #4aa84a;
-      text-decoration: none;
-      border-radius: 8px;
-    }
-
-    .alert.success {background-color: #4CAF50;}
-    .alert.info {background-color: #2196F3;}
-    .alert.warning {background-color: #ff9800;}
-
-    .closebtn {
+        display: none;
+        font-family: "Avenir Next", Avenir, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, sans-serif;
+      }
+      .alert-info {
+        background-color: #538195;
+        color: white;
+      }
+      .alert > img {
+        display: inline-block;
+        margin-right: 15px;
+      }
+      .btn-alert {
+        padding: 5px 10px;
+        background-color: #7499a9;
+        display: inline-block;
+        color: white;
+        text-decoration: none;
+        margin-left: 15px;
+      }
+      .closebtn {
         margin-left: 15px;
         color: white;
+        opacity: .8;
         font-weight: bold;
         float: right;
         font-size: 22px;
         line-height: 20px;
         cursor: pointer;
         transition: 0.3s;
-    }
-
-    .closebtn:hover {
-        color: black;
-    }
-      body,html {
-        padding:0;
-        margin:0;
+      }
+      .closebtn:hover {
+        opacity: 1;
       }
       .table {
         display:table;
@@ -267,8 +261,9 @@
   </script>
 </head>
 <body>
-  <div class="alert info" id="fxalert">
-    <img style="width:20px; vertical-align:middle;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAC/VBMVEUAAAAAAAgAAAcAAAAAAAAA
+
+  <div class="alert alert-info" role="alert" id="fxalert">
+    <img style="width:20px;vertical-align:middle;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAC/VBMVEUAAAAAAAgAAAcAAAAAAAAA
 AAAAPz8AAAAAAAAABQUAAAUDAwcACAgAAwoEBAkAAAYABgwACAsCChcABBRvv+d2x+wEFjgDFjkB
 F0AAG0h5yvF4yvB5zPF5zPN4zPMCGEQDG0QCGUV5y/IUKFtfq9cZOGdAeqlMhrVnrdU3WYMTEjYX
 Fj4UG0UPGkQNH0wTHEkVF0AUfL4RFDoOJlgOG0YNIE8NR4sUhcUVebwTEjcQI1QQGEASEzgXbbET
@@ -317,11 +312,19 @@ Ln3DGGg5GZaZqShCMKL5M20yglwSPNhGbSTQgTyLNd7YG//V/HweguHmyyRXbA9J41KJvwjqb5WB
 Am819iadCsq8zVcelcklniJC8oNsKU4ePY1/GKv+6T3vYqeHLbe1Zcj8nbq2BCco/B8LQNHYVo0a
 rfQtPuIXP6pcuANGkiSf966ra6u2IQWfB7aP72ReIlL6/LftVzxsfNgy6nvBOyGR+RUqX/iBASmg
 J4eNkDOKx08jmxGOkCRffclHjkrKAwlPPoYB/BfypempCELP38XdJ3x+lvmxTQX/OhMwAwsbbDnB
-C8Ar//Vn1zcq/Wwl6/8cfwO7+9oQfZdlAgAAAABJRU5ErkJggg=="/>
+C8Ar//Vn1zcq/Wwl6/8cfwO7+9oQfZdlAgAAAABJRU5ErkJggg==" alt="alert-info"><strong>Want to help test Firefox?</strong> Give Firefox Nightly a try!
+    <a href="https://nightly.mozilla.org/" class="btn-alert" target="_blank"><?xml version="1.0" encoding="UTF-8"?>
+      <svg width="14px" height="11px" viewBox="0 0 14 11" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <defs></defs>
+          <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+              <g id="icons-/-arrow-right-white" fill="#FFFFFF">
+                  <path d="M9.4921875,0.5 L13.3984375,4.6015625 C13.6328137,4.83593867 13.75,5.13541484 13.75,5.5 C13.75,5.83854336 13.6328137,6.12499883 13.3984375,6.359375 L9.4921875,10.5 C9.25781133,10.7343762 8.97786621,10.8515625 8.65234375,10.8515625 C8.32682129,10.8515625 8.04687617,10.7343762 7.8125,10.5 C7.57812383,10.2656238 7.4609375,9.96614766 7.4609375,9.6015625 C7.4609375,9.23697734 7.57812383,8.93750117 7.8125,8.703125 L9.6875,6.75 L1.2109375,6.75 C0.872394141,6.75 0.585938672,6.62630332 0.3515625,6.37890625 C0.117186328,6.13150918 0,5.83854336 0,5.5 C0,5.16145664 0.117186328,4.86849082 0.3515625,4.62109375 C0.585938672,4.37369668 0.872394141,4.25 1.2109375,4.25 L9.6875,4.25 L7.7734375,2.296875 C7.53906133,2.06249883 7.421875,1.76302266 7.421875,1.3984375 C7.421875,1.03385234 7.53906133,0.734376172 7.7734375,0.5 C8.00781367,0.265623828 8.29426914,0.1484375 8.6328125,0.1484375 C8.97135586,0.1484375 9.25781133,0.265623828 9.4921875,0.5 Z" id="ion-arrow-right-c---Ionicons"></path>
+              </g>
+          </g>
+      </svg>
+      Download
+    </a>
     <span class="closebtn"  onclick="this.parentElement.style.display='none';">&times;</span>
-    <strong>Want to help test Firefox?</strong> Give Firefox Nightly a try!
-    <span style="clear:both; margin: 100px; padding-top:200px"></span>
-    <a id="download" href="https://nightly.mozilla.org">Download</a>
   </div>
 
  <div class="table">
