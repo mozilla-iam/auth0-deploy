@@ -12,7 +12,8 @@ function (user, context, callback) {
   var ALLOWED_GROUPS = [
     // Examples:
     //'team_moco', 'team_mofo'
-    'SecurityWiki'
+    'SecurityWiki',
+    'team_moco'
   ];
 
   if (SECURITYWIKI_APP.indexOf(context.clientID) >= 0) {
