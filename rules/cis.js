@@ -7,7 +7,13 @@ function (user, context, callback) {
   // settings)
   // Additional integration into user.app_metadata itself is at:
   // https://github.com/mozilla-iam/cis_functions/tree/master/functions/idvtoauth0
+
+  var namespace = 'https://sso.mozilla.com/claim/';
+
   if (typeof(user.app_metadata) !== undefined) {
+    // Import entire CIS profile to an "OIDC conformant" namespace"
+    // Note this is different from the Auth0 Management API's user data structure
+    context.idToken[namespace+'cis'] = user.app_metadata;
     user.app_metadata = undefined;
     user.email_aliases = undefined;
     user.dn = undefined;
