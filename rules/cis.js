@@ -59,12 +59,15 @@ function (user, context, callback) {
       console.log('CIS: HTTP Error while parsing user groups for user '+user.user_id+': '+err);
       return cb();
     });
+  } else {
+    return cb();
   }
 
   // Ensure this is always called or the webtask will timeout
   function cb(new_groups) {
     if (new_groups !== undefined) {
       user.groups = new_groups;
+      user.app_metadata = user.app_metadata || {};
       user.app_metadata.groups = new_groups;
       // Save app_metadata changes
       auth0.users.updateAppMetadata(user.user_id, user.app_metadata)
@@ -80,6 +83,6 @@ function (user, context, callback) {
     user.dn = undefined;
     user.organizationUnits = undefined;
 
-    callback(null, user, context);
+    return callback(null, user, context);
   }
 }
