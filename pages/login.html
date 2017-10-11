@@ -15,10 +15,26 @@
         text-align: center;
         display: none;
         font-family: "Avenir Next", Avenir, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, sans-serif;
-      }
-      .alert-info {
-        background-color: #538195;
         color: white;
+      }
+      .alert-success {
+          background-color: #14c887;
+      }
+
+      &.alert-medium {
+          background-color: #00458b;
+      }
+
+      &.alert-high {
+          background-color: #ffc300;
+      }
+
+      &.alert-maximum {
+          background-color: #ff4f5e;
+      }
+
+      &.alert-low {
+          background-color: #000000;
       }
       .alert > img {
         display: inline-block;
@@ -26,7 +42,7 @@
       }
       .btn-alert {
         padding: 5px 10px;
-        background-color: #7499a9;
+        background: rgba(255, 255, 255, 0.2);
         display: inline-block;
         color: white;
         text-decoration: none;
@@ -266,7 +282,7 @@
 </head>
 <body>
 
-  <div class="alert alert-info" role="alert" id="fxalert">
+  <div class="alert alert-medium" role="alert" id="fxalert">
     <img style="width:20px;vertical-align:middle;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAC/VBMVEUAAAAAAAgAAAcAAAAAAAAA
 AAAAPz8AAAAAAAAABQUAAAUDAwcACAgAAwoEBAkAAAYABgwACAsCChcABBRvv+d2x+wEFjgDFjkB
 F0AAG0h5yvF4yvB5zPF5zPN4zPMCGEQDG0QCGUV5y/IUKFtfq9cZOGdAeqlMhrVnrdU3WYMTEjYX
@@ -316,7 +332,7 @@ Ln3DGGg5GZaZqShCMKL5M20yglwSPNhGbSTQgTyLNd7YG//V/HweguHmyyRXbA9J41KJvwjqb5WB
 Am819iadCsq8zVcelcklniJC8oNsKU4ePY1/GKv+6T3vYqeHLbe1Zcj8nbq2BCco/B8LQNHYVo0a
 rfQtPuIXP6pcuANGkiSf966ra6u2IQWfB7aP72ReIlL6/LftVzxsfNgy6nvBOyGR+RUqX/iBASmg
 J4eNkDOKx08jmxGOkCRffclHjkrKAwlPPoYB/BfypempCELP38XdJ3x+lvmxTQX/OhMwAwsbbDnB
-C8Ar//Vn1zcq/Wwl6/8cfwO7+9oQfZdlAgAAAABJRU5ErkJggg==" alt="alert-info"><strong>Want to help test Firefox?</strong> Give Firefox Nightly a try!
+C8Ar//Vn1zcq/Wwl6/8cfwO7+9oQfZdlAgAAAABJRU5ErkJggg==" alt="alert-medium"><strong>Want to help test Firefox?</strong> Give Firefox Nightly a try!
     <a href="https://nightly.mozilla.org/" class="btn-alert" target="_blank"><?xml version="1.0" encoding="UTF-8"?>
       <svg width="14px" height="11px" viewBox="0 0 14 11" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
           <defs></defs>
