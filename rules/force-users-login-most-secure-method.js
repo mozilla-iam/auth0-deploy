@@ -1,4 +1,7 @@
 function (user, context, callback) {
+  var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH' // mozillians.org account verification
+             ];
+
   if (!user.email_verified) {
     var reason = 'You primary email is not verified. Please contact EUS.';
     context.redirect = {
@@ -7,11 +10,20 @@ function (user, context, callback) {
     console.log('Primary email not verified');
     return callback(null, user, context);
   }
-  
+
   if (context.connectionStrategy === 'ad') {
     // this is the highest level of account, always let in
     console.log('ad account passthru');
     return callback(null, user, context);
+  }
+
+  try {
+    if (WHITELIST.indexOf(context.clientID) >= 0) {
+      console.log('Whitelisted client '+context.clientID+', no login enforcement taking place');
+      return callback(null, user, context);
+    }
+  } catch (e) {
+    console.log('Client not found while checking force-user-to-login-with-most-secure-method whitelist (non-fatal): '+e);
   }
 
   if (context.connectionStrategy === 'google-oauth2') {
@@ -21,11 +33,11 @@ function (user, context, callback) {
       return callback(null, user, context);
     }
   }
-  
+
   // Query all users to find matches for everything else...
   var request = require('request@2.56.0');
   var userApiUrl = auth0.baseUrl + '/users';
-  
+
   // Lower is better
   var matchOrder = {'ad': 0,
                     'github': 1,
@@ -45,13 +57,12 @@ function (user, context, callback) {
   },
   function(err, response, body) {
     if (err) return callback(err);
-    
+
     if (response.statusCode !== 200) return callback(new Error(body));
 
     var data = JSON.parse(body);
     if (data.length > 0) {
       var myprovider = context.connectionStrategy;
-      console.log(myprovider);
       console.log('All users matching '+user.email+' current match order '+matchOrder[myprovider]);
       var selected_user = user;
       async.each(data, function(targetUser, cb) {
