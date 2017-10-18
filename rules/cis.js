@@ -30,9 +30,14 @@ function (user, context, callback) {
     function(err, response, body) {
       if (!err) {
         var udata = JSON.parse(body);
+        // If user has no LDAP groups, return immediately
+        if (udata.groups === undefined) {
+          return cb();
+        }
 
         // Add non-LDAP groups to new_groups
         var new_groups = [];
+
         for (index = 0; index < ugroups.length; ++index) {
           var cur_grp = ugroups[index];
           if (cur_grp === null) {
@@ -72,7 +77,7 @@ function (user, context, callback) {
       // Save app_metadata changes
       auth0.users.updateAppMetadata(user.user_id, user.app_metadata)
         .catch(function(err){
-          console.log('CIS: Error updating app_metadata (groups) for user '+user.user_id+': '+err);     
+          console.log('CIS: Error updating app_metadata (groups) for user '+user.user_id+': '+err);
       });
     }
 
