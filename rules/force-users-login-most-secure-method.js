@@ -80,7 +80,6 @@ function (user, context, callback) {
         if (err) {
           callback(err, user, context);
         } else { // No error, but loop ended
-          console.log(context);
           console.log('User profile that may log in is: '+selected_user.user_id+' initial login attempt was with: '+user.user_id);
             if (user.user_id !== selected_user.user_id) {
               var reason = 'Sorry - you may not login with that user account. Please always' +
