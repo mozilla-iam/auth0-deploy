@@ -73,7 +73,7 @@ function (user, context, callback) {
           if (matchOrder[provider] < matchOrder[previous_provider]) {
             selected_user = targetUser;
           }
-          console.log(targetUser.user_id+'is of match order '+matchOrder[provider]+'. Selecting: '+selected_user.user_id);
+          console.log(targetUser.user_id+' is of match order '+matchOrder[provider]+'. Selecting: '+selected_user.user_id);
         }
         cb();
       }, function(err) {
