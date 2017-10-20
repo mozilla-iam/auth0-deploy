@@ -62,31 +62,34 @@ function (user, context, callback) {
 
     var data = JSON.parse(body);
     if (data.length > 0) {
-      var myprovider = context.connectionStrategy;
-      console.log('All users matching '+user.email+' current match order '+matchOrder[myprovider]);
+      // Initialize selected_user as current user
       var selected_user = user;
       async.each(data, function(targetUser, cb) {
         // Only list "not us" ;-)
         if (targetUser.user_id !== user.user_id) {
           // XXX This currently assumes single identity/no linked account /!\
           var provider = targetUser.identities[0].provider;
-          console.log(targetUser.user_id+' match order '+matchOrder[provider]);
-          if (matchOrder[provider] < matchOrder[myprovider]) {
-            console.log('Found better account target');
+          var previous_provider = selected_user.identities[0].provider;
+          if (matchOrder[provider] < matchOrder[previous_provider]) {
             selected_user = targetUser;
           }
+          console.log(targetUser.user_id+' is of match order '+matchOrder[provider]+'. Selecting: '+selected_user.user_id);
         }
-        console.log('Final selected user is '+selected_user.user_id);
-        if (user.user_id !== selected_user.user_id) {
-          var reason = 'Sorry - you may not login with that user account. Please always' +
-              ' use your '+selected_user.identities[0].connection+' account instead.';
-          context.redirect = {
-            url: "https://sso.mozilla.com/forbidden?reason="+encodeURIComponent(reason)
-          };
-        }
-        cb(); // bail + success
+        cb();
       }, function(err) {
-        callback(err, user, context);
+        if (err) {
+          callback(err, user, context);
+        } else { // No error, but loop ended
+          console.log('User profile that may log in is: '+selected_user.user_id+' initial login attempt was with: '+user.user_id);
+            if (user.user_id !== selected_user.user_id) {
+              var reason = 'Sorry - you may not login with that user account. Please always' +
+                  ' use your '+selected_user.identities[0].connection+' account instead.';
+              context.redirect = {
+                url: "https://sso.mozilla.com/forbidden?reason="+encodeURIComponent(reason)+'&redirect_uri='+context.request.query.redirect_uri
+              };
+            }
+        }
+        callback(null, user, context);
       });
     } else {
       callback(null, user, context);
