@@ -1,4 +1,9 @@
 function (user, context, callback) {
+  if (!user) {
+    // If the user is not presented (i.e. a rule deleted it), just go on, since authenticate will always fail.
+    return callback(null, null, context);
+  }
+
   var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH' // mozillians.org account verification
              ];
 

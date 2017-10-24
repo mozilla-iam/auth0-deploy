@@ -1,4 +1,9 @@
 function (user, context, callback) {
+  if (!user) {
+    // If the user is not presented (i.e. a rule deleted it), just go on, since authenticate will always fail.
+    return callback(null, null, context);
+  }
+
   // Auth0 in the "OIDC-Conformant" mode will only allow these claims. That mode
   // enforces more than the OIDC spec in at least one regard:
   // Auth0 forbids the use of optional claims UNLESS these are namespaced by a URL.
