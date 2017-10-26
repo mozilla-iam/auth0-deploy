@@ -1,4 +1,9 @@
 function (user, context, callback) {
+  if (!user) {
+    // If the user is not presented (i.e. a rule deleted it), just go on, since authenticate will always fail.
+    return callback(null, null, context);
+  }
+
   var ALLOWED_CLIENTIDS = [
     'R4djNlyXSl3i8N2KXWkfylghDa9kFQ84', //mozilla.tap.thinksmart.com
   ];

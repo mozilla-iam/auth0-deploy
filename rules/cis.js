@@ -1,4 +1,9 @@
 function (user, context, callback) {
+  if (!user) {
+    // If the user is not presented (i.e. a rule deleted it), just go on, since authenticate will always fail.
+    return callback(null, null, context);
+  }
+
   // CIS is our only functionality that can set app_metadata
   // Auth0 auto-integrate user.app_metadata.* into user.*
   // This rule cleans up the left overs for conciseness, clarity and size

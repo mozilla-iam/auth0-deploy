@@ -1,10 +1,15 @@
 function (user, context, callback) {
+  if (!user) {
+    // If the user is not presented (i.e. a rule deleted it), just go on, since authenticate will always fail.
+    return callback(null, null, context);
+  }
+
   var APPS = [
     'koX1ze40wpoUovVV3RA7K79uTlxpbZFp' // AWS Consolidated Billing - Read Only
   ];
 
   var ALLOWED_GROUPS = ['aws_consolidatedbilling_read_only'];
-  
+
   if (APPS.indexOf(context.clientID) >= 0) {
     var groupHasAccess = ALLOWED_GROUPS.some(
       function (group) {
