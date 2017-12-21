@@ -1,8 +1,4 @@
 function (user, context, callback) {
-  if (!user) {
-    // If the user is not presented (i.e. a rule deleted it), just go on, since authenticate will always fail.
-    return callback(null, null, context);
-  }
   // This is a rule to specifically allow access to _HRData for specific ClientIDs
   // _HRData comes from WorkDay, through LDAP Connector
   // Ideally the RPs who need this data should request it directly from WorkDay, so this is a work-around.

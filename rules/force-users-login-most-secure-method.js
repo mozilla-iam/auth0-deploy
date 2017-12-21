@@ -1,27 +1,29 @@
 function (user, context, callback) {
+var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH', // mozillians.org account verification
+                   'nV1rnMMkB4uX9IewNOCitqy8NoyXVHlM', // air.mozilla.org
+                   'w5mW5ZufRCWg6metsZ7hMckSH5s3b1Cq', // air.allizom.org
+                   't9bMi4eTCPpMp5Y6E1Lu92iVcqU0r1P1', // https://web-mozillians-staging.production.paas.mozilla.community Verification client
+                   'jijaIzcZmFCDRtV74scMb9lI87MtYNTA', // mozillians.org Verification Client
+                   '1db5KNoLN5rLZukvLouWwVouPkbztyso', // login.taskcluster.net
+                  ];
+  
   if (!user) {
-    // If the user is not presented (i.e. a rule deleted it), just go on, since authenticate will always fail.
     return callback(null, null, context);
   }
-
-  var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH' // mozillians.org account verification
-             ];
-
+  
+  
   if (!user.email_verified) {
-    var reason = 'You primary email is not verified. Please contact EUS.';
-    context.redirect = {
-     url: "https://sso.mozilla.com/forbidden?reason="+encodeURIComponent(reason)
-    };
+    var code = 'primarynotverified';
     console.log('Primary email not verified');
-    return callback(null, user, context);
+    return callback(null, user, global.postError(code, context));
   }
-
+  
   if (context.connectionStrategy === 'ad') {
     // this is the highest level of account, always let in
-    console.log('ad account passthru');
+    console.log('User is allowed to login because this is an ad account');
     return callback(null, user, context);
   }
-
+ 
   try {
     if (WHITELIST.indexOf(context.clientID) >= 0) {
       console.log('Whitelisted client '+context.clientID+', no login enforcement taking place');
@@ -34,15 +36,15 @@ function (user, context, callback) {
   if (context.connectionStrategy === 'google-oauth2') {
     // this is == to 'ad' for us
     if (user.email.endsWith('mozilla.com') || user.email.endsWith('mozillafoundation.org')) {
-      console.log('ad account via google-oauth2 passthru');
+      console.log('User is allowed to login because this is an ad account via google-oauth2 passthru');
       return callback(null, user, context);
     }
   }
-
+  
   // Query all users to find matches for everything else...
-  var request = require('request@2.56.0');
+  var request = require('request');
   var userApiUrl = auth0.baseUrl + '/users';
-
+  
   // Lower is better
   var matchOrder = {'ad': 0,
                     'github': 1,
@@ -62,7 +64,7 @@ function (user, context, callback) {
   },
   function(err, response, body) {
     if (err) return callback(err);
-
+    
     if (response.statusCode !== 200) return callback(new Error(body));
 
     var data = JSON.parse(body);
@@ -78,7 +80,7 @@ function (user, context, callback) {
           if (matchOrder[provider] < matchOrder[previous_provider]) {
             selected_user = targetUser;
           }
-          console.log(targetUser.user_id+' is of match order '+matchOrder[provider]+'. Selecting: '+selected_user.user_id);
+          console.log(targetUser.user_id+'is of match order '+matchOrder[provider]+'. Selecting: '+selected_user.user_id);
         }
         cb();
       }, function(err) {
@@ -86,13 +88,10 @@ function (user, context, callback) {
           callback(err, user, context);
         } else { // No error, but loop ended
           console.log('User profile that may log in is: '+selected_user.user_id+' initial login attempt was with: '+user.user_id);
-            if (user.user_id !== selected_user.user_id) {
-              var reason = 'Sorry - you may not login with that user account. Please always' +
-                  ' use your '+selected_user.identities[0].connection+' account instead.';
-              context.redirect = {
-                url: "https://sso.mozilla.com/forbidden?reason="+encodeURIComponent(reason)+'&redirect_uri='+context.request.query.redirect_uri
-              };
-            }
+          if (user.user_id !== selected_user.user_id) {
+            var code = 'incorrectaccount';
+            return callback(null, user, global.postError(code, context, selected_user.identities[0].connection));
+          }
         }
         callback(null, user, context);
       });
