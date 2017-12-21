@@ -1,6 +1,9 @@
 function (user, context, callback) {
   var ALLOWED_CLIENTIDS = [ 'poy4bMcyUJ7v2RuOTjs8WVDVcfCHbqqY', //testrp
-                            '7euXeq96glWUS85bwDRCCs10xKGY93t0' //INXPO
+                            '7euXeq96glWUS85bwDRCCs10xKGY93t0', //INXPO
+                           'UCOY390lYDxgj5rU8EeXRtN6EP005k7V', //sso dash
+                           'WXVdgVoCca11OtpGlK8Ir3pR9CBAlSA5', // slack prod
+                           'BbenZUhB0TUVZnAtYvysfvpZKNHby4JX' // community analytics
   ];
   //See https://mozillians.org/en-US/group/nda/
   var WHITELIST_GROUP = 'mozilliansorg_nda';
@@ -50,6 +53,7 @@ function (user, context, callback) {
         var obj = [WHITELIST_GROUP];
         user.groups = extend(true, user.groups, obj);
       }
+
       return callback(null, user, context);
     });
   }
