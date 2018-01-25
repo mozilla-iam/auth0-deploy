@@ -1,6 +1,7 @@
 function (user, context, callback) {
   // If user is not LDAP user don't try to do stuff
-  if (context.connection !== 'ad') {
+
+  if (context.connectionStrategy !== 'ad') {
     return callback(null, user, context);
   }
   // XXX Remove this webtask when a LDAP CIS Publisher is available
@@ -42,14 +43,12 @@ function (user, context, callback) {
     user.app_metadata.groups = groups;
     auth0.users.updateAppMetadata(user.user_id, user.app_metadata)
        .then(function(){
-         callback(null, user, context);
+         console.log("reintegration complete for " + user.user_id);
+         return callback(null, user, context);
        })
        .catch(function(err){
          console.log(err);
-         callback(err);
+         return callback(err);
     });
-    console.log("reintegration complete for " + user.user_id);
-//    console.log(groups);
-    return callback(null, user, context);
   });
 }
