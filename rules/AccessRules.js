@@ -1,6 +1,6 @@
 function (user, context, callback) {
   var rules_url = 'https://cdn.sso.mozilla.com/apps.yml'; //S3 bucket with CFN
-  user.groups = user.groups || {};
+  var groups = user.groups || [];
   
   // Check if array A has any occurence from array B
   function array_in_array(A, B) {
@@ -35,7 +35,7 @@ function (user, context, callback) {
         if ((app.authorized_users.length > 0 ) && (app.authorized_users.indexOf(user.email) >= 0)) {
           return callback(null, user, context);
         // Same dance as above, but for groups
-        } else if ((app.authorized_groups.length > 0) && array_in_array(app.authorized_groups, user.groups)) {
+        } else if ((app.authorized_groups.length > 0) && array_in_array(app.authorized_groups, groups)) {
           return callback(null, user, context);
         }
         console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - not in authorized_groups or authorized_users");

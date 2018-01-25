@@ -10,8 +10,7 @@ function (user, context, callback) {
   }
   // Just for safety
   user.app_metadata = user.app_metadata || {};
-  user.app_metadata.groups = user.app_metadata.groups || {};
-  user.groups = user.groups || {};
+  user.app_metadata.groups = user.app_metadata.groups || [];
   
   // Retrieve LDAP groups from the API since the rule does not have direct access
   // as auth0 will remap user.app_metadata.groups to user.groups in the rule context
@@ -37,12 +36,20 @@ function (user, context, callback) {
       }
     });
     //reconstruct groups...
-    user.groups = theuser[0].groups || {};
-    Array.prototype.push.apply(user.groups, ['everyone']);
-    Array.prototype.push.apply(user.groups, non_ldap_groups);
-    user.app_metadata.groups = user.groups;
+    var groups = theuser[0].groups || [];
+    Array.prototype.push.apply(groups, ['everyone']);
+    Array.prototype.push.apply(groups, non_ldap_groups);
+    user.app_metadata.groups = groups;
+    auth0.users.updateAppMetadata(user.user_id, user.app_metadata)
+       .then(function(){
+         callback(null, user, context);
+       })
+       .catch(function(err){
+         console.log(err);
+         callback(err);
+    });
     console.log("reintegration complete for " + user.user_id);
-//    console.log(user.groups);
+//    console.log(groups);
     return callback(null, user, context);
   });
 }
