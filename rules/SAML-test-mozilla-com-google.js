@@ -1,4 +1,9 @@
 function (user, context, callback) {
+  if (!user) {
+    // If the user is not presented (i.e. a rule deleted it), just go on, since authenticate will always fail.
+    return callback(null, null, context);
+  }
+
   if (context.clientID !== 'q0tFB9QyFIKqPOOKvkFnHMj2VwrLjX46') return callback(null, user, context); // Google (test.mozilla.com)
 
   // This rule simply remaps @mozilla.com e-mail addresses to @test.mozilla.com to be used with the test.mozilla.com GSuite domain.
