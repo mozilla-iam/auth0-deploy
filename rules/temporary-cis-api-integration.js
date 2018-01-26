@@ -52,6 +52,7 @@ function (user, context, callback) {
         console.log('user '+user.user_id+' is in group '+WHITELIST_GROUP+', reintegrating');
         var obj = [WHITELIST_GROUP];
         user.groups = extend(true, user.groups, obj);
+        //XXX is this rule is re-enabled, change this to use app_metadata or things may fail
       }
 
       return callback(null, user, context);
