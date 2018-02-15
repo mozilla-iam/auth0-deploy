@@ -48,7 +48,8 @@
       input[type="email"]:focus,
       input[type="password"]:hover,
       input[type="password"]:focus {
-        border: 1px solid #229DC4; }
+        border: 1px solid #229DC4;
+        outline: none; }
       input[type="text"]:focus,
       input[type="email"]:focus,
       input[type="password"]:focus {
@@ -217,6 +218,9 @@
         margin-left: -1em; }
       .button:last-child {
         margin-bottom: 0; }
+      .button svg,
+      .button span {
+        pointer-events: none; }
 
     .card {
       background-color: #fff;
@@ -348,16 +352,37 @@
 
 </svg></a>
       <form data-decorator="init-auth handle-submit" method="post" action="/" lock-state="initial">
-        <fieldset>
+        <fieldset data-decorator="filter-connections">
           <legend class="rp-name"><span class="visually-hidden">Log in to </span><span id="rp-name-placeholder" class="rp-name__text"></span></legend>
-          <div id="initial" data-screen>
+          <div id="loading" class="loading" data-screen>
+            <p class="visually-hidden ">Loading…</p>
+            <svg width="38" height="38" stroke="#000" viewBox="0 0 38 38" class="loading__spinner">
+
+                <g fill="none" fill-rule="evenodd">
+                    <g transform="translate(1 1)" stroke-width="2">
+                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"/>
+                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                            <animateTransform
+                                attributeName="transform"
+                                type="rotate"
+                                from="0 18 18"
+                                to="360 18 18"
+                                dur="1s"
+                                repeatCount="indefinite"/>
+                        </path>
+                    </g>
+                </g>
+
+            </svg>
+          </div>
+          <div id="initial" data-screen data-hidden inert>
             <p>Log in with email or third-party</p>
             <label for="field-email" class="visually-hidden">E-mail address</label>
             <input type="email" name="username" id="field-email" placeholder="Email address" autocomplete="username email" autofocus />
-            <button type="button" class="button button--full-width" data-handler="enter" id="enter-initial">Enter</button>
+            <input type="submit" class="button button--full-width" id="enter-initial" value="Enter" />
             <hr>
             <ul class="login-options list list--plain">
-              <li>
+              <li data-optional-rp="github">
                 <button class="button button--full-width button--social button--secondary" type="button" data-handler="authorise-github">
                   <svg width="18" height="18" viewBox="0 0 18 18" class="icon" role="presentation">
 
@@ -367,7 +392,7 @@
                   <span>Log in with GitHub</span>
                 </button>
               </li>
-              <li>
+              <li data-optional-rp="google-oauth2">
                 <button class="button button--full-width button--social button--secondary" type="button" data-handler="authorise-google">
                   <svg width="18" height="18" viewBox="0 0 18 18" class="icon" role="presentation">
 
@@ -394,7 +419,7 @@
             <button type="button" class="button button--text-only card__back button--unpadded" data-handler="go-to-initial-page">Need to log in with a different account?</button>
           </div>
           <div id="non-ldap" data-screen data-hidden inert>
-            <ul class="login-options list list--plain">
+            <ul class="login-options list list--plain" data-optional-rp="email">
               <li>
                 <button class="button button--full-width button--secondary" type="button" data-handler="send-passwordless-link">Send me an email</button>
               </li>
@@ -402,7 +427,7 @@
             <a href="https://wiki.mozilla.org/IAM/Frequently_asked_questions#Q:_Why_do_you_support_email_login_.28.22passwordless.22.29_if_it.27s_less_safe_than_other_methods.3F" class="button button--text-only button--unpadded">Why an email?</a>
             <hr>
             <ul class="login-options list list--plain">
-              <li>
+              <li data-optional-rp="github">
                 <button class="button button--full-width button--social button--secondary" type="button" data-handler="authorise-github">
                   <svg width="18" height="18" viewBox="0 0 18 18" class="icon" role="presentation">
 
@@ -412,7 +437,7 @@
                   <span>Log in with GitHub</span>
                 </button>
               </li>
-              <li>
+              <li data-optional-rp="google-oauth2">
                 <button class="button button--full-width button--social button--secondary" type="button" data-handler="authorise-google">
                   <svg width="18" height="18" viewBox="0 0 18 18" class="icon" role="presentation">
 
@@ -459,27 +484,6 @@
             <button type="button" class="button button--text-only card__back  button--unpadded" data-handler="go-to-initial-page">Try again</button>
             <hr>
             <button type="button" class="button button--text-only card__back button--unpadded" data-handler="go-to-initial-page">Need to log in with a different account?</button>
-          </div>
-          <div id="loading" class="loading" data-screen data-hidden inert>
-            <p class="visually-hidden ">Loading…</p>
-            <svg width="38" height="38" stroke="#000" viewBox="0 0 38 38" class="loading__spinner">
-
-                <g fill="none" fill-rule="evenodd">
-                    <g transform="translate(1 1)" stroke-width="2">
-                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"/>
-                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                            <animateTransform
-                                attributeName="transform"
-                                type="rotate"
-                                from="0 18 18"
-                                to="360 18 18"
-                                dur="1s"
-                                repeatCount="indefinite"/>
-                        </path>
-                    </g>
-                </g>
-
-            </svg>
           </div>
         </fieldset>
       </form>
@@ -2474,7 +2478,7 @@
     module.exports = Management;
 
     },{"../helper/assert":4,"../helper/request-builder":15,"../helper/response-handler":16,"url-join":57}],26:[function(require,module,exports){
-    module.exports = { raw: '8.12.2' };
+    module.exports = { raw: '8.12.1' };
 
     },{}],27:[function(require,module,exports){
     var urljoin = require('url-join');
@@ -3666,13 +3670,7 @@
       this.timeout = options.timeout || 60 * 1000;
       this.handler = null;
       this.postMessageDataType = options.postMessageDataType || false;
-
-      // prefer origin from options, fallback to origin from browser, and some browsers (for example MS Edge) don't support origin; fallback to construct origin manually
-      this.postMessageOrigin =
-        options.postMessageOrigin ||
-        windowHelper.getWindow().location.origin ||
-        windowHelper.getWindow().location.protocol + '//' + windowHelper.getWindow().location.hostname
-          + (windowHelper.getWindow().location.port ? ':' + windowHelper.getWindow().location.port : '');
+      this.postMessageOrigin = options.postMessageOrigin || windowHelper.getWindow().origin;
     }
 
     SilentAuthenticationHandler.create = function(options) {
@@ -3719,12 +3717,7 @@
                 eventData.event.data.type && eventData.event.data.type === _this.postMessageDataType
               );
 
-            case 'load':
-              if (eventData.sourceObject.contentWindow.location.protocol === 'about:') {
-                // Chrome is automatically loading the about:blank page, we ignore this.
-                return false;
-              }
-            // Fall through to default
+            case 'load': // Fall through to default
             default:
               return true;
           }
@@ -9868,13 +9861,14 @@
       'auto-login': require( 'decorators/auto-login' ),
       'load-ga': require( 'decorators/load-ga' ),
       'handle-submit': require( 'decorators/handle-submit' ),
-      'display-rp-name': require( 'decorators/display-rp-name' )
+      'display-rp-name': require( 'decorators/display-rp-name' ),
+      'filter-connections': require( 'decorators/filter-connections' )
     };
 
     module.exports = decorators;
 
 
-    },{"decorators/auto-login":61,"decorators/continue-with-keyboard":62,"decorators/display-rp-name":63,"decorators/handle-submit":64,"decorators/init-auth":65,"decorators/load-ga":66}],61:[function(require,module,exports){
+    },{"decorators/auto-login":61,"decorators/continue-with-keyboard":62,"decorators/display-rp-name":63,"decorators/filter-connections":64,"decorators/handle-submit":65,"decorators/init-auth":66,"decorators/load-ga":67}],61:[function(require,module,exports){
     module.exports = function autoLogin() {
       /* Ugly hack to auto log you in. Only works with LDAP in this case */
       var w = window.location.toString();
@@ -9909,7 +9903,41 @@
       }
     };
 
-    },{"helpers/getRPName":77}],64:[function(require,module,exports){
+    },{"helpers/getRPName":78}],64:[function(require,module,exports){
+    var dom = require( 'helpers/dom' );
+    var ui  = require( 'helpers/ui' );
+
+    module.exports = function( element ) {
+      var form = element.form;
+      var url = 'https://auth-dev.mozilla.auth0.com/public/api/' + form.webAuthConfig.clientID + '/connections';
+
+      ui.setLockState( element, 'loading' );
+
+      fetch( url ).then( function( response ) {
+        return response.json()
+      }).then( function( allowed ) {
+        var allowedRPs = [];
+        var RPfunctionalities = dom.$( '[data-optional-rp]' );
+
+        for ( var i = 0; i < allowed.length; i++) {
+          allowedRPs.push( allowed[i].name );
+        }
+
+        RPfunctionalities.forEach( function( functionality ) {
+          var functionalityName = functionality.getAttribute( 'data-optional-rp' );
+
+          if ( allowedRPs.indexOf( functionalityName ) === -1 ) {
+            ui.hide( functionality );
+          }
+        });
+
+        ui.setLockState( element, 'initial' );
+      }, function(){
+        ui.setLockState( element, 'initial' );
+      });
+    };
+
+    },{"helpers/dom":76,"helpers/ui":79}],65:[function(require,module,exports){
     var authoriseLDAP = require( 'handlers/authorise-ldap' );
     var enter = require( 'handlers/enter' );
 
@@ -9936,7 +9964,7 @@
       });
     };
 
-    },{"handlers/authorise-ldap":70,"handlers/enter":71}],65:[function(require,module,exports){
+    },{"handlers/authorise-ldap":71,"handlers/enter":72}],66:[function(require,module,exports){
     function getConfig( string ) {
       var config = {};
       var hostedConfig;
@@ -9965,7 +9993,7 @@
       element.webAuthConfig = config;
     };
 
-    },{"auth0-js":24,"config/local-config-sample":59}],66:[function(require,module,exports){
+    },{"auth0-js":24,"config/local-config-sample":59}],67:[function(require,module,exports){
     var checkDntEnabled = require( 'helpers/dntEnabled' );
     var dntEnabled = checkDntEnabled();
 
@@ -9992,7 +10020,7 @@
       }
     };
 
-    },{"helpers/dntEnabled":74}],67:[function(require,module,exports){
+    },{"helpers/dntEnabled":75}],68:[function(require,module,exports){
     // define handlers
     //
     // handlers are functions that run when a user clicks an interactive
@@ -10011,7 +10039,7 @@
     };
 
 
-    },{"handlers/authorise-github":68,"handlers/authorise-google":69,"handlers/authorise-ldap":70,"handlers/enter":71,"handlers/go-to-initial-page":72,"handlers/send-passwordless-link":73}],68:[function(require,module,exports){
+    },{"handlers/authorise-github":69,"handlers/authorise-google":70,"handlers/authorise-ldap":71,"handlers/enter":72,"handlers/go-to-initial-page":73,"handlers/send-passwordless-link":74}],69:[function(require,module,exports){
     var fireGAEvent = require( 'helpers/fireGAEvent' );
 
     module.exports = function authorise( element ) {
@@ -10025,7 +10053,7 @@
       });
     };
 
-    },{"helpers/fireGAEvent":76}],69:[function(require,module,exports){
+    },{"helpers/fireGAEvent":77}],70:[function(require,module,exports){
     var fireGAEvent = require( 'helpers/fireGAEvent' );
 
     module.exports = function authorise( element ) {
@@ -10039,7 +10067,7 @@
       });
     };
 
-    },{"helpers/fireGAEvent":76}],70:[function(require,module,exports){
+    },{"helpers/fireGAEvent":77}],71:[function(require,module,exports){
     var ui = require( 'helpers/ui' );
     var fireGAEvent = require( 'helpers/fireGAEvent' );
 
@@ -10072,21 +10100,22 @@
       });
     };
 
-    },{"helpers/fireGAEvent":76,"helpers/ui":79}],71:[function(require,module,exports){
-    var isLDAP = require( 'helpers/isLDAP' );
+    },{"helpers/fireGAEvent":77,"helpers/ui":79}],72:[function(require,module,exports){
     var ui = require( 'helpers/ui' );
     var fireGAEvent = require( 'helpers/fireGAEvent' );
 
     module.exports = function enter( element ) {
       var emailField = document.getElementById( 'field-email' );
       var passwordField = document.getElementById( 'field-password' );
+      var isDefinitelyLDAP = /mozilla.com|getpocket.com$/.test( emailField.value );
+      var ENDPOINT = 'https://person-api.sso.allizom.org/v1/connection/';
 
       if ( emailField.value === '' || emailField.validity.valid === false ) {
         emailField.focus();
         return;
       }
 
-      if ( isLDAP( emailField.value ) ) {
+      if ( isDefinitelyLDAP ) {
         // show password field
         ui.setLockState( element, 'ldap' );
         // focus password field
@@ -10097,15 +10126,39 @@
         fireGAEvent( 'Screen change', 'Continued as LDAP' );
       }
       else {
-        // show social logins + passwordless
-        ui.setLockState( element, 'non-ldap' );
-        fireGAEvent( 'Screen change', 'Continued as non-LDAP' );
+        ui.setLockState( element, 'loading' );
+
+        fetch( ENDPOINT + emailField.value )
+          .then(
+            function(response) {
+              response.json().then(function( data ) {
+                var userinfo = JSON.parse( data );
+
+                if ( userinfo.hasOwnProperty( 'user_email' ) && userinfo.hasOwnProperty( 'connection_method' ) ) {
+
+                  // show password field
+                  ui.setLockState( element, 'ldap' );
+                  // focus password field
+                  setTimeout( function() {
+                    passwordField.focus();
+                  }, 400 );
+
+                  fireGAEvent( 'Screen change', 'Continued as LDAP' );
+                }
+                else {
+                  // show social logins + passwordless
+                  ui.setLockState( element, 'non-ldap' );
+                  fireGAEvent( 'Screen change', 'Continued as non-LDAP' );
+                }
+              });
+            }
+          );
       }
     };
 
 
 
-    },{"helpers/fireGAEvent":76,"helpers/isLDAP":78,"helpers/ui":79}],72:[function(require,module,exports){
+    },{"helpers/fireGAEvent":77,"helpers/ui":79}],73:[function(require,module,exports){
     var ui = require( 'helpers/ui' );
     var fireGAEvent = require( 'helpers/fireGAEvent' );
 
@@ -10114,7 +10167,7 @@
       fireGAEvent( 'Screen change', 'Back to initial screen' );
     };
 
-    },{"helpers/fireGAEvent":76,"helpers/ui":79}],73:[function(require,module,exports){
+    },{"helpers/fireGAEvent":77,"helpers/ui":79}],74:[function(require,module,exports){
     var fireGAEvent = require( 'helpers/fireGAEvent' );
     var ui = require( 'helpers/ui' );
 
@@ -10151,7 +10204,7 @@
       });
     };
 
-    },{"helpers/fireGAEvent":76,"helpers/ui":79}],74:[function(require,module,exports){
+    },{"helpers/fireGAEvent":77,"helpers/ui":79}],75:[function(require,module,exports){
     module.exports = function( dnt, ua ) {
 
       // for old version of IE we need to use the msDoNotTrack property of navigator
@@ -10192,7 +10245,7 @@
       return dntStatus === 'Enabled' ? true : false;
     };
 
-    },{}],75:[function(require,module,exports){
+    },{}],76:[function(require,module,exports){
     var ui = require( 'helpers/ui' );
 
     var dom = {
@@ -10213,7 +10266,7 @@
 
     module.exports = dom;
 
-    },{"helpers/ui":79}],76:[function(require,module,exports){
+    },{"helpers/ui":79}],77:[function(require,module,exports){
     module.exports = function( eventCategory, eventAction ) {
       var TRACKER_NAME = 'gtm1';
       var getRPName = require( 'helpers/getRPName' );
@@ -10229,7 +10282,7 @@
       }
     };
 
-    },{"helpers/getRPName":77}],77:[function(require,module,exports){
+    },{"helpers/getRPName":78}],78:[function(require,module,exports){
     function getUrlParameter( name ) {
       var regex;
       var results;
@@ -10267,11 +10320,6 @@
       return extractHostname( RP );
     }
 
-    },{}],78:[function(require,module,exports){
-    module.exports = function isLDAP( string ) {
-      return /mozilla.com|getpocket.com$/.test( string );
-    };
-
     },{}],79:[function(require,module,exports){
     var ui = {
       // toggle visibility of `element`
@@ -10308,8 +10356,8 @@
       },
       // make `element` inert (unavailable for anything, including keyboard users, AT users, in page search)
       makeInert: function( element ) {
-        if ( ! element.hasAttribute( 'inert' ) ) {
-          element.setAttribute( 'inert', true );
+        if ( !element.hasAttribute( 'inert' ) ) {
+          element.setAttribute( 'inert', '' );
         }
       },
       // undo making `element` inert
@@ -10351,6 +10399,7 @@
         var form = element.tagName === 'FORM' ? element : element.form;
         var screens = dom.$( '[data-screen]', form );
         var screenToShow = document.getElementById( state );
+        var autofocusInput = dom.$( '[autofocus]', screenToShow );
 
         if ( screenToShow ) {
 
@@ -10364,13 +10413,19 @@
           ui.show( screenToShow, screenToShow );
           ui.undoInert( screenToShow );
           form.setAttribute( 'lock-state', state );
+
+          if ( autofocusInput && autofocusInput.length > 0 ) {
+            setTimeout( function() {
+              autofocusInput[0].focus();
+            }, 100 );
+          }
         }
       }
     };
 
     module.exports = ui;
 
-    },{"helpers/dom":75}],80:[function(require,module,exports){
+    },{"helpers/dom":76}],80:[function(require,module,exports){
     module.exports = function decorate( decorators, baseElement ) {
       var dom = require( 'helpers/dom' );
       var WHITESPACE = /\s+/;
@@ -10388,7 +10443,7 @@
       });
     };
 
-    },{"helpers/dom":75}],81:[function(require,module,exports){
+    },{"helpers/dom":76}],81:[function(require,module,exports){
     module.exports = function( handlers ) {
 
       document.addEventListener( 'click', function handleClick( event ) {
@@ -10439,7 +10494,7 @@
     // of elements with data-handler="handler"
     setupHandlers( handlers );
 
-    },{"decorators":60,"handlers":67,"init/decorate":80,"init/setupHandlers":81,"polyfills/polyfill":83}],83:[function(require,module,exports){
+    },{"decorators":60,"handlers":68,"init/decorate":80,"init/setupHandlers":81,"polyfills/polyfill":83}],83:[function(require,module,exports){
     /*eslint-disable */
     module.exports = function() {
 
