@@ -2,16 +2,15 @@
 <html lang="en">
   <head>
      <script>
-      /* Auto-login hacks XXX: this should be done in a prettier way whenever possible.
-       * It is currently done this way for loading speed reasons, so that the user is not interrupted.
-       */
-      if ( window.location.hostname !== 'localhost' ) {
-        var w = window.location.toString();
-        if ( w.indexOf('tried_silent_auth=true') === -1 ) {
-          /* Only works with LDAP at this time */
-          window.location = w.replace('/login?', '/authorize?').replace('?client=', '?client_id=') + '&sso=true&connection=Mozilla-LDAP-Dev&tried_silent_auth=true'
-        }
+    /* Before doing anything else, let's try if we can login with the last used connection */
+    if ( window.location.hostname !== 'localhost' && window.localStorage ) {
+      var lastUsedConnection = window.localStorage.getItem( 'nlx-last-used-connection' );
+      var w = window.location.toString();
+
+      if ( lastUsedConnection && w.indexOf('tried_silent_auth=true') === -1 ) {
+        window.location = w.replace('/login?', '/authorize?').replace('?client=', '?client_id=') + '&sso=true&connection=' + lastUsedConnection + '&tried_silent_auth=true'
       }
+    }
      </script>
     <title>Mozilla Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -351,6 +350,7 @@
 </g>
 
 </svg></a>
+      <noscript><p>This login form requires JavaScript to work, please enable it to log in.</p></noscript>
       <form data-decorator="init-auth handle-submit" method="post" action="/" lock-state="initial">
         <fieldset data-decorator="filter-connections">
           <legend class="rp-name"><span class="visually-hidden">Log in to </span><span id="rp-name-placeholder" class="rp-name__text"></span></legend>
@@ -9938,7 +9938,7 @@
       });
     };
 
-    },{"helpers/dom":76,"helpers/ui":79}],65:[function(require,module,exports){
+    },{"helpers/dom":76,"helpers/ui":80}],65:[function(require,module,exports){
     var authoriseLDAP = require( 'handlers/authorise-ldap' );
     var enter = require( 'handlers/enter' );
 
@@ -10042,41 +10042,51 @@
 
     },{"handlers/authorise-github":69,"handlers/authorise-google":70,"handlers/authorise-ldap":71,"handlers/enter":72,"handlers/go-to-initial-page":73,"handlers/send-passwordless-link":74}],69:[function(require,module,exports){
     var fireGAEvent = require( 'helpers/fireGAEvent' );
+    var storeLastUsedConnection = require( 'helpers/storeLastUsedConnection' );
 
     module.exports = function authorise( element ) {
       var form = element.closest( 'form' );
+      var connection = 'github';
 
       fireGAEvent( 'Authorisation', 'Authorising with GitHub' );
 
       form.webAuth.authorize({
         responseType: 'token',
-        connection: 'github'
+        connection: connection
       });
+
+      storeLastUsedConnection( connection );
     };
 
-    },{"helpers/fireGAEvent":77}],70:[function(require,module,exports){
+    },{"helpers/fireGAEvent":77,"helpers/storeLastUsedConnection":79}],70:[function(require,module,exports){
     var fireGAEvent = require( 'helpers/fireGAEvent' );
+    var storeLastUsedConnection = require( 'helpers/storeLastUsedConnection' );
 
     module.exports = function authorise( element ) {
       var form = element.closest( 'form' );
+      var connection = 'google-oauth2';
 
       fireGAEvent( 'Authorisation', 'Authorising with Google' );
 
       form.webAuth.authorize({
         responseType: 'token',
-        connection: 'google-oauth2'
+        connection: connection
       });
+
+      storeLastUsedConnection( connection );
     };
 
-    },{"helpers/fireGAEvent":77}],71:[function(require,module,exports){
+    },{"helpers/fireGAEvent":77,"helpers/storeLastUsedConnection":79}],71:[function(require,module,exports){
     var ui = require( 'helpers/ui' );
     var fireGAEvent = require( 'helpers/fireGAEvent' );
+    var storeLastUsedConnection = require( 'helpers/storeLastUsedConnection' );
 
     module.exports = function authorise( element, secondTry ) {
       var form = element.tagName === 'FORM' ? element : element.form;
       var emailField = document.getElementById( 'field-email' );
       var passwordField = secondTry ? document.getElementById( 'field-password-try-2' ) : document.getElementById( 'field-password' );
       var errorText = document.getElementById( 'error-message-ldap' );
+      var connection = 'Mozilla-LDAP-Dev';
 
       if ( element.id === 'authorise-ldap-credentials-try-2' ) {
         passwordField = document.getElementById( 'field-password-try-2' );
@@ -10087,7 +10097,7 @@
       fireGAEvent( 'Authorisation', 'Authorising with LDAP' );
 
       form.webAuth.redirect.loginWithCredentials({
-        connection: 'Mozilla-LDAP-Dev',
+        connection: connection,
         username: emailField.value,
         password: passwordField.value,
         scope: 'openid'
@@ -10099,9 +10109,11 @@
           fireGAEvent( 'Error', 'LDAP: invalid username or password' );
         }
       });
+
+      storeLastUsedConnection( connection );
     };
 
-    },{"helpers/fireGAEvent":77,"helpers/ui":79}],72:[function(require,module,exports){
+    },{"helpers/fireGAEvent":77,"helpers/storeLastUsedConnection":79,"helpers/ui":80}],72:[function(require,module,exports){
     var ui = require( 'helpers/ui' );
     var fireGAEvent = require( 'helpers/fireGAEvent' );
 
@@ -10160,7 +10172,7 @@
 
 
 
-    },{"helpers/fireGAEvent":77,"helpers/ui":79}],73:[function(require,module,exports){
+    },{"helpers/fireGAEvent":77,"helpers/ui":80}],73:[function(require,module,exports){
     var ui = require( 'helpers/ui' );
     var fireGAEvent = require( 'helpers/fireGAEvent' );
 
@@ -10169,7 +10181,7 @@
       fireGAEvent( 'Screen change', 'Back to initial screen' );
     };
 
-    },{"helpers/fireGAEvent":77,"helpers/ui":79}],74:[function(require,module,exports){
+    },{"helpers/fireGAEvent":77,"helpers/ui":80}],74:[function(require,module,exports){
     var fireGAEvent = require( 'helpers/fireGAEvent' );
     var ui = require( 'helpers/ui' );
 
@@ -10206,7 +10218,7 @@
       });
     };
 
-    },{"helpers/fireGAEvent":77,"helpers/ui":79}],75:[function(require,module,exports){
+    },{"helpers/fireGAEvent":77,"helpers/ui":80}],75:[function(require,module,exports){
     module.exports = function( dnt, ua ) {
 
       // for old version of IE we need to use the msDoNotTrack property of navigator
@@ -10268,7 +10280,7 @@
 
     module.exports = dom;
 
-    },{"helpers/ui":79}],77:[function(require,module,exports){
+    },{"helpers/ui":80}],77:[function(require,module,exports){
     module.exports = function( eventCategory, eventAction ) {
       var TRACKER_NAME = 'gtm1';
       var getRPName = require( 'helpers/getRPName' );
@@ -10323,6 +10335,13 @@
     };
 
     },{}],79:[function(require,module,exports){
+    module.exports = function( connectionName ) {
+      if ( window.localStorage ) {
+        window.localStorage.setItem( 'nlx-last-used-connection', connectionName );
+      }
+    }
+
+    },{}],80:[function(require,module,exports){
     var ui = {
       // toggle visibility of `element`
       toggle: function( element ) {
@@ -10427,7 +10446,7 @@
 
     module.exports = ui;
 
-    },{"helpers/dom":76}],80:[function(require,module,exports){
+    },{"helpers/dom":76}],81:[function(require,module,exports){
     module.exports = function decorate( decorators, baseElement ) {
       var dom = require( 'helpers/dom' );
       var WHITESPACE = /\s+/;
@@ -10445,7 +10464,7 @@
       });
     };
 
-    },{"helpers/dom":76}],81:[function(require,module,exports){
+    },{"helpers/dom":76}],82:[function(require,module,exports){
     module.exports = function( handlers ) {
 
       document.addEventListener( 'click', function handleClick( event ) {
@@ -10478,7 +10497,7 @@
       });
     };
 
-    },{}],82:[function(require,module,exports){
+    },{}],83:[function(require,module,exports){
     var decorate = require( 'init/decorate' );
     var setupHandlers = require( 'init/setupHandlers' );
     var handlers = require( 'handlers' );
@@ -10496,7 +10515,7 @@
     // of elements with data-handler="handler"
     setupHandlers( handlers );
 
-    },{"decorators":60,"handlers":68,"init/decorate":80,"init/setupHandlers":81,"polyfills/polyfill":83}],83:[function(require,module,exports){
+    },{"decorators":60,"handlers":68,"init/decorate":81,"init/setupHandlers":82,"polyfills/polyfill":84}],84:[function(require,module,exports){
     /*eslint-disable */
     module.exports = function() {
 
@@ -10826,7 +10845,7 @@
     }
     /*eslint-enable */
 
-    },{}]},{},[82]);
+    },{}]},{},[83]);
 
     </script>
   </body>
