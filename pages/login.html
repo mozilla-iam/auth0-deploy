@@ -1,17 +1,39 @@
+<!--
+             _.-~-.
+           7''  Q..\
+        _7         (_
+      _7  _/    _q.  /
+    _7 . ___  /VVvv-'_                                            .
+   7/ / /~- \_\\      '-._     .-'                      /       //
+  ./ ( /-~-/||'=.__  '::. '-~'' {             ___   /  //     ./{
+ V   V-~-~| ||   __''_   ':::.   ''~-~.___.-'' _/  // / {_   /  {  /
+  VV/-~-~-|/ \ .'__'. '.    '::                     _ _ _        ''.
+  / /~~~~||VVV/ /  \ )  \        _ __ ___   ___ ___(_) | | __ _   .::'
+ / (~-~-~\\.-' /    \'   \::::. | '_ ` _ \ / _ \_  / | | |/ _` | :::'
+/..\    /..\__/      '     '::: | | | | | | (_) / /| | | | (_| | ::'
+vVVv    vVVv                 ': |_| |_| |_|\___/___|_|_|_|\__,_| ''
+
+This is the custom Mozilla Login Experience, designed and built by Mozilla's IAM Project.
+
+Version: 1.1.0.
+
+These are the variables we are using:
+
+  Auth0-domain: auth-dev.mozilla.auth0.com
+  Client ID: 
+  LDAP connection name: Mozilla-LDAP-Dev
+  Person API domain: https://person-api.sso.allizom.org/connection/
+  Google Tag Manager ID: GTM-T2N2BRW
+  Features:
+   autologin: true
+   person_api_lookup: true
+
+The code is the result of a build process, please find the source code
+on GitHub: https://github.com/mozilla-iam/auth0-custom-lock
+-->
 <!DOCTYPE html>
 <html lang="en">
   <head>
-     <script>
-    /* Before doing anything else, let's try if we can login with the last used connection */
-    if ( window.location.hostname !== 'localhost' && window.localStorage ) {
-      var lastUsedConnection = window.localStorage.getItem( 'nlx-last-used-connection' );
-      var w = window.location.toString();
-
-      if ( lastUsedConnection && w.indexOf('tried_silent_auth=true') === -1 ) {
-        window.location = w.replace('/login?', '/authorize?').replace('?client=', '?client_id=') + '&sso=true&connection=' + lastUsedConnection + '&tried_silent_auth=true'
-      }
-    }
-     </script>
     <title>Mozilla Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style type="text/css">
@@ -59,11 +81,11 @@
       color: #595959;
       font-family: "Open Sans", sans-serif;
       letter-spacing: 0.03em;
-      margin: 0; }
-      @media (min-height: 50em) and (min-width: 20em) {
+      margin: 0 1.5em; }
+      @media (min-height: 50em) and (min-width: 40em) {
         body {
           display: flex;
-          padding: 8em 1em;
+          padding: 10em 1em;
           height: calc( 100vh - 6em); } }
 
     [hidden] {
@@ -103,16 +125,24 @@
       border-bottom: 1px solid #fff;
       padding: 1.5em;
       text-align: center;
-      margin-bottom: 2em; }
-      @media (min-height: 50em) and (min-width: 20em) {
+      margin: 0 -1.5em 2em -1.5em;
+      display: flex;
+      flex-direction: column; }
+      @media (min-height: 50em) and (min-width: 40em) {
         .banner {
           position: absolute;
           top: 0;
           left: 0;
           right: 0;
-          margin-bottom: 0; } }
+          margin: 0 0; } }
       .banner p {
-        margin: 0; }
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center; }
+        @media (min-width: 40em) {
+          .banner p {
+            display: block; } }
       .banner__button {
         background-color: rgba(255, 255, 255, 0.2);
         color: #fff;
@@ -121,12 +151,12 @@
         font-weight: bold;
         padding: .25em 1em;
         margin: 1em 0 0 1em;
-        display: inline-block;
-        vertical-align: middle;
         text-transform: uppercase; }
-        @media (min-width: 50em) {
+        @media (min-width: 40em) {
           .banner__button {
-            margin: 0 0 0 1em; } }
+            margin: .5em 0 .5em 1em;
+            display: inline-block;
+            vertical-align: middle; } }
         .banner__button:hover {
           color: #fff;
           text-decoration: none; }
@@ -150,7 +180,10 @@
       color: #fff;
       border: 1px solid transparent;
       text-transform: uppercase;
-      transition: background-color .1s ease-in-out; }
+      transition: background-color .1s ease-in-out;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none; }
       .button:hover {
         background-color: #fff;
         color: #000;
@@ -306,6 +339,10 @@
       margin: 3em auto;
       width: 2em; }
 
+    .loading__status {
+      text-align: center;
+      margin: 1em 0; }
+
     .login-options li {
       margin-bottom: 1em; }
       .login-options li:last-child {
@@ -335,7 +372,7 @@
   </head>
   <body data-decorator="load-ga display-rp-name">
     <div class="banner">
-      <p>Yay, we are piloting the new login experience. Things might break from time to time. <a href="https://discourse.mozilla.org/t/piloting-the-new-lock/23199" class="banner__button">Read more</a></p>
+      <p>We have launched and are actively testing the new login experience. Please report any issues. <a href="https://discourse.mozilla.org/t/important-changing-the-look-of-your-login/25843" class="banner__button">Read more</a> <a href="https://wiki.mozilla.org/IAM/Frequently_asked_questions#New_Login_Experience_FAQ_.28Frequently_Asked_Questions.29" class="banner__button">FAQ</a></p>
     </div>
     <div class="card">
       <a href="https://mozilla.org" class="logo"><svg id="Layer_1" x="0px" y="0px" width="106" height="33" style="enable-background:new 0 0 360 102.8;" xml:space="preserve" viewBox="0 0 360 102.8">
@@ -374,9 +411,10 @@
                 </g>
 
             </svg>
+            <p role="alert" id="loading__status"></p>
           </div>
           <div id="initial" data-screen data-hidden inert>
-            <p>Log in with email or third-party</p>
+            <p id="initial-login-text">Log in with email<span> or third-party</span></p>
             <label for="field-email" class="visually-hidden">E-mail address</label>
             <input type="email" name="username" id="field-email" placeholder="Email address" autocomplete="username email" autofocus />
             <input type="submit" class="button button--full-width" id="enter-initial" value="Enter" />
@@ -413,7 +451,7 @@
           <div id="ldap" data-screen data-hidden inert>
             <p>Welcome</p>
             <label for="field-password" class="visually-hidden">Password</label>
-            <input type="password" id="field-password" autocomplete="current-password" name="password" placeholder="Password" data-decorator="continue-with-keyboard" data-continue-with="authorise-ldap-credentials"  />
+            <input type="password" id="field-password" autocomplete="current-password" name="password" placeholder="Password" data-decorator="submit-with-enter" data-continue-with="authorise-ldap-credentials"  />
             <input type="submit" class="button button--full-width" id="authorise-ldap-credentials" value="Enter"/>
             <hr>
             <button type="button" class="button button--text-only card__back button--unpadded" data-handler="go-to-initial-page">Need to log in with a different account?</button>
@@ -471,7 +509,7 @@
 </svg> <span>Error</span></h2>
             <p>Please attempt again or contact the Help Desk for assistance.</p>
             <label for="field-password-try-2" class="visually-hidden">Password</label>
-            <input type="password" name="password" id="field-password-try-2" autocomplete="current-password" placeholder="Password" data-decorator="continue-with-keyboard" data-continue-with="authorise-ldap-credentials-try-2" />
+            <input type="password" name="password" id="field-password-try-2" autocomplete="current-password" placeholder="Password" data-decorator="submit-with-enter" data-continue-with="authorise-ldap-credentials-try-2" />
             <input type="submit" class="button button--full-width" id="authorise-ldap-credentials-try-2" value="Enter" />
             <hr>
             <button type="button" class="button button--text-only card__back button--unpadded" data-handler="go-to-initial-page">Need to log in with a different account?</button>
@@ -599,7 +637,7 @@
 
     module.exports = DBConnection;
 
-    },{"../helper/assert":4,"../helper/object":10,"../helper/response-handler":16,"url-join":57}],2:[function(require,module,exports){
+    },{"../helper/assert":4,"../helper/object":10,"../helper/response-handler":16,"url-join":58}],2:[function(require,module,exports){
     var urljoin = require('url-join');
 
     var RequestBuilder = require('../helper/request-builder');
@@ -1074,7 +1112,7 @@
 
     module.exports = Authentication;
 
-    },{"../helper/assert":4,"../helper/object":10,"../helper/parameters-whitelist":11,"../helper/request-builder":15,"../helper/response-handler":16,"../helper/warn":22,"./db-connection":1,"./passwordless-authentication":3,"qs":47,"url-join":57}],3:[function(require,module,exports){
+    },{"../helper/assert":4,"../helper/object":10,"../helper/parameters-whitelist":11,"../helper/request-builder":15,"../helper/response-handler":16,"../helper/warn":22,"./db-connection":1,"./passwordless-authentication":3,"qs":48,"url-join":58}],3:[function(require,module,exports){
     var urljoin = require('url-join');
 
     var objectHelper = require('../helper/object');
@@ -1264,7 +1302,7 @@
 
     module.exports = PasswordlessAuthentication;
 
-    },{"../helper/assert":4,"../helper/object":10,"../helper/response-handler":16,"qs":47,"url-join":57}],4:[function(require,module,exports){
+    },{"../helper/assert":4,"../helper/object":10,"../helper/response-handler":16,"qs":48,"url-join":58}],4:[function(require,module,exports){
     var toString = Object.prototype.toString;
 
     function attribute(o, attr, type, text) {
@@ -1949,7 +1987,7 @@
 
     module.exports = PopupHandler;
 
-    },{"./object":10,"./window":23,"qs":47,"winchan":58}],14:[function(require,module,exports){
+    },{"./object":10,"./window":23,"qs":48,"winchan":60}],14:[function(require,module,exports){
     var windowHelper = require('./window');
 
     function randomString(length) {
@@ -2092,7 +2130,7 @@
 
     module.exports = RequestBuilder;
 
-    },{"../version":26,"./base64_url":5,"superagent":52}],16:[function(require,module,exports){
+    },{"../version":26,"./base64_url":5,"superagent":53}],16:[function(require,module,exports){
     var error = require('./error');
     var objectHelper = require('./object');
 
@@ -2477,7 +2515,7 @@
 
     module.exports = Management;
 
-    },{"../helper/assert":4,"../helper/request-builder":15,"../helper/response-handler":16,"url-join":57}],26:[function(require,module,exports){
+    },{"../helper/assert":4,"../helper/request-builder":15,"../helper/response-handler":16,"url-join":58}],26:[function(require,module,exports){
     module.exports = { raw: '8.12.1' };
 
     },{}],27:[function(require,module,exports){
@@ -2604,7 +2642,7 @@
 
     module.exports = CrossOriginAuthentication;
 
-    },{"../helper/object":10,"../helper/request-builder":15,"../helper/window":23,"url-join":57}],28:[function(require,module,exports){
+    },{"../helper/object":10,"../helper/request-builder":15,"../helper/window":23,"url-join":58}],28:[function(require,module,exports){
     var IdTokenVerifier = require('idtoken-verifier');
 
     var assert = require('../helper/assert');
@@ -3251,7 +3289,7 @@
 
     module.exports = WebAuth;
 
-    },{"../authentication":2,"../helper/assert":4,"../helper/error":7,"../helper/object":10,"../helper/plugins":12,"../helper/window":23,"./cross-origin-authentication":27,"./popup":29,"./redirect":30,"./silent-authentication-handler":31,"./transaction-manager":32,"./web-message-handler":34,"idtoken-verifier":44,"qs":47}],29:[function(require,module,exports){
+    },{"../authentication":2,"../helper/assert":4,"../helper/error":7,"../helper/object":10,"../helper/plugins":12,"../helper/window":23,"./cross-origin-authentication":27,"./popup":29,"./redirect":30,"./silent-authentication-handler":31,"./transaction-manager":32,"./web-message-handler":34,"idtoken-verifier":44,"qs":48}],29:[function(require,module,exports){
     var urljoin = require('url-join');
 
     var urlHelper = require('../helper/url');
@@ -3565,7 +3603,7 @@
 
     module.exports = Popup;
 
-    },{"../helper/assert":4,"../helper/object":10,"../helper/popup-handler":13,"../helper/response-handler":16,"../helper/url":21,"../helper/warn":22,"../helper/window":23,"./transaction-manager":32,"url-join":57}],30:[function(require,module,exports){
+    },{"../helper/assert":4,"../helper/object":10,"../helper/popup-handler":13,"../helper/response-handler":16,"../helper/url":21,"../helper/warn":22,"../helper/window":23,"./transaction-manager":32,"url-join":58}],30:[function(require,module,exports){
     var UsernamePassword = require('./username-password');
     var objectHelper = require('../helper/object');
     var Warn = require('../helper/warn');
@@ -3859,7 +3897,7 @@
 
     module.exports = UsernamePassword;
 
-    },{"../helper/object":10,"../helper/request-builder":15,"../helper/response-handler":16,"../helper/window":23,"./transaction-manager":32,"url-join":57}],34:[function(require,module,exports){
+    },{"../helper/object":10,"../helper/request-builder":15,"../helper/response-handler":16,"../helper/window":23,"./transaction-manager":32,"url-join":58}],34:[function(require,module,exports){
     var IframeHandler = require('../helper/iframe-handler');
     var objectHelper = require('../helper/object');
 
@@ -5307,7 +5345,7 @@
       getJWKS: getJWKS
     };
 
-    },{"./base64":39,"superagent":52,"url-join":57}],43:[function(require,module,exports){
+    },{"./base64":39,"superagent":53,"url-join":58}],43:[function(require,module,exports){
     /*
     Based on the work of Tom Wu
     http://www-cs-students.stanford.edu/~tjw/jsbn/
@@ -6996,6 +7034,241 @@
     }).call(this);
 
     },{}],46:[function(require,module,exports){
+    (function (root) {
+
+      // Store setTimeout reference so promise-polyfill will be unaffected by
+      // other code modifying setTimeout (like sinon.useFakeTimers())
+      var setTimeoutFunc = setTimeout;
+
+      function noop() {}
+      
+      // Polyfill for Function.prototype.bind
+      function bind(fn, thisArg) {
+        return function () {
+          fn.apply(thisArg, arguments);
+        };
+      }
+
+      function Promise(fn) {
+        if (!(this instanceof Promise)) throw new TypeError('Promises must be constructed via new');
+        if (typeof fn !== 'function') throw new TypeError('not a function');
+        this._state = 0;
+        this._handled = false;
+        this._value = undefined;
+        this._deferreds = [];
+
+        doResolve(fn, this);
+      }
+
+      function handle(self, deferred) {
+        while (self._state === 3) {
+          self = self._value;
+        }
+        if (self._state === 0) {
+          self._deferreds.push(deferred);
+          return;
+        }
+        self._handled = true;
+        Promise._immediateFn(function () {
+          var cb = self._state === 1 ? deferred.onFulfilled : deferred.onRejected;
+          if (cb === null) {
+            (self._state === 1 ? resolve : reject)(deferred.promise, self._value);
+            return;
+          }
+          var ret;
+          try {
+            ret = cb(self._value);
+          } catch (e) {
+            reject(deferred.promise, e);
+            return;
+          }
+          resolve(deferred.promise, ret);
+        });
+      }
+
+      function resolve(self, newValue) {
+        try {
+          // Promise Resolution Procedure: https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure
+          if (newValue === self) throw new TypeError('A promise cannot be resolved with itself.');
+          if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {
+            var then = newValue.then;
+            if (newValue instanceof Promise) {
+              self._state = 3;
+              self._value = newValue;
+              finale(self);
+              return;
+            } else if (typeof then === 'function') {
+              doResolve(bind(then, newValue), self);
+              return;
+            }
+          }
+          self._state = 1;
+          self._value = newValue;
+          finale(self);
+        } catch (e) {
+          reject(self, e);
+        }
+      }
+
+      function reject(self, newValue) {
+        self._state = 2;
+        self._value = newValue;
+        finale(self);
+      }
+
+      function finale(self) {
+        if (self._state === 2 && self._deferreds.length === 0) {
+          Promise._immediateFn(function() {
+            if (!self._handled) {
+              Promise._unhandledRejectionFn(self._value);
+            }
+          });
+        }
+
+        for (var i = 0, len = self._deferreds.length; i < len; i++) {
+          handle(self, self._deferreds[i]);
+        }
+        self._deferreds = null;
+      }
+
+      function Handler(onFulfilled, onRejected, promise) {
+        this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null;
+        this.onRejected = typeof onRejected === 'function' ? onRejected : null;
+        this.promise = promise;
+      }
+
+      /**
+       * Take a potentially misbehaving resolver function and make sure
+       * onFulfilled and onRejected are only called once.
+       *
+       * Makes no guarantees about asynchrony.
+       */
+      function doResolve(fn, self) {
+        var done = false;
+        try {
+          fn(function (value) {
+            if (done) return;
+            done = true;
+            resolve(self, value);
+          }, function (reason) {
+            if (done) return;
+            done = true;
+            reject(self, reason);
+          });
+        } catch (ex) {
+          if (done) return;
+          done = true;
+          reject(self, ex);
+        }
+      }
+
+      Promise.prototype['catch'] = function (onRejected) {
+        return this.then(null, onRejected);
+      };
+
+      Promise.prototype.then = function (onFulfilled, onRejected) {
+        var prom = new (this.constructor)(noop);
+
+        handle(this, new Handler(onFulfilled, onRejected, prom));
+        return prom;
+      };
+
+      Promise.all = function (arr) {
+        return new Promise(function (resolve, reject) {
+          if (!arr || typeof arr.length === 'undefined') throw new TypeError('Promise.all accepts an array');
+          var args = Array.prototype.slice.call(arr);
+          if (args.length === 0) return resolve([]);
+          var remaining = args.length;
+
+          function res(i, val) {
+            try {
+              if (val && (typeof val === 'object' || typeof val === 'function')) {
+                var then = val.then;
+                if (typeof then === 'function') {
+                  then.call(val, function (val) {
+                    res(i, val);
+                  }, reject);
+                  return;
+                }
+              }
+              args[i] = val;
+              if (--remaining === 0) {
+                resolve(args);
+              }
+            } catch (ex) {
+              reject(ex);
+            }
+          }
+
+          for (var i = 0; i < args.length; i++) {
+            res(i, args[i]);
+          }
+        });
+      };
+
+      Promise.resolve = function (value) {
+        if (value && typeof value === 'object' && value.constructor === Promise) {
+          return value;
+        }
+
+        return new Promise(function (resolve) {
+          resolve(value);
+        });
+      };
+
+      Promise.reject = function (value) {
+        return new Promise(function (resolve, reject) {
+          reject(value);
+        });
+      };
+
+      Promise.race = function (values) {
+        return new Promise(function (resolve, reject) {
+          for (var i = 0, len = values.length; i < len; i++) {
+            values[i].then(resolve, reject);
+          }
+        });
+      };
+
+      // Use polyfill for setImmediate for performance gains
+      Promise._immediateFn = (typeof setImmediate === 'function' && function (fn) { setImmediate(fn); }) ||
+        function (fn) {
+          setTimeoutFunc(fn, 0);
+        };
+
+      Promise._unhandledRejectionFn = function _unhandledRejectionFn(err) {
+        if (typeof console !== 'undefined' && console) {
+          console.warn('Possible Unhandled Promise Rejection:', err); // eslint-disable-line no-console
+        }
+      };
+
+      /**
+       * Set the immediate function to execute callbacks
+       * @param fn {function} Function to execute
+       * @deprecated
+       */
+      Promise._setImmediateFn = function _setImmediateFn(fn) {
+        Promise._immediateFn = fn;
+      };
+
+      /**
+       * Change the function to execute on unhandled rejection
+       * @param {function} fn Function to execute on unhandled rejection
+       * @deprecated
+       */
+      Promise._setUnhandledRejectionFn = function _setUnhandledRejectionFn(fn) {
+        Promise._unhandledRejectionFn = fn;
+      };
+      
+      if (typeof module !== 'undefined' && module.exports) {
+        module.exports = Promise;
+      } else if (!root.Promise) {
+        root.Promise = Promise;
+      }
+
+    })(this);
+
+    },{}],47:[function(require,module,exports){
     'use strict';
 
     var replace = String.prototype.replace;
@@ -7015,7 +7288,7 @@
         RFC3986: 'RFC3986'
     };
 
-    },{}],47:[function(require,module,exports){
+    },{}],48:[function(require,module,exports){
     'use strict';
 
     var stringify = require('./stringify');
@@ -7028,7 +7301,7 @@
         stringify: stringify
     };
 
-    },{"./formats":46,"./parse":48,"./stringify":49}],48:[function(require,module,exports){
+    },{"./formats":47,"./parse":49,"./stringify":50}],49:[function(require,module,exports){
     'use strict';
 
     var utils = require('./utils');
@@ -7204,7 +7477,7 @@
         return utils.compact(obj);
     };
 
-    },{"./utils":50}],49:[function(require,module,exports){
+    },{"./utils":51}],50:[function(require,module,exports){
     'use strict';
 
     var utils = require('./utils');
@@ -7416,7 +7689,7 @@
         return joined.length > 0 ? prefix + joined : '';
     };
 
-    },{"./formats":46,"./utils":50}],50:[function(require,module,exports){
+    },{"./formats":47,"./utils":51}],51:[function(require,module,exports){
     'use strict';
 
     var has = Object.prototype.hasOwnProperty;
@@ -7620,7 +7893,7 @@
         return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
     };
 
-    },{}],51:[function(require,module,exports){
+    },{}],52:[function(require,module,exports){
     function Agent() {
       this._defaults = [];
     }
@@ -7642,7 +7915,7 @@
 
     module.exports = Agent;
 
-    },{}],52:[function(require,module,exports){
+    },{}],53:[function(require,module,exports){
     /**
      * Root reference for iframes.
      */
@@ -8564,7 +8837,7 @@
       return req;
     };
 
-    },{"./agent-base":51,"./is-object":53,"./request-base":54,"./response-base":55,"component-emitter":36}],53:[function(require,module,exports){
+    },{"./agent-base":52,"./is-object":54,"./request-base":55,"./response-base":56,"component-emitter":36}],54:[function(require,module,exports){
     'use strict';
 
     /**
@@ -8581,7 +8854,7 @@
 
     module.exports = isObject;
 
-    },{}],54:[function(require,module,exports){
+    },{}],55:[function(require,module,exports){
     'use strict';
 
     /**
@@ -9277,7 +9550,7 @@
       }
     };
 
-    },{"./is-object":53}],55:[function(require,module,exports){
+    },{"./is-object":54}],56:[function(require,module,exports){
     'use strict';
 
     /**
@@ -9413,7 +9686,7 @@
         this.notFound = 404 == status;
     };
 
-    },{"./utils":56}],56:[function(require,module,exports){
+    },{"./utils":57}],57:[function(require,module,exports){
     'use strict';
 
     /**
@@ -9486,7 +9759,7 @@
       return header;
     };
 
-    },{}],57:[function(require,module,exports){
+    },{}],58:[function(require,module,exports){
     (function (name, context, definition) {
       if (typeof module !== 'undefined' && module.exports) module.exports = definition();
       else if (typeof define === 'function' && define.amd) define(definition);
@@ -9526,7 +9799,470 @@
 
     });
 
-    },{}],58:[function(require,module,exports){
+    },{}],59:[function(require,module,exports){
+    (function(self) {
+      'use strict';
+
+      if (self.fetch) {
+        return
+      }
+
+      var support = {
+        searchParams: 'URLSearchParams' in self,
+        iterable: 'Symbol' in self && 'iterator' in Symbol,
+        blob: 'FileReader' in self && 'Blob' in self && (function() {
+          try {
+            new Blob()
+            return true
+          } catch(e) {
+            return false
+          }
+        })(),
+        formData: 'FormData' in self,
+        arrayBuffer: 'ArrayBuffer' in self
+      }
+
+      if (support.arrayBuffer) {
+        var viewClasses = [
+          '[object Int8Array]',
+          '[object Uint8Array]',
+          '[object Uint8ClampedArray]',
+          '[object Int16Array]',
+          '[object Uint16Array]',
+          '[object Int32Array]',
+          '[object Uint32Array]',
+          '[object Float32Array]',
+          '[object Float64Array]'
+        ]
+
+        var isDataView = function(obj) {
+          return obj && DataView.prototype.isPrototypeOf(obj)
+        }
+
+        var isArrayBufferView = ArrayBuffer.isView || function(obj) {
+          return obj && viewClasses.indexOf(Object.prototype.toString.call(obj)) > -1
+        }
+      }
+
+      function normalizeName(name) {
+        if (typeof name !== 'string') {
+          name = String(name)
+        }
+        if (/[^a-z0-9\-#$%&'*+.\^_`|~]/i.test(name)) {
+          throw new TypeError('Invalid character in header field name')
+        }
+        return name.toLowerCase()
+      }
+
+      function normalizeValue(value) {
+        if (typeof value !== 'string') {
+          value = String(value)
+        }
+        return value
+      }
+
+      // Build a destructive iterator for the value list
+      function iteratorFor(items) {
+        var iterator = {
+          next: function() {
+            var value = items.shift()
+            return {done: value === undefined, value: value}
+          }
+        }
+
+        if (support.iterable) {
+          iterator[Symbol.iterator] = function() {
+            return iterator
+          }
+        }
+
+        return iterator
+      }
+
+      function Headers(headers) {
+        this.map = {}
+
+        if (headers instanceof Headers) {
+          headers.forEach(function(value, name) {
+            this.append(name, value)
+          }, this)
+        } else if (Array.isArray(headers)) {
+          headers.forEach(function(header) {
+            this.append(header[0], header[1])
+          }, this)
+        } else if (headers) {
+          Object.getOwnPropertyNames(headers).forEach(function(name) {
+            this.append(name, headers[name])
+          }, this)
+        }
+      }
+
+      Headers.prototype.append = function(name, value) {
+        name = normalizeName(name)
+        value = normalizeValue(value)
+        var oldValue = this.map[name]
+        this.map[name] = oldValue ? oldValue+','+value : value
+      }
+
+      Headers.prototype['delete'] = function(name) {
+        delete this.map[normalizeName(name)]
+      }
+
+      Headers.prototype.get = function(name) {
+        name = normalizeName(name)
+        return this.has(name) ? this.map[name] : null
+      }
+
+      Headers.prototype.has = function(name) {
+        return this.map.hasOwnProperty(normalizeName(name))
+      }
+
+      Headers.prototype.set = function(name, value) {
+        this.map[normalizeName(name)] = normalizeValue(value)
+      }
+
+      Headers.prototype.forEach = function(callback, thisArg) {
+        for (var name in this.map) {
+          if (this.map.hasOwnProperty(name)) {
+            callback.call(thisArg, this.map[name], name, this)
+          }
+        }
+      }
+
+      Headers.prototype.keys = function() {
+        var items = []
+        this.forEach(function(value, name) { items.push(name) })
+        return iteratorFor(items)
+      }
+
+      Headers.prototype.values = function() {
+        var items = []
+        this.forEach(function(value) { items.push(value) })
+        return iteratorFor(items)
+      }
+
+      Headers.prototype.entries = function() {
+        var items = []
+        this.forEach(function(value, name) { items.push([name, value]) })
+        return iteratorFor(items)
+      }
+
+      if (support.iterable) {
+        Headers.prototype[Symbol.iterator] = Headers.prototype.entries
+      }
+
+      function consumed(body) {
+        if (body.bodyUsed) {
+          return Promise.reject(new TypeError('Already read'))
+        }
+        body.bodyUsed = true
+      }
+
+      function fileReaderReady(reader) {
+        return new Promise(function(resolve, reject) {
+          reader.onload = function() {
+            resolve(reader.result)
+          }
+          reader.onerror = function() {
+            reject(reader.error)
+          }
+        })
+      }
+
+      function readBlobAsArrayBuffer(blob) {
+        var reader = new FileReader()
+        var promise = fileReaderReady(reader)
+        reader.readAsArrayBuffer(blob)
+        return promise
+      }
+
+      function readBlobAsText(blob) {
+        var reader = new FileReader()
+        var promise = fileReaderReady(reader)
+        reader.readAsText(blob)
+        return promise
+      }
+
+      function readArrayBufferAsText(buf) {
+        var view = new Uint8Array(buf)
+        var chars = new Array(view.length)
+
+        for (var i = 0; i < view.length; i++) {
+          chars[i] = String.fromCharCode(view[i])
+        }
+        return chars.join('')
+      }
+
+      function bufferClone(buf) {
+        if (buf.slice) {
+          return buf.slice(0)
+        } else {
+          var view = new Uint8Array(buf.byteLength)
+          view.set(new Uint8Array(buf))
+          return view.buffer
+        }
+      }
+
+      function Body() {
+        this.bodyUsed = false
+
+        this._initBody = function(body) {
+          this._bodyInit = body
+          if (!body) {
+            this._bodyText = ''
+          } else if (typeof body === 'string') {
+            this._bodyText = body
+          } else if (support.blob && Blob.prototype.isPrototypeOf(body)) {
+            this._bodyBlob = body
+          } else if (support.formData && FormData.prototype.isPrototypeOf(body)) {
+            this._bodyFormData = body
+          } else if (support.searchParams && URLSearchParams.prototype.isPrototypeOf(body)) {
+            this._bodyText = body.toString()
+          } else if (support.arrayBuffer && support.blob && isDataView(body)) {
+            this._bodyArrayBuffer = bufferClone(body.buffer)
+            // IE 10-11 can't handle a DataView body.
+            this._bodyInit = new Blob([this._bodyArrayBuffer])
+          } else if (support.arrayBuffer && (ArrayBuffer.prototype.isPrototypeOf(body) || isArrayBufferView(body))) {
+            this._bodyArrayBuffer = bufferClone(body)
+          } else {
+            throw new Error('unsupported BodyInit type')
+          }
+
+          if (!this.headers.get('content-type')) {
+            if (typeof body === 'string') {
+              this.headers.set('content-type', 'text/plain;charset=UTF-8')
+            } else if (this._bodyBlob && this._bodyBlob.type) {
+              this.headers.set('content-type', this._bodyBlob.type)
+            } else if (support.searchParams && URLSearchParams.prototype.isPrototypeOf(body)) {
+              this.headers.set('content-type', 'application/x-www-form-urlencoded;charset=UTF-8')
+            }
+          }
+        }
+
+        if (support.blob) {
+          this.blob = function() {
+            var rejected = consumed(this)
+            if (rejected) {
+              return rejected
+            }
+
+            if (this._bodyBlob) {
+              return Promise.resolve(this._bodyBlob)
+            } else if (this._bodyArrayBuffer) {
+              return Promise.resolve(new Blob([this._bodyArrayBuffer]))
+            } else if (this._bodyFormData) {
+              throw new Error('could not read FormData body as blob')
+            } else {
+              return Promise.resolve(new Blob([this._bodyText]))
+            }
+          }
+
+          this.arrayBuffer = function() {
+            if (this._bodyArrayBuffer) {
+              return consumed(this) || Promise.resolve(this._bodyArrayBuffer)
+            } else {
+              return this.blob().then(readBlobAsArrayBuffer)
+            }
+          }
+        }
+
+        this.text = function() {
+          var rejected = consumed(this)
+          if (rejected) {
+            return rejected
+          }
+
+          if (this._bodyBlob) {
+            return readBlobAsText(this._bodyBlob)
+          } else if (this._bodyArrayBuffer) {
+            return Promise.resolve(readArrayBufferAsText(this._bodyArrayBuffer))
+          } else if (this._bodyFormData) {
+            throw new Error('could not read FormData body as text')
+          } else {
+            return Promise.resolve(this._bodyText)
+          }
+        }
+
+        if (support.formData) {
+          this.formData = function() {
+            return this.text().then(decode)
+          }
+        }
+
+        this.json = function() {
+          return this.text().then(JSON.parse)
+        }
+
+        return this
+      }
+
+      // HTTP methods whose capitalization should be normalized
+      var methods = ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'POST', 'PUT']
+
+      function normalizeMethod(method) {
+        var upcased = method.toUpperCase()
+        return (methods.indexOf(upcased) > -1) ? upcased : method
+      }
+
+      function Request(input, options) {
+        options = options || {}
+        var body = options.body
+
+        if (input instanceof Request) {
+          if (input.bodyUsed) {
+            throw new TypeError('Already read')
+          }
+          this.url = input.url
+          this.credentials = input.credentials
+          if (!options.headers) {
+            this.headers = new Headers(input.headers)
+          }
+          this.method = input.method
+          this.mode = input.mode
+          if (!body && input._bodyInit != null) {
+            body = input._bodyInit
+            input.bodyUsed = true
+          }
+        } else {
+          this.url = String(input)
+        }
+
+        this.credentials = options.credentials || this.credentials || 'omit'
+        if (options.headers || !this.headers) {
+          this.headers = new Headers(options.headers)
+        }
+        this.method = normalizeMethod(options.method || this.method || 'GET')
+        this.mode = options.mode || this.mode || null
+        this.referrer = null
+
+        if ((this.method === 'GET' || this.method === 'HEAD') && body) {
+          throw new TypeError('Body not allowed for GET or HEAD requests')
+        }
+        this._initBody(body)
+      }
+
+      Request.prototype.clone = function() {
+        return new Request(this, { body: this._bodyInit })
+      }
+
+      function decode(body) {
+        var form = new FormData()
+        body.trim().split('&').forEach(function(bytes) {
+          if (bytes) {
+            var split = bytes.split('=')
+            var name = split.shift().replace(/\+/g, ' ')
+            var value = split.join('=').replace(/\+/g, ' ')
+            form.append(decodeURIComponent(name), decodeURIComponent(value))
+          }
+        })
+        return form
+      }
+
+      function parseHeaders(rawHeaders) {
+        var headers = new Headers()
+        rawHeaders.split(/\r?\n/).forEach(function(line) {
+          var parts = line.split(':')
+          var key = parts.shift().trim()
+          if (key) {
+            var value = parts.join(':').trim()
+            headers.append(key, value)
+          }
+        })
+        return headers
+      }
+
+      Body.call(Request.prototype)
+
+      function Response(bodyInit, options) {
+        if (!options) {
+          options = {}
+        }
+
+        this.type = 'default'
+        this.status = 'status' in options ? options.status : 200
+        this.ok = this.status >= 200 && this.status < 300
+        this.statusText = 'statusText' in options ? options.statusText : 'OK'
+        this.headers = new Headers(options.headers)
+        this.url = options.url || ''
+        this._initBody(bodyInit)
+      }
+
+      Body.call(Response.prototype)
+
+      Response.prototype.clone = function() {
+        return new Response(this._bodyInit, {
+          status: this.status,
+          statusText: this.statusText,
+          headers: new Headers(this.headers),
+          url: this.url
+        })
+      }
+
+      Response.error = function() {
+        var response = new Response(null, {status: 0, statusText: ''})
+        response.type = 'error'
+        return response
+      }
+
+      var redirectStatuses = [301, 302, 303, 307, 308]
+
+      Response.redirect = function(url, status) {
+        if (redirectStatuses.indexOf(status) === -1) {
+          throw new RangeError('Invalid status code')
+        }
+
+        return new Response(null, {status: status, headers: {location: url}})
+      }
+
+      self.Headers = Headers
+      self.Request = Request
+      self.Response = Response
+
+      self.fetch = function(input, init) {
+        return new Promise(function(resolve, reject) {
+          var request = new Request(input, init)
+          var xhr = new XMLHttpRequest()
+
+          xhr.onload = function() {
+            var options = {
+              status: xhr.status,
+              statusText: xhr.statusText,
+              headers: parseHeaders(xhr.getAllResponseHeaders() || '')
+            }
+            options.url = 'responseURL' in xhr ? xhr.responseURL : options.headers.get('X-Request-URL')
+            var body = 'response' in xhr ? xhr.response : xhr.responseText
+            resolve(new Response(body, options))
+          }
+
+          xhr.onerror = function() {
+            reject(new TypeError('Network request failed'))
+          }
+
+          xhr.ontimeout = function() {
+            reject(new TypeError('Network request failed'))
+          }
+
+          xhr.open(request.method, request.url, true)
+
+          if (request.credentials === 'include') {
+            xhr.withCredentials = true
+          }
+
+          if ('responseType' in xhr && support.blob) {
+            xhr.responseType = 'blob'
+          }
+
+          request.headers.forEach(function(value, name) {
+            xhr.setRequestHeader(name, value)
+          })
+
+          xhr.send(typeof request._bodyInit === 'undefined' ? null : request._bodyInit)
+        })
+      }
+      self.fetch.polyfill = true
+    })(typeof self !== 'undefined' ? self : this);
+
+    },{}],60:[function(require,module,exports){
     var WinChan = (function() {
       var RELAY_FRAME_NAME = "__winchan_relay_frame";
       var CLOSE_CMD = "die";
@@ -9841,24 +10577,14 @@
       module.exports = WinChan;
     }
 
-    },{}],59:[function(require,module,exports){
-    module.exports={
-      "domain": "auth-dev.mozilla.auth0.com",
-      "clientID": "CIynn5wTPyYZQcA1FJx1Io9z4t7QWDaE",
-      "redirectUri": "http://localhost:3000/callback",
-      "responseType": "token"
-    }
-
-
-    },{}],60:[function(require,module,exports){
+    },{}],61:[function(require,module,exports){
     // define decorators
     //
     // decorators are functions that run when the page loads
 
     var decorators = {
       'init-auth': require( 'decorators/init-auth' ),
-      'continue-with-keyboard': require( 'decorators/continue-with-keyboard' ),
-      'auto-login': require( 'decorators/auto-login' ),
+      'submit-with-enter': require( 'decorators/submit-with-enter' ),
       'load-ga': require( 'decorators/load-ga' ),
       'handle-submit': require( 'decorators/handle-submit' ),
       'display-rp-name': require( 'decorators/display-rp-name' ),
@@ -9868,31 +10594,7 @@
     module.exports = decorators;
 
 
-    },{"decorators/auto-login":61,"decorators/continue-with-keyboard":62,"decorators/display-rp-name":63,"decorators/filter-connections":64,"decorators/handle-submit":65,"decorators/init-auth":66,"decorators/load-ga":67}],61:[function(require,module,exports){
-    module.exports = function autoLogin() {
-      /* Ugly hack to auto log you in. Only works with LDAP in this case */
-      var w = window.location.toString();
-
-      if ( w.indexOf( 'tried_silent_auth=true' ) === -1 ) {
-        window.location = w.replace( '/login?', '/authorize?' ).replace( '?client=', '?client_id=' ) + '&sso=true&connection=Mozilla-LDAP-Dev&tried_silent_auth=true';
-      }
-    };
-
-    },{}],62:[function(require,module,exports){
-    module.exports = function( element ) {
-      var KEY_ENTER = 13;
-      var button = document.getElementById( element.getAttribute( 'data-continue-with' ) );
-
-      if ( button && button.nodeName === 'BUTTON' ) {
-        element.addEventListener( 'keyup', function( event ) {
-          if ( event.which === KEY_ENTER ) {
-            button.click();
-          }
-        });
-      }
-    };
-
-    },{}],63:[function(require,module,exports){
+    },{"decorators/display-rp-name":62,"decorators/filter-connections":63,"decorators/handle-submit":64,"decorators/init-auth":65,"decorators/load-ga":66,"decorators/submit-with-enter":67}],62:[function(require,module,exports){
     module.exports = function() {
       var getRPName = require( 'helpers/getRPName' );
       var rp = getRPName();
@@ -9903,13 +10605,17 @@
       }
     };
 
-    },{"helpers/getRPName":78}],64:[function(require,module,exports){
+    },{"helpers/getRPName":78}],63:[function(require,module,exports){
     var dom = require( 'helpers/dom' );
     var ui = require( 'helpers/ui' );
+    var fireGAEvent = require( 'helpers/fireGAEvent' );
 
     module.exports = function( element ) {
       var form = element.form;
-      var url = 'https://auth-dev.mozilla.auth0.com/public/api/' + form.webAuthConfig.clientID + '/connections';
+      var url = 'https://' + NLX.auth0_domain + '/public/api/' + form.webAuthConfig.clientID + '/connections';
+      var visualStatusReport = document.getElementById( 'loading__status' );
+      var willRedirect = false;
+      var loginIntro = document.getElementById( 'initial-login-text' );
 
       ui.setLockState( element, 'loading' );
 
@@ -9918,6 +10624,7 @@
       }).then( function( allowed ) {
         var allowedRPs = [];
         var RPfunctionalities = dom.$( '[data-optional-rp]' );
+        var hiddenFunctionalities = [];
         var i;
 
         for ( i = 0; i < allowed.length; i++ ) {
@@ -9926,19 +10633,46 @@
 
         RPfunctionalities.forEach( function( functionality ) {
           var functionalityName = functionality.getAttribute( 'data-optional-rp' );
+          var lastUsedConnection;
+          var locationString = window.location.toString();
+          var silentAuthEnabled = locationString.indexOf( 'tried_silent_auth=true' ) === -1 || NLX.features.autologin === 'true';
+          var newLocation;
 
           if ( allowedRPs.indexOf( functionalityName ) === -1 ) {
             ui.hide( functionality );
+            hiddenFunctionalities.push( functionalityName );
+
+            fireGAEvent( 'Hiding', 'Hiding login method that isn\'t supported for this RP' );
+          }
+
+          if ( silentAuthEnabled && window.localStorage ) {
+            lastUsedConnection = window.localStorage.getItem( 'nlx-last-used-connection' );
+
+            if ( lastUsedConnection && allowedRPs.indexOf( lastUsedConnection ) >= 0 ) {
+              willRedirect = true;
+              visualStatusReport.textContent = 'Autologging in with ' + lastUsedConnection;
+
+              newLocation = locationString.replace( '/login?', '/authorize?' ).replace( '?client=', '?client_id=' ) + '&sso=true&connection=' + lastUsedConnection + '&tried_silent_auth=true';
+              window.location.replace( newLocation );
+              fireGAEvent( 'Authorisation', 'Performing auto-login with ' + lastUsedConnection );
+            }
           }
         });
 
-        ui.setLockState( element, 'initial' );
-      }, function(){
+        if ( !willRedirect ) {
+          ui.setLockState( element, 'initial' );
+        }
+
+        if ( hiddenFunctionalities.indexOf( 'github' ) > 0 && hiddenFunctionalities.indexOf( 'google-oauth2' ) > 0 ) {
+          loginIntro.querySelector( 'span' ).style.display = 'none';
+        }
+      }).catch( function() {
+        // Could not check which connections are available for this RP; just show all.
         ui.setLockState( element, 'initial' );
       });
     };
 
-    },{"helpers/dom":76,"helpers/ui":80}],65:[function(require,module,exports){
+    },{"helpers/dom":76,"helpers/fireGAEvent":77,"helpers/ui":80}],64:[function(require,module,exports){
     var authoriseLDAP = require( 'handlers/authorise-ldap' );
     var enter = require( 'handlers/enter' );
 
@@ -9965,7 +10699,7 @@
       });
     };
 
-    },{"handlers/authorise-ldap":71,"handlers/enter":72}],66:[function(require,module,exports){
+    },{"handlers/authorise-ldap":71,"handlers/enter":72}],65:[function(require,module,exports){
     function getConfig( string ) {
       var config = {};
       var hostedConfig;
@@ -9980,7 +10714,9 @@
         config = Object.assign( config, hostedConfig.internalOptions );
       }
       else {
-        config = require( 'config/local-config-sample' );
+        config.domain = NLX.auth0_domain;
+        config.clientID = NLX.client_ID;
+        config.responseType = 'code';
       }
       return config;
     }
@@ -9994,19 +10730,17 @@
       element.webAuthConfig = config;
     };
 
-    },{"auth0-js":24,"config/local-config-sample":59}],67:[function(require,module,exports){
+    },{"auth0-js":24}],66:[function(require,module,exports){
     var checkDntEnabled = require( 'helpers/dntEnabled' );
     var dntEnabled = checkDntEnabled();
 
     module.exports = function() {
       var firstScriptTag;
       var scriptTag;
-      var ID;
 
       if ( dntEnabled === false ) {
         firstScriptTag = document.getElementsByTagName( 'script' )[0];
         scriptTag = document.createElement( 'script' );
-        ID = 'GTM-T2N2BRW';
 
         window.dataLayer = window.dataLayer || [];
         window.dataLayer.push({
@@ -10015,13 +10749,26 @@
         });
 
         scriptTag.async = true;
-        scriptTag.src = 'https://www.googletagmanager.com/gtm.js?id=' + ID;
+        scriptTag.src = 'https://www.googletagmanager.com/gtm.js?id=' + NLX.GTM_ID;
 
         firstScriptTag.parentNode.insertBefore( scriptTag, firstScriptTag );
       }
     };
 
-    },{"helpers/dntEnabled":75}],68:[function(require,module,exports){
+    },{"helpers/dntEnabled":75}],67:[function(require,module,exports){
+    var authoriseLDAP = require( 'handlers/authorise-ldap' );
+
+    module.exports = function( element ) {
+      var KEY_ENTER = 13;
+
+      element.addEventListener( 'keyup', function( event ) {
+        if ( event.which === KEY_ENTER && element.value.length > 0 ) {
+          authoriseLDAP( element.form, false );
+        }
+      });
+    };
+
+    },{"handlers/authorise-ldap":71}],68:[function(require,module,exports){
     // define handlers
     //
     // handlers are functions that run when a user clicks an interactive
@@ -10086,7 +10833,7 @@
       var emailField = document.getElementById( 'field-email' );
       var passwordField = secondTry ? document.getElementById( 'field-password-try-2' ) : document.getElementById( 'field-password' );
       var errorText = document.getElementById( 'error-message-ldap' );
-      var connection = 'Mozilla-LDAP-Dev';
+      var connection = NLX.LDAP_connection_name;
 
       if ( element.id === 'authorise-ldap-credentials-try-2' ) {
         passwordField = document.getElementById( 'field-password-try-2' );
@@ -10120,8 +10867,8 @@
     module.exports = function enter( element ) {
       var emailField = document.getElementById( 'field-email' );
       var passwordField = document.getElementById( 'field-password' );
-      var isDefinitelyLDAP = /mozilla.com|getpocket.com$/.test( emailField.value );
-      var ENDPOINT = 'https://person-api.sso.allizom.org/v1/connection/';
+      var isDefinitelyLDAP = /mozilla.com|getpocket.com|mozillafoundation.org$/.test( emailField.value );
+      var ENDPOINT = NLX.person_api_domain;
 
       if ( emailField.value === '' || emailField.validity.valid === false ) {
         emailField.focus();
@@ -10139,34 +10886,46 @@
         fireGAEvent( 'Screen change', 'Continued as LDAP' );
       }
       else {
-        ui.setLockState( element, 'loading' );
+        if ( NLX.features.person_api_lookup ) {
 
-        fetch( ENDPOINT + emailField.value )
-          .then(
-            function( response ) {
-              response.json().then( function( data ) {
-                var userinfo = JSON.parse( data );
-                var isLDAP = userinfo.hasOwnProperty( 'user_email' ) && userinfo.hasOwnProperty( 'connection_method' ) && userinfo[ 'connection_method' ] === 'ad';
+          ui.setLockState( element, 'loading' );
 
-                if ( isLDAP ) {
+          fetch( ENDPOINT + emailField.value )
+            .then(
+              function( response ) {
+                response.json().then( function( data ) {
+                  var userinfo = JSON.parse( data );
+                  var isLDAP = userinfo.hasOwnProperty( 'user_email' ) && userinfo.hasOwnProperty( 'connection_method' ) && userinfo[ 'connection_method' ] === 'ad';
 
-                  // show password field
-                  ui.setLockState( element, 'ldap' );
-                  // focus password field
-                  setTimeout( function() {
-                    passwordField.focus();
-                  }, 400 );
+                  if ( isLDAP ) {
 
-                  fireGAEvent( 'Screen change', 'Continued as LDAP' );
-                }
-                else {
-                  // show social logins + passwordless
-                  ui.setLockState( element, 'non-ldap' );
-                  fireGAEvent( 'Screen change', 'Continued as non-LDAP' );
-                }
-              });
-            }
-          );
+                    // show password field
+                    ui.setLockState( element, 'ldap' );
+                    // focus password field
+                    setTimeout( function() {
+                      passwordField.focus();
+                    }, 400 );
+
+                    fireGAEvent( 'Screen change', 'Continued as LDAP' );
+                  }
+                  else {
+                    // show social logins + passwordless
+                    ui.setLockState( element, 'non-ldap' );
+                    fireGAEvent( 'Screen change', 'Continued as non-LDAP' );
+                  }
+                })
+              }
+          ).catch( function() {
+            // if request fails, show social logins + passwordless
+            ui.setLockState( element, 'non-ldap' );
+            fireGAEvent( 'Screen change', 'Continued as non-LDAP' );
+          });
+        }
+        else {
+          // show social logins + passwordless
+          ui.setLockState( element, 'non-ldap' );
+          fireGAEvent( 'Screen change', 'Continued as non-LDAP' );
+        }
       }
     };
 
@@ -10184,16 +10943,20 @@
     },{"helpers/fireGAEvent":77,"helpers/ui":80}],74:[function(require,module,exports){
     var fireGAEvent = require( 'helpers/fireGAEvent' );
     var ui = require( 'helpers/ui' );
+    var storeLastUsedConnection = require( 'helpers/storeLastUsedConnection' );
 
     module.exports = function authorise( element ) {
       var emailField = document.getElementById( 'field-email' );
       var form = element.form;
       var emailPlaceholder = document.getElementById( 'passwordless-success-email-address' );
       var errorText = document.getElementById( 'error-message-passwordless' );
+      var connection = 'email';
 
       ui.setLockState( element, 'loading' );
 
       fireGAEvent( 'Authorisation', 'Requested passwordless link' );
+
+      storeLastUsedConnection( connection );
 
       form.webAuth.passwordlessStart({
         connection: 'email',
@@ -10218,7 +10981,7 @@
       });
     };
 
-    },{"helpers/fireGAEvent":77,"helpers/ui":80}],75:[function(require,module,exports){
+    },{"helpers/fireGAEvent":77,"helpers/storeLastUsedConnection":79,"helpers/ui":80}],75:[function(require,module,exports){
     module.exports = function( dnt, ua ) {
 
       // for old version of IE we need to use the msDoNotTrack property of navigator
@@ -10339,7 +11102,7 @@
       if ( window.localStorage ) {
         window.localStorage.setItem( 'nlx-last-used-connection', connectionName );
       }
-    }
+    };
 
     },{}],80:[function(require,module,exports){
     var ui = {
@@ -10504,7 +11267,23 @@
     var decorators = require( 'decorators' );
     var polyfill = require( 'polyfills/polyfill' );
 
+    window.Promise = require( 'promise-polyfill' );
+    require( 'whatwg-fetch' );
+
     document.documentElement.className = 'has-js';
+
+    // environment variables are replaced in build process
+    window.NLX = {
+      'auth0_domain': 'auth-dev.mozilla.auth0.com',
+      'client_ID': 'CIynn5wTPyYZQcA1FJx1Io9z4t7QWDaE',
+      'LDAP_connection_name': 'Mozilla-LDAP-Dev',
+      'person_api_domain': 'https://person-api.sso.allizom.org/connection/',
+      'GTM_ID': 'GTM-T2N2BRW',
+      'features': {
+        'autologin': 'true',
+        'person_api_lookup': 'true'
+      }
+    };
 
     polyfill();
 
@@ -10515,7 +11294,7 @@
     // of elements with data-handler="handler"
     setupHandlers( handlers );
 
-    },{"decorators":60,"handlers":68,"init/decorate":81,"init/setupHandlers":82,"polyfills/polyfill":84}],84:[function(require,module,exports){
+    },{"decorators":61,"handlers":68,"init/decorate":81,"init/setupHandlers":82,"polyfills/polyfill":84,"promise-polyfill":46,"whatwg-fetch":59}],84:[function(require,module,exports){
     /*eslint-disable */
     module.exports = function() {
 
