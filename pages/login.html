@@ -335,7 +335,7 @@
   </head>
   <body data-decorator="load-ga display-rp-name">
     <div class="banner">
-      <p>Yay, we are piloting the new login experience. Things might break from time to time. <a href="https://discourse.mozilla.org/t/piloting-the-new-lock/23199" class="banner__button">Read more</a></p>
+      <p>We have launched and are actively testing the new login experience. Please report any issues. <a href="https://discourse.mozilla.org/t/piloting-the-new-lock/23199" class="banner__button">More info</a></p>
     </div>
     <div class="card">
       <a href="https://mozilla.org" class="logo"><svg id="Layer_1" x="0px" y="0px" width="106" height="33" style="enable-background:new 0 0 360 102.8;" xml:space="preserve" viewBox="0 0 360 102.8">
@@ -350,7 +350,6 @@
 </g>
 
 </svg></a>
-      <noscript><p>This login form requires JavaScript to work, please enable it to log in.</p></noscript>
       <form data-decorator="init-auth handle-submit" method="post" action="/" lock-state="initial">
         <fieldset data-decorator="filter-connections">
           <legend class="rp-name"><span class="visually-hidden">Log in to </span><span id="rp-name-placeholder" class="rp-name__text"></span></legend>
@@ -9858,7 +9857,6 @@
     var decorators = {
       'init-auth': require( 'decorators/init-auth' ),
       'continue-with-keyboard': require( 'decorators/continue-with-keyboard' ),
-      'auto-login': require( 'decorators/auto-login' ),
       'load-ga': require( 'decorators/load-ga' ),
       'handle-submit': require( 'decorators/handle-submit' ),
       'display-rp-name': require( 'decorators/display-rp-name' ),
@@ -9868,17 +9866,7 @@
     module.exports = decorators;
 
 
-    },{"decorators/auto-login":61,"decorators/continue-with-keyboard":62,"decorators/display-rp-name":63,"decorators/filter-connections":64,"decorators/handle-submit":65,"decorators/init-auth":66,"decorators/load-ga":67}],61:[function(require,module,exports){
-    module.exports = function autoLogin() {
-      /* Ugly hack to auto log you in. Only works with LDAP in this case */
-      var w = window.location.toString();
-
-      if ( w.indexOf( 'tried_silent_auth=true' ) === -1 ) {
-        window.location = w.replace( '/login?', '/authorize?' ).replace( '?client=', '?client_id=' ) + '&sso=true&connection=Mozilla-LDAP-Dev&tried_silent_auth=true';
-      }
-    };
-
-    },{}],62:[function(require,module,exports){
+    },{"decorators/continue-with-keyboard":61,"decorators/display-rp-name":62,"decorators/filter-connections":63,"decorators/handle-submit":64,"decorators/init-auth":65,"decorators/load-ga":66}],61:[function(require,module,exports){
     module.exports = function( element ) {
       var KEY_ENTER = 13;
       var button = document.getElementById( element.getAttribute( 'data-continue-with' ) );
@@ -9892,7 +9880,7 @@
       }
     };
 
-    },{}],63:[function(require,module,exports){
+    },{}],62:[function(require,module,exports){
     module.exports = function() {
       var getRPName = require( 'helpers/getRPName' );
       var rp = getRPName();
@@ -9903,7 +9891,7 @@
       }
     };
 
-    },{"helpers/getRPName":78}],64:[function(require,module,exports){
+    },{"helpers/getRPName":77}],63:[function(require,module,exports){
     var dom = require( 'helpers/dom' );
     var ui = require( 'helpers/ui' );
 
@@ -9938,7 +9926,7 @@
       });
     };
 
-    },{"helpers/dom":76,"helpers/ui":80}],65:[function(require,module,exports){
+    },{"helpers/dom":75,"helpers/ui":80}],64:[function(require,module,exports){
     var authoriseLDAP = require( 'handlers/authorise-ldap' );
     var enter = require( 'handlers/enter' );
 
@@ -9965,7 +9953,7 @@
       });
     };
 
-    },{"handlers/authorise-ldap":71,"handlers/enter":72}],66:[function(require,module,exports){
+    },{"handlers/authorise-ldap":70,"handlers/enter":71}],65:[function(require,module,exports){
     function getConfig( string ) {
       var config = {};
       var hostedConfig;
@@ -9994,7 +9982,7 @@
       element.webAuthConfig = config;
     };
 
-    },{"auth0-js":24,"config/local-config-sample":59}],67:[function(require,module,exports){
+    },{"auth0-js":24,"config/local-config-sample":59}],66:[function(require,module,exports){
     var checkDntEnabled = require( 'helpers/dntEnabled' );
     var dntEnabled = checkDntEnabled();
 
@@ -10021,7 +10009,7 @@
       }
     };
 
-    },{"helpers/dntEnabled":75}],68:[function(require,module,exports){
+    },{"helpers/dntEnabled":74}],67:[function(require,module,exports){
     // define handlers
     //
     // handlers are functions that run when a user clicks an interactive
@@ -10040,7 +10028,7 @@
     };
 
 
-    },{"handlers/authorise-github":69,"handlers/authorise-google":70,"handlers/authorise-ldap":71,"handlers/enter":72,"handlers/go-to-initial-page":73,"handlers/send-passwordless-link":74}],69:[function(require,module,exports){
+    },{"handlers/authorise-github":68,"handlers/authorise-google":69,"handlers/authorise-ldap":70,"handlers/enter":71,"handlers/go-to-initial-page":72,"handlers/send-passwordless-link":73}],68:[function(require,module,exports){
     var fireGAEvent = require( 'helpers/fireGAEvent' );
     var storeLastUsedConnection = require( 'helpers/storeLastUsedConnection' );
 
@@ -10058,7 +10046,7 @@
       storeLastUsedConnection( connection );
     };
 
-    },{"helpers/fireGAEvent":77,"helpers/storeLastUsedConnection":79}],70:[function(require,module,exports){
+    },{"helpers/fireGAEvent":76,"helpers/storeLastUsedConnection":79}],69:[function(require,module,exports){
     var fireGAEvent = require( 'helpers/fireGAEvent' );
     var storeLastUsedConnection = require( 'helpers/storeLastUsedConnection' );
 
@@ -10076,17 +10064,18 @@
       storeLastUsedConnection( connection );
     };
 
-    },{"helpers/fireGAEvent":77,"helpers/storeLastUsedConnection":79}],71:[function(require,module,exports){
+    },{"helpers/fireGAEvent":76,"helpers/storeLastUsedConnection":79}],70:[function(require,module,exports){
     var ui = require( 'helpers/ui' );
     var fireGAEvent = require( 'helpers/fireGAEvent' );
     var storeLastUsedConnection = require( 'helpers/storeLastUsedConnection' );
+    var isDev = require( 'helpers/isDev' );
 
     module.exports = function authorise( element, secondTry ) {
       var form = element.tagName === 'FORM' ? element : element.form;
       var emailField = document.getElementById( 'field-email' );
       var passwordField = secondTry ? document.getElementById( 'field-password-try-2' ) : document.getElementById( 'field-password' );
       var errorText = document.getElementById( 'error-message-ldap' );
-      var connection = 'Mozilla-LDAP-Dev';
+      var connection = isDev ? 'Mozilla-LDAP-Dev' : 'Mozilla-LDAP';
 
       if ( element.id === 'authorise-ldap-credentials-try-2' ) {
         passwordField = document.getElementById( 'field-password-try-2' );
@@ -10113,15 +10102,16 @@
       storeLastUsedConnection( connection );
     };
 
-    },{"helpers/fireGAEvent":77,"helpers/storeLastUsedConnection":79,"helpers/ui":80}],72:[function(require,module,exports){
+    },{"helpers/fireGAEvent":76,"helpers/isDev":78,"helpers/storeLastUsedConnection":79,"helpers/ui":80}],71:[function(require,module,exports){
     var ui = require( 'helpers/ui' );
     var fireGAEvent = require( 'helpers/fireGAEvent' );
+    var isDev = require( 'helpers/isDev' );
 
     module.exports = function enter( element ) {
       var emailField = document.getElementById( 'field-email' );
       var passwordField = document.getElementById( 'field-password' );
-      var isDefinitelyLDAP = /mozilla.com|getpocket.com$/.test( emailField.value );
-      var ENDPOINT = 'https://person-api.sso.allizom.org/v1/connection/';
+      var isDefinitelyLDAP = /mozilla.com|getpocket.com|mozillafoundation.org$/.test( emailField.value );
+      var ENDPOINT = isDev ? 'https://person-api.sso.allizom.org/v1/connection/' : 'https://person-api.sso.mozilla.com/v1/connection/';
 
       if ( emailField.value === '' || emailField.validity.valid === false ) {
         emailField.focus();
@@ -10172,7 +10162,7 @@
 
 
 
-    },{"helpers/fireGAEvent":77,"helpers/ui":80}],73:[function(require,module,exports){
+    },{"helpers/fireGAEvent":76,"helpers/isDev":78,"helpers/ui":80}],72:[function(require,module,exports){
     var ui = require( 'helpers/ui' );
     var fireGAEvent = require( 'helpers/fireGAEvent' );
 
@@ -10181,19 +10171,23 @@
       fireGAEvent( 'Screen change', 'Back to initial screen' );
     };
 
-    },{"helpers/fireGAEvent":77,"helpers/ui":80}],74:[function(require,module,exports){
+    },{"helpers/fireGAEvent":76,"helpers/ui":80}],73:[function(require,module,exports){
     var fireGAEvent = require( 'helpers/fireGAEvent' );
     var ui = require( 'helpers/ui' );
+    var storeLastUsedConnection = require( 'helpers/storeLastUsedConnection' );
 
     module.exports = function authorise( element ) {
       var emailField = document.getElementById( 'field-email' );
       var form = element.form;
       var emailPlaceholder = document.getElementById( 'passwordless-success-email-address' );
       var errorText = document.getElementById( 'error-message-passwordless' );
+      var connection = 'email';
 
       ui.setLockState( element, 'loading' );
 
       fireGAEvent( 'Authorisation', 'Requested passwordless link' );
+
+      storeLastUsedConnection( connection );
 
       form.webAuth.passwordlessStart({
         connection: 'email',
@@ -10218,7 +10212,7 @@
       });
     };
 
-    },{"helpers/fireGAEvent":77,"helpers/ui":80}],75:[function(require,module,exports){
+    },{"helpers/fireGAEvent":76,"helpers/storeLastUsedConnection":79,"helpers/ui":80}],74:[function(require,module,exports){
     module.exports = function( dnt, ua ) {
 
       // for old version of IE we need to use the msDoNotTrack property of navigator
@@ -10259,7 +10253,7 @@
       return dntStatus === 'Enabled' ? true : false;
     };
 
-    },{}],76:[function(require,module,exports){
+    },{}],75:[function(require,module,exports){
     var ui = require( 'helpers/ui' );
 
     var dom = {
@@ -10280,7 +10274,7 @@
 
     module.exports = dom;
 
-    },{"helpers/ui":80}],77:[function(require,module,exports){
+    },{"helpers/ui":80}],76:[function(require,module,exports){
     module.exports = function( eventCategory, eventAction ) {
       var TRACKER_NAME = 'gtm1';
       var getRPName = require( 'helpers/getRPName' );
@@ -10296,7 +10290,7 @@
       }
     };
 
-    },{"helpers/getRPName":78}],78:[function(require,module,exports){
+    },{"helpers/getRPName":77}],77:[function(require,module,exports){
     function getUrlParameter( name ) {
       var regex;
       var results;
@@ -10332,6 +10326,13 @@
       var RP = getUrlParameter( 'redirect_uri' ) || '';
 
       return extractHostname( RP );
+    };
+
+    },{}],78:[function(require,module,exports){
+    module.exports = function() {
+      var host = window.location.host.toString();
+
+      return /^auth-dev/.test( host ) ? true : false;
     };
 
     },{}],79:[function(require,module,exports){
@@ -10446,7 +10447,7 @@
 
     module.exports = ui;
 
-    },{"helpers/dom":76}],81:[function(require,module,exports){
+    },{"helpers/dom":75}],81:[function(require,module,exports){
     module.exports = function decorate( decorators, baseElement ) {
       var dom = require( 'helpers/dom' );
       var WHITESPACE = /\s+/;
@@ -10464,7 +10465,7 @@
       });
     };
 
-    },{"helpers/dom":76}],82:[function(require,module,exports){
+    },{"helpers/dom":75}],82:[function(require,module,exports){
     module.exports = function( handlers ) {
 
       document.addEventListener( 'click', function handleClick( event ) {
@@ -10515,7 +10516,7 @@
     // of elements with data-handler="handler"
     setupHandlers( handlers );
 
-    },{"decorators":60,"handlers":68,"init/decorate":81,"init/setupHandlers":82,"polyfills/polyfill":84}],84:[function(require,module,exports){
+    },{"decorators":60,"handlers":67,"init/decorate":81,"init/setupHandlers":82,"polyfills/polyfill":84}],84:[function(require,module,exports){
     /*eslint-disable */
     module.exports = function() {
 
