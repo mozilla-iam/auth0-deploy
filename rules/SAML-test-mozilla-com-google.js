@@ -9,9 +9,7 @@ function (user, context, callback) {
   // This rule simply remaps @mozilla.com e-mail addresses to @test.mozilla.com to be used with the test.mozilla.com GSuite domain.
   // Be careful when adding replacements not to do "double-replacements" where a replace replaces another rule. If that happens,
   // you probably want to improve this code instead
-  user.myemail = user.email.replace("mozilla.com", "test.mozilla.com");
-  user.myemail = user.email.replace("mozillafoundation.org", "test.mozillafoundation.org");
-  user.myemail = user.email.replace("getpocket.com", "test-gsuite.getpocket.com");
+  user.myemail = user.email.replace("mozilla.com", "test.mozilla.com").replace("mozillafoundation.org", "test.mozillafoundation.org").replace("getpocket.com", "test-gsuite.getpocket.com");
 
   context.samlConfiguration = context.samlConfiguration || {};
 
