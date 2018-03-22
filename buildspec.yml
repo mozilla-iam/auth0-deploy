@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Preparing to run the automated tests...
+      - apt-get update -y
+      - pip install boto3
+      - python params2json.py
+      - pip install tox
+      - apt-get install firefox xvfb -y
+      - Xvfb :10 -ac &
+      - export DISPLAY=:10
+      - wget https://github.com/mozilla/geckodriver/releases/download/v0.20.0/geckodriver-v0.20.0-linux64.tar.gz
+      - tar -xvzf geckodriver-v0.20.0-linux64.tar.gz
+      - chmod +x geckodriver
+      - cp geckodriver /usr/local/bin/
+  build:
+    commands:
+      - echo Running the tests now...
+      - tox
+  post_build:
+    commands:
+      - echo Testing complete...
