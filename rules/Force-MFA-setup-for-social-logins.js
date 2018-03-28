@@ -3,7 +3,7 @@ function (user, context, callback) {
     // Force MFA for GitHub logins
     console.log('GitHub user not allowed to log in because 2FA was disabled on the account: '+user.user_id);
     return callback(null, user, global.postError('githubrequiremfa', context));
-  } else if ((context.connection === 'github') && (!user.fxa_twoFactorAuthentication)) {
+  } else if ((context.connection === 'firefoxaccounts') && (!user.fxa_twoFactorAuthentication)) {
     // Force MFA for Firefox Accounts (FxA) logins
     // Note FxA also provides the standard amrValues which can be used to specify which 2FA we want to allow.
     // Right now we trust FxA to make this choice for us (which is, require TOTP for user.fxa_twoFactorAuthentication to

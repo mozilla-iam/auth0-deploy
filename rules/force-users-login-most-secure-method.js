@@ -48,6 +48,7 @@ var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH', // mozillians.org account v
   // Lower is better
   var matchOrder = {'ad': 0,
                     'github': 1,
+                    'firefoxaccounts': 1,
                     'google-oauth2': 2,
                     'email': 3
                    };
