@@ -18,34 +18,36 @@ function(accessToken, ctx, cb) {
   var id_token = JSON.parse(jwt.decode(ctx.id_token));
 
   // Request additional profile info, such as picture, locale, etc.
-  request.get('https://latest.dev.lcip.org/profile/v1/profile', {
-    'headers': {
-      'Authorization': 'Bearer ' + accessToken,
-      'User-Agent': 'MozillaIAM-Auth0'
+  request.get('https://latest.dev.lcip.org/profile/v1/profile',
+    {
+      'headers': {
+        'Authorization': 'Bearer ' + accessToken,
+        'User-Agent': 'MozillaIAM-Auth0'
+      }
+    },
+    function(e, r, b) {
+      if (e) return callback(e);
+      if (r.statusCode !== 200) {
+        return cb(new Error('Failed to fetch user profile. StatusCode:' + r.statusCode));
+      }
+
+      var p = JSON.parse(b);
+
+      if (id_token.sub != p.sub) {
+        return cb(new Error('sub does not match, this should not happen'));
+      }
+
+      return cb(null, {
+        user_id: id_token.sub,
+        picture: p.avatar,
+        preferredLanguage: p.locale,
+        email: p.email,
+        email_verified: true,
+        fxa_sub: id_token.sub,
+        amr: id_token.amr,
+        acr: id_token.acr,
+        fxa_twoFactorAuthentication: p.twoFactorAuthentication
+      });
     }
-  }, function(e, r, b) {
-    if (e) return callback(e);
-    if (r.statusCode !== 200) {
-      return cb(new Error('Failed to fetch user profile. StatusCode:' + r.statusCode));
-    }
-
-    var p = JSON.parse(b);
-
-    if (id_token.sub != p.sub) {
-      return cb(new Error('sub does not match, this should not happen'));
-    }
-
-    return cb(null, {
-      user_id: id_token.sub,
-      picture: p.avatar,
-      preferredLanguage: p.locale,
-      email: p.email,
-      email_verified: true,
-      fxa_sub: id_token.sub,
-      amr: id_token.amr,
-      acr: id_token.acr,
-      fxa_twoFactorAuthentication: p.twoFactorAuthentication
-    });
-
-  });
+  );
 }
