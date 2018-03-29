@@ -4,12 +4,6 @@
 // Token endpoint: https://oauth-latest.dev.lcip.org/v1/token
 // scopes: openid profile
 function(accessToken, ctx, cb) {
-  // An Fxa profile looks like:
-  //     {
-  //      "email": "kang+fxa@mozilla.com",
-  //      "uid": "14e701f4bfd647ce925c0239a2065665",
-  //      "sub": "14e701f4bfd647ce925c0239a2065665"
-  //  }
   // See docs at https://developer.mozilla.org/en-US/docs/Mozilla/Tech/Firefox_Accounts/Introduction
   request.get('https://latest.dev.lcip.org/profile/v1/profile', {
     'headers': {
@@ -23,11 +17,17 @@ function(accessToken, ctx, cb) {
     }
 
     var p = JSON.parse(b);
+    // If you need to debug FxA's reply, un-comment this and look at the webtask logs
+    // console.log('FxA profile output: '+p);
     return cb(null, {
       user_id: p.uid,
+      picture: p.avatar,
+      preferredLanguage: p.locale,
       email: p.email,
       email_verified: true,
-      fxa_sub: p.sub
+      fxa_sub: p.sub,
+      fxa_amrValues: p.amrValues,
+      fxa_twoFactorAuthentication: p.twoFactorAuthentication
     });
 
   });
