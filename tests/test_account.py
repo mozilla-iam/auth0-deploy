@@ -44,7 +44,7 @@ class TestAccount:
     @pytest.mark.nondestructive
     def test_cannot_login_passwordless_if_email_in_invalid_format(self, base_url, selenium):
         test_rp = HomepageTestRp(base_url, selenium)
-        auth0 = test_rp.click_sign_in_button()
+        auth0 = test_rp.auth
         invalid_email = "invalid@mail"
         auth0.enter_email(invalid_email)
         auth0.click_email_enter()
@@ -55,7 +55,7 @@ class TestAccount:
     @pytest.mark.nondestructive
     def test_cannot_login_with_ldap_if_email_not_correct(self, base_url, selenium, ldap_user):
         test_rp = HomepageTestRp(base_url, selenium)
-        auth0 = test_rp.click_sign_in_button()
+        auth0 = test_rp.auth
         auth0.enter_email(ldap_user['email'])
         auth0.click_email_enter()
         auth0.enter_ldap_password('invalid')
@@ -67,7 +67,7 @@ class TestAccount:
     @pytest.mark.nondestructive
     def test_cannot_login_with_ldap_if_password_not_correct(self, base_url, selenium, ldap_user):
         test_rp = HomepageTestRp(base_url, selenium)
-        auth0 = test_rp.click_sign_in_button()
+        auth0 = test_rp.auth
         auth0.enter_email('invalid@mozilla.com')
         auth0.click_email_enter()
         auth0.enter_ldap_password(ldap_user['password'])
