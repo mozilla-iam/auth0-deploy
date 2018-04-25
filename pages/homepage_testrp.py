@@ -16,16 +16,16 @@ class HomepageTestRp(Base):
             self.selenium.get(self.base_url)
 
     @property
+    def auth(self):
+        return Auth0(self.base_url, self.selenium)
+
+    @property
     def is_logout_button_displayed(self):
         return self.is_element_visible(*self._logout_button_locator)
 
     @property
     def is_sign_in_button_displayed(self):
         return self.is_element_visible(*self._sign_in_button)
-
-    def click_sign_in_button(self):
-        self.selenium.find_element(*self._sign_in_button).click()
-        return Auth0(self.base_url, self.selenium)
 
     def wait_for_logout_button(self):
         self.wait_for_element_visible(*self._logout_button_locator)
@@ -35,7 +35,7 @@ class HomepageTestRp(Base):
         self.selenium.find_element(*self._logout_button_locator).click()
 
     def login_with_ldap(self, email_address, password):
-        auth0 = self.click_sign_in_button()
+        auth0 = Auth0(self.base_url, self.selenium)
         auth0.enter_email(email_address)
         auth0.click_email_enter()
         auth0.enter_ldap_password(password)
@@ -43,7 +43,7 @@ class HomepageTestRp(Base):
         return TwoFactorAuthenticationPage(self.base_url, self.selenium)
 
     def login_passwordless(self, email_address):
-        auth0 = self.click_sign_in_button()
+        auth0 = Auth0(self.base_url, self.selenium)
         auth0.enter_email(email_address)
         auth0.click_email_enter()
         auth0.click_send_email()
@@ -51,7 +51,7 @@ class HomepageTestRp(Base):
         self.selenium.get(login_link)
 
     def login_with_github(self, username, password, secret):
-        auth0 = self.click_sign_in_button()
+        auth0 = Auth0(self.base_url, self.selenium)
         auth0.click_login_with_github()
         auth0.enter_github_username(username)
         auth0.enter_github_password(password)
@@ -59,7 +59,7 @@ class HomepageTestRp(Base):
         auth0.enter_passcode(secret)
 
     def login_with_google(self, email, password):
-        auth0 = self.click_sign_in_button()
+        auth0 = Auth0(self.base_url, self.selenium)
         auth0.click_login_with_google()
         auth0.enter_google_email(email)
         auth0.click_email_next()
