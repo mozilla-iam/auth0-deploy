@@ -20,7 +20,7 @@ class SsoDashboard(Base):
         auth0.enter_github_username(username)
         auth0.enter_github_password(password)
         auth0.click_github_sign_in()
-        auth0.enter_passcode(secret)
+        auth0.enter_github_passcode(secret)
 
     def login_with_ldap(self, email_address, password):
         auth0 = Auth0(self.base_url, self.selenium)

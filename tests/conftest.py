@@ -48,3 +48,8 @@ def github_user(stored_users):
 @pytest.fixture
 def google_user(stored_users):
     return stored_users['google']
+
+
+@pytest.fixture
+def firefox_accounts_user(stored_users):
+    return stored_users['fxa']

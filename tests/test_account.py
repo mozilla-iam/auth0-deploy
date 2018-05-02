@@ -33,6 +33,13 @@ class TestAccount:
         test_rp.click_logout()
         assert test_rp.is_sign_in_button_displayed
 
+    def test_login_with_firefox_accounts(self, base_url, selenium, firefox_accounts_user):
+        test_rp = HomepageTestRp(base_url, selenium)
+        test_rp.login_with_firefox_accounts(firefox_accounts_user['email'], firefox_accounts_user['password'], firefox_accounts_user['secret'])
+        assert test_rp.is_logout_button_displayed
+        test_rp.click_logout()
+        assert test_rp.is_sign_in_button_displayed
+
     @pytest.mark.nondestructive
     def test_login_with_google(self, base_url, selenium, google_user):
         test_rp = HomepageTestRp(base_url, selenium)
@@ -76,18 +83,20 @@ class TestAccount:
         auth0.wait_for_error_message_shown()
         assert auth0.ldap_error_message == ldap_global_error_message
 
+    @pytest.mark.xfail("'social-ldap-pwless' in config.getvalue('base_url')")
     @pytest.mark.nondestructive
     def test_github_autologin(self, base_url, selenium, github_user):
         sso_dashboard = SsoDashboard(base_url, selenium)
         sso_dashboard.login_with_github(github_user['username'], github_user['password'], github_user['secret'])
-        discourse = sso_dashboard.click_discourse(message="Autologging in with github")
+        discourse = sso_dashboard.click_discourse(message="Attempting auto-login with github")
         assert discourse.is_avatar_displayed
 
+    @pytest.mark.xfail("'social-ldap-pwless' in config.getvalue('base_url')")
     @pytest.mark.nondestructive
     def test_ldap_autologin(self, base_url, selenium, ldap_user):
         sso_dashboard = SsoDashboard(base_url, selenium)
         two_factor_authentication_page = sso_dashboard.login_with_ldap(ldap_user['email'], ldap_user['password'])
         passcode = conftest.passcode(ldap_user['secret_seed'])
         two_factor_authentication_page.enter_passcode(passcode)
-        discourse = sso_dashboard.click_discourse(message="Autologging in with Mozilla-LDAP")
+        discourse = sso_dashboard.click_discourse(message="Attempting auto-login with Mozilla-LDAP")
         assert discourse.is_avatar_displayed
