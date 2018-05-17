@@ -23,6 +23,32 @@ function (user, context, callback) {
       //          };
 
       if (app.client_id && (app.client_id.indexOf(context.clientID) >= 0)) {
+        // The follow expiration check MUST always run first
+        // Check if the user access to the RP has expired due to ExpirationOfAccess
+        if ((app.expire_access_when_unused_after !== undefined) && (app.expire_access_when_unused_after > 0)) {
+          user.app_metadata = user.app_metadata || {};
+          // If the user has no authoritativeGroups for this clientID, let the user in
+          if (user.app_metadata.authoritativeGroups !== undefined) {
+            for (var index=0;index < user.app_metadata.authoritativeGroups.length; ++index) {
+              if (user.app_metadata.authoritativeGroups[index].uuid === context.clientID) {
+                // Find the delta for this user and see if access should have expired
+                var lastUsed_ts = new Date(user.app_metadata.authoritativeGroups[index].lastUsed).getTime();
+                var delta = new Date().getTime() - lastUsed_ts;
+                // If not expired, let the user in
+                if (delta < app.expire_access_when_unused_after) {
+                  return callback(null, user, context);
+                } else {
+                    // Do not allow the user in, no matter what other access has been set
+                    console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - access has expired");
+                    return callback(null, user, global.postError('accesshasexpired', context));
+                }
+                break;
+              }
+            }
+          }
+          return callback(null, user, context);
+        }
+
         // XXX this authorized_users SHOULD BE REMOVED as it's unsafe. USE GROUPS.
         // XXX This needs to be fixed in the dashboard first
 
@@ -38,7 +64,8 @@ function (user, context, callback) {
         } else if ((app.authorized_groups.length > 0) && array_in_array(app.authorized_groups, groups)) {
           return callback(null, user, context);
         }
-        console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - not in authorized_groups or authorized_users");
+
+        console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - not in authorized group or not an authorized user");
         return callback(null, user, global.postError('notingroup', context));
       } // correct client id
     } // for loop
