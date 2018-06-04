@@ -73,7 +73,9 @@ var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH', // mozillians.org account v
     if (data.length > 0) {
       // Initialize selected_user as current user
       var selected_user = user;
+      selected_user.app_metadata = selected_user.app_metadata || {};
       async.each(data, function(targetUser, cb) {
+        targetUser.app_metadata = targetUser.app_metadata || {};
         // Only list "not us" ;-)
         if (targetUser.user_id !== user.user_id) {
           // XXX This currently assumes single identity/no linked account /!\
@@ -83,12 +85,20 @@ var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH', // mozillians.org account v
           if (matchOrder[connection] < matchOrder[previous_connection]) {
             selected_user = targetUser;
           }
-          console.log(targetUser.user_id+'is of match order '+matchOrder[connection]+'. Selecting: '+selected_user.user_id);
+
+          if (selected_user.app_metadata.mozilliansorg_primary !== undefined) {
+            if (selected_user.app_metadata.mozilliansorg_primary === false) {
+              console.log(selected_user.user_id+' is not a mozilliansorg_primary account and thus cannot log in.');
+              var code = 'accountnotprimary';
+              return callback(null, user, global.postError(code, context, selected_user.identities[0].connection));
+            }
+          }
+          console.log(targetUser.user_id+' is of match order '+matchOrder[connection]+'. Selecting: '+selected_user.user_id);
         }
         cb();
       }, function(err) {
         if (err) {
-          callback(err, user, context);
+          return callback(err, user, context);
         } else { // No error, but loop ended
           console.log('User profile that may log in is: '+selected_user.user_id+' initial login attempt was with: '+user.user_id);
           if (user.user_id !== selected_user.user_id) {
@@ -96,10 +106,10 @@ var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH', // mozillians.org account v
             return callback(null, user, global.postError(code, context, selected_user.identities[0].connection));
           }
         }
-        callback(null, user, context);
+        return callback(null, user, context);
       });
     } else {
-      callback(null, user, context);
+      return callback(null, user, context);
     }
   });
 }
