@@ -49,9 +49,9 @@ var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH', // mozillians.org account v
   var matchOrder = {'Mozilla-LDAP': 0,
                     'Mozilla-LDAP-Dev': 0,
                     'firefoxaccounts': 1,
-                    'github': 1,
-                    'google-oauth2': 2,
-                    'email': 3
+                    'github': 2,
+                    'google-oauth2': 3,
+                    'email': 4
                    };
 
   request({
