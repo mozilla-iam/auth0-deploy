@@ -24,7 +24,7 @@ function(accessToken, ctx, cb) {
   var id_token = JSON.parse(jwt.decode(ctx.id_token));
 
   // Request additional profile info, such as picture, locale, etc.
-  request.get('https://latest.dev.lcip.org/profile/v1/profile',
+  request.get('https://profile.stage.mozaws.net/v1/profile',
     {
       'headers': {
         'Authorization': 'Bearer ' + accessToken,
@@ -42,6 +42,12 @@ function(accessToken, ctx, cb) {
       if (id_token.sub != p.sub) {
         return cb(new Error('sub does not match, this should not happen'));
       }
+      // Work-around possible cache issues in the user profile endpoint
+      // where p.twoFactorAuthentication may not be up to date
+      var two_factor = false;
+      if (id_token['fxa-aal'] >= 2) {
+        two_factor = true;
+      }
 
       return cb(null, {
         user_id: id_token.sub,
@@ -52,7 +58,7 @@ function(accessToken, ctx, cb) {
         fxa_sub: id_token.sub,
         amr: id_token.amr,
         acr: id_token.acr,
-        fxa_twoFactorAuthentication: p.twoFactorAuthentication
+        fxa_twoFactorAuthentication: two_factor
       });
     }
   );
