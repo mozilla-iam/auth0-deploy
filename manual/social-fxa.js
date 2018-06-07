@@ -24,7 +24,7 @@ function(accessToken, ctx, cb) {
   var id_token = JSON.parse(jwt.decode(ctx.id_token));
 
   // Request additional profile info, such as picture, locale, etc.
-  request.get('https://latest.dev.lcip.org/profile/v1/profile',
+  request.get('https://profile.stage.mozaws.net/v1/profile',
     {
       'headers': {
         'Authorization': 'Bearer ' + accessToken,
