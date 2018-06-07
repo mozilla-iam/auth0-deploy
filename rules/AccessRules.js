@@ -13,7 +13,7 @@ function (user, context, callback) {
     return found;
   }
   function access_granted(a, b, c) {
-    global.updateAccessExpiration();
+    updateAccessExpiration();
     return callback(a, b, c);
   }
 
