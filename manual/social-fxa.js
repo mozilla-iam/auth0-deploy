@@ -42,11 +42,16 @@ function(accessToken, ctx, cb) {
       if (id_token.sub != p.sub) {
         return cb(new Error('sub does not match, this should not happen'));
       }
-      // Work-around possible cache issues in the user profile endpoint
-      // where p.twoFactorAuthentication may not be up to date
+      // We check if the current session was authenticated with 2FA (id_token knows this)
       var two_factor = false;
       if (id_token['fxa-aal'] >= 2) {
         two_factor = true;
+      } else {
+        // if not , it might be the user just enabled 2FA and has not logged back in
+        // for now, handle this like GitHub 2FA by looking it up in the user info endpoint
+        // note that if for caching reasons this is not set, we may still get the incorrect value
+        // and in that case there's nothing we can currently do / user has to wait or log back in to get it "faster"
+        two_factor = p.twoFactorAuthentication;
       }
 
       return cb(null, {
