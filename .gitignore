@@ -1,0 +1,8 @@
+.DS_Store
+.pytest_cache/
+tests/*.pyc
+tests/__pycache__
+pages/*.pyc
+env/
+.tox/
+results/
