@@ -20,7 +20,7 @@ Resources:
       ServiceRole: arn:aws:iam::320464205386:role/iam/automatedtest/codebuild-automated-test
       Source:
         Type: GITHUB
-        Location: "https://github.com/andrewkrug/auth0-tests"
+        Location: "https://github.com/mozilla-iam/auth0-tests"
 Outputs:
   CodeBuildURL:
     Description: CodeBuild URL
