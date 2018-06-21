@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CodeBuild job for automated testing.
+Resources:
+  ArtifactStoreBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+      AccessControl: BucketOwnerFullControl
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: no_artifacts
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/python:3.5.2
+        Type: LINUX_CONTAINER
+      Name: !Sub ${AWS::StackName}CodeBuildProject
+      ServiceRole: arn:aws:iam::320464205386:role/iam/automatedtest/codebuild-automated-test
+      Source:
+        Type: GITHUB
+        Location: "https://github.com/andrewkrug/auth0-tests"
+Outputs:
+  CodeBuildURL:
+    Description: CodeBuild URL
+    Value:
+      Fn::Join:
+        - ""
+        - - "https://console.aws.amazon.com/codebuild/home?region="
+          - Ref: AWS::Region
+          - "#/projects/"
+          - Ref: CodeBuildProject
+          - "/view"
