@@ -1,6 +1,6 @@
 import time
 
-from selenium.common.exceptions import NoSuchElementException, ElementNotVisibleException
+from selenium.common.exceptions import NoSuchElementException, ElementNotVisibleException, ElementNotInteractableException
 from selenium.webdriver.support.wait import WebDriverWait
 
 
@@ -17,6 +17,12 @@ class Base(object):
         except (NoSuchElementException, ElementNotVisibleException):
             return False
 
+    def is_element_enabled(self, *locator):
+        try:
+            self.selenium.find_element(*locator).is_enabled()
+        except (NoSuchElementException, ElementNotVisibleException, ElementNotInteractableException):
+            return False
+
     def wait_for_element_visible(self, *locator):
         count = 0
         while not self.is_element_visible(*locator):
@@ -24,6 +30,14 @@ class Base(object):
             count += 1
             if count == self.timeout:
                 raise Exception(':'.join(locator) + " is not visible")
+
+    def wait_for_element_enabled(self, *locator):
+        count = 0
+        while not self.is_element_enabled(*locator):
+            time.sleep(1)
+            count += 1
+            if count == self.timeout:
+                raise Exception(':'.join(locator) + " is not enabled")
 
     @property
     def is_page_loaded(self):
