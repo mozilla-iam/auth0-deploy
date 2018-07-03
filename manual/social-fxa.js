@@ -21,7 +21,8 @@ function(accessToken, ctx, cb) {
   // See also https://github.com/mozilla/fxa-oauth-server/issues/519#issuecomment-367196241 for information on fields
   // Note that we assert this email is verified by FxA, though we do not check `amr` contains `email`. This is because
   // We currently assert `email_verified` to be true if it has ever been verified, not if it's "just been verified"
-  var id_token = JSON.parse(jwt.decode(ctx.id_token));
+  var jwt = require('jsonwebtoken');
+  var id_token = jwt.decode(ctx.id_token);
 
   // Request additional profile info, such as picture, locale, etc.
   request.get('https://profile.stage.mozaws.net/v1/profile',
