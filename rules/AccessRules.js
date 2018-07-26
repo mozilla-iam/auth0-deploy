@@ -1,6 +1,57 @@
 function (user, context, callback) {
-  var rules_url = 'https://cdn.sso.mozilla.com/apps.yml'; //S3 bucket with CFN
+  // Imports
+  var request = require('request');
+  var YAML = require('js-yaml');
+  var jwt = require('jsonwebtoken');
+
+  // Define global variables that need some kind of initialization in case they're missing from Auth0
   var groups = user.groups || [];
+
+  // Retrieve the access file URL from well-known
+  // See also https://github.com/mozilla-iam/cis/blob/profilev2/docs/.well-known/mozilla-iam.json
+  function get_access_file_url() {
+    var access_file = {}
+    try {
+      var options = { method: 'GET', url: configuration.iam_well_known };
+      request(options, function (error, response, body) {
+        if (error) throw new Error(error);
+        access_file = JSON.load(body).access_file;
+        // contains mainly:
+        // access_file.endpoint  (URL)
+        // access_file.jwks_keys[]{} (pub keys)
+      }
+    } catch(e) {
+      console.log('Error fetching well-known file (fatal): '+e);
+      return access_denied(null, null, context);
+    }
+    return access_file
+  }
+
+  // Retrieve and verify access rule file itself
+  function get_verified_access_rules(access_file) {
+    // Bypass if we have a cached version present already
+    // Cache is very short lived in webtask, it just means we hit a "hot" task which nodejs process hasn't yet been
+    // terminated. Generally this means we hit the same task within 60s.
+    if (global.access_rules) {
+      return global.access_rules;
+    }
+
+    try {
+      var options = { method: 'GET', url: access_file.endpoint };
+      request(options, function (error, response, body) {
+        if (error) throw new Error(error);
+        var decoded = jwt.verify(body, configuration.iam_jwt_rsa_pkey, function(err, decoded) {
+          console.log('Signature verification of access file failed (fatal): '+err);
+          return access_denied(null, null, context);
+        });
+        global.access_rules = YAML.load(decoded).apps;
+        return global.access_rules;
+      }
+    } catch(e) {
+      console.log('Error fetching access rules (fatal): '+e);
+      return access_denied(null, null, context);
+    }
+  }
 
   // Check if array A has any occurence from array B
   function array_in_array(A, B) {
@@ -12,11 +63,14 @@ function (user, context, callback) {
     });
     return found;
   }
+
+  // Update expiration and grant access
   function access_granted(a, b, c) {
     updateAccessExpiration();
     return callback(a, b, c);
   }
 
+  // Deny access
   function access_denied(a, b, c) {
     return callback(a, b, c);
   }
@@ -109,26 +163,10 @@ function (user, context, callback) {
     return access_granted(null, user, context);
   }
 
-  // Fetch the apps.yml access rules or use cache if available
-  // Note that the cache is very short lived, though it's better than nothing
-  // Basically: the underlaying webtask is still running and reused,
-  // thus the global namespace (`global`) is shared/still in memory and available to us
-  if (global.access_rules) {
-    return access_decision(global.access_rules);
-  } else {
-    var request = require('request');
-    var YAML = require('js-yaml');
-    try {
-      var options = { method: 'GET',
-        url: rules_url};
-      request(options, function (error, response, body) {
-        if (error) throw new Error(error);
-        global.access_rules = YAML.load(body).apps;
-        return access_decision(global.access_rules);
-      });
-    } catch(e) {
-      console.log('Error fetching access rules (fatal): '+e);
-      return access_denied(null, null, context);
-    }
-  }
+
+  // "Main" starts here
+  var access_file = await get_access_file_url();
+  var access_rules = await get_verified_access_rules(access_file);
+
+  return access_decision(access_rules);
 }
