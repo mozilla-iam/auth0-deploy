@@ -5,6 +5,7 @@ var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH', // mozillians.org account v
                    't9bMi4eTCPpMp5Y6E1Lu92iVcqU0r1P1', // https://web-mozillians-staging.production.paas.mozilla.community Verification client
                    'jijaIzcZmFCDRtV74scMb9lI87MtYNTA', // mozillians.org Verification Client
                    '1db5KNoLN5rLZukvLouWwVouPkbztyso', // login.taskcluster.net
+                   'pl6mWaOtBMeXzTY3fUw57ED80bVkrgU1', // Common Voice Dev
                   ];
   
   if (!user) {
@@ -80,7 +81,14 @@ var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH', // mozillians.org account v
           var connection = targetUser.identities[0].connection;
           var previous_connection = selected_user.identities[0].connection;
 
+          // As we iterate through the search results, targetUser is the current result
+          // If targetUser uses a more secure connection than the one the currently logged in user used
+          // Change selected_user from being the currently logged in user to be this search result
           if (matchOrder[connection] < matchOrder[previous_connection]) {
+            // TODO : Check for the presence of connection and previous_connection in matchOrder to protect against
+            // an unexpected connection type
+
+            // The user has logged in with a less secure connection than one they've previously logged in with
             selected_user = targetUser;
           }
           console.log(targetUser.user_id+'is of match order '+matchOrder[connection]+'. Selecting: '+selected_user.user_id);
@@ -92,6 +100,7 @@ var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH', // mozillians.org account v
         } else { // No error, but loop ended
           console.log('User profile that may log in is: '+selected_user.user_id+' initial login attempt was with: '+user.user_id);
           if (user.user_id !== selected_user.user_id) {
+            // A user profile was found in the search results that was of a more secure connection than what the user just logged in with
             var code = 'incorrectaccount';
             return callback(null, user, global.postError(code, context, selected_user.identities[0].connection));
           }
@@ -99,6 +108,9 @@ var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH', // mozillians.org account v
         callback(null, user, context);
       });
     } else {
+      // Search for this user returned no results. Should this never occur, or is this what happens when a user logs
+      // in for the first time? If it's the former, a case that should never occur, shouldn't we fail the login
+      // instead of allowing like we do here?
       callback(null, user, context);
     }
   });
