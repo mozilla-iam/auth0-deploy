@@ -5,6 +5,7 @@ var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH', // mozillians.org account v
                    't9bMi4eTCPpMp5Y6E1Lu92iVcqU0r1P1', // https://web-mozillians-staging.production.paas.mozilla.community Verification client
                    'jijaIzcZmFCDRtV74scMb9lI87MtYNTA', // mozillians.org Verification Client
                    '1db5KNoLN5rLZukvLouWwVouPkbztyso', // login.taskcluster.net
+                   'pl6mWaOtBMeXzTY3fUw57ED80bVkrgU1', // Common Voice Dev
                   ];
   
   if (!user) {
