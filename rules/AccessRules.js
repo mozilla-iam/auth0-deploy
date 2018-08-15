@@ -2,7 +2,7 @@ function (user, context, callback) {
   // Imports
   var request = require('request');
   var YAML = require('js-yaml');
-  var jwt = require('jsonwebtoken');
+  var rs = require('jsrsasign');
 
   // Define global variables that need some kind of initialization in case they're missing from Auth0
   var groups = user.groups || [];
@@ -29,6 +29,8 @@ function (user, context, callback) {
 
   // Retrieve and verify access rule file itself
   function get_verified_access_rules(access_file) {
+    var alg = "RS256";
+
     // Bypass if we have a cached version present already
     // Cache is very short lived in webtask, it just means we hit a "hot" task which nodejs process hasn't yet been
     // terminated. Generally this means we hit the same task within 60s.
@@ -40,10 +42,13 @@ function (user, context, callback) {
       var options = { method: 'GET', url: access_file.endpoint };
       request(options, function (error, response, body) {
         if (error) throw new Error(error);
-        var decoded = jwt.verify(body, configuration.iam_jwt_rsa_pkey, function(err, decoded) {
+        var verified = rs.jws.JWS.verify(body, configuration.iam_jwt_rsa_pkey, [alg]);
+        if (!verified) {
           console.log('Signature verification of access file failed (fatal): '+err);
           return access_denied(null, null, context);
-        });
+        };
+        var splitted = body.split(/\./);
+        var decoded = rs.KJUR.jws.JWS.readSafeJSONString(rs.b64utoutf8(splitted[1]));
         global.access_rules = YAML.load(decoded).apps;
         return global.access_rules;
       }
@@ -165,8 +170,8 @@ function (user, context, callback) {
 
 
   // "Main" starts here
-  var access_file = await get_access_file_url();
-  var access_rules = await get_verified_access_rules(access_file);
+  var access_file_url = await get_access_file_url();
+  var access_rules = await get_verified_access_rules(access_file_url);
 
   return access_decision(access_rules);
 }
