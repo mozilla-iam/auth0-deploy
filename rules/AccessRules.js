@@ -10,7 +10,7 @@ function (user, context, callback) {
   // Retrieve the access file URL from well-known
   // See also https://github.com/mozilla-iam/cis/blob/profilev2/docs/.well-known/mozilla-iam.json
   function get_access_file_url() {
-    var access_file = {}
+    var access_file = {};
     try {
       var options = { method: 'GET', url: configuration.iam_well_known };
       request(options, function (error, response, body) {
@@ -19,12 +19,12 @@ function (user, context, callback) {
         // contains mainly:
         // access_file.endpoint  (URL)
         // access_file.jwks_keys[]{} (pub keys)
-      }
+      });
     } catch(e) {
       console.log('Error fetching well-known file (fatal): '+e);
       return access_denied(null, null, context);
     }
-    return access_file
+    return access_file;
   }
 
   // Retrieve and verify access rule file itself
@@ -44,14 +44,14 @@ function (user, context, callback) {
         if (error) throw new Error(error);
         var verified = rs.jws.JWS.verify(body, configuration.iam_jwt_rsa_pkey, [alg]);
         if (!verified) {
-          console.log('Signature verification of access file failed (fatal): '+err);
+          console.log('Signature verification of access file failed (fatal): ' + error);
           return access_denied(null, null, context);
-        };
+        }
         var splitted = body.split(/\./);
         var decoded = rs.KJUR.jws.JWS.readSafeJSONString(rs.b64utoutf8(splitted[1]));
         global.access_rules = YAML.load(decoded).apps;
         return global.access_rules;
-      }
+      });
     } catch(e) {
       console.log('Error fetching access rules (fatal): '+e);
       return access_denied(null, null, context);
@@ -170,8 +170,8 @@ function (user, context, callback) {
 
 
   // "Main" starts here
-  var access_file_url = await get_access_file_url();
-  var access_rules = await get_verified_access_rules(access_file_url);
+  var access_file_url = get_access_file_url();
+  var access_rules = get_verified_access_rules(access_file_url);
 
   return access_decision(access_rules);
 }
