@@ -20,6 +20,13 @@ For testing, this looks like this:
 ```
 $ python3 -m venv venv
 $ source venv/bin/activate
-$ pip install auth0-ci
+$ pip install -r requirements.txt
 $ uploader_rules.py <args>
 ```
+
+## Development
+
+How do I know which nodejs modules are available to me?
+
+At this time Auth0 runs nodejs8. The module list that is cached inside webtasks is listed here:
+https://auth0-extensions.github.io/canirequire/#rsa
