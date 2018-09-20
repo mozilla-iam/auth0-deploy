@@ -2,16 +2,15 @@ function (user, context, callback) {
   // Imports
   var request = require('request');
   var YAML = require('js-yaml');
-  var rs = require('jsrsasign');
+  var jose = require('node-jose');
 
   // Define global variables that need some kind of initialization in case they're missing from Auth0
   var groups = user.groups || [];
 
   // Retrieve the access file URL from well-known
   // See also https://github.com/mozilla-iam/cis/blob/profilev2/docs/.well-known/mozilla-iam.json
-  function get_access_file_url() {
+  function get_access_file_url(cb) {
     var access_file = {};
-    try {
       var options = { method: 'GET', url: configuration.iam_well_known };
       request(options, function (error, response, body) {
         if (error) throw new Error(error);
@@ -19,46 +18,48 @@ function (user, context, callback) {
         // contains mainly:
         // access_file.endpoint  (URL)
         // access_file.jwks_keys[]{} (pub keys)
+        return cb(access_file);
       });
-    } catch(e) {
-      console.log('Error fetching well-known file (fatal): '+e);
-      return access_denied(null, null, context);
-    }
-    return access_file;
   }
 
   // Retrieve and verify access rule file itself
-  function get_verified_access_rules(access_file) {
-    var alg = "RS256";
-
+  function get_verified_access_rules(cb, access_file) {
     // Bypass if we have a cached version present already
     // Cache is very short lived in webtask, it just means we hit a "hot" task which nodejs process hasn't yet been
     // terminated. Generally this means we hit the same task within 60s.
     if (global.access_rules) {
-      return global.access_rules;
+      return cb(global.access_rules);
     }
 
-    try {
-      var options = { method: 'GET', url: access_file.endpoint };
-      request(options, function (error, response, body) {
-        if (error) throw new Error(error);
-        var verified = rs.jws.JWS.verify(body, configuration.iam_jwt_rsa_pkey, [alg]);
-        if (!verified) {
-          console.log('Signature verification of access file failed (fatal): ' + error);
-          return access_denied(null, null, context);
-        }
-        var splitted = body.split(/\./);
-        var decoded = rs.KJUR.jws.JWS.readSafeJSONString(rs.b64utoutf8(splitted[1]));
-        global.access_rules = YAML.load(decoded).apps;
-        return global.access_rules;
+    var options = { method: 'GET', url: access_file.endpoint };
+    request(options, function (error, response, body) {
+      if (error) throw new Error(error);
+      // Convert key into jose-formatted-key
+      // XXX This key should also be fetched from well-known
+      var pubkey = jose.JWK.asKey(configuration.iam_jwt_rsa_pkey, 'pem').then((jwk) => jwk);
+
+      var verifier = jose.JWS.createVerify(pubkey);
+      var ret = verifier.verify(body).then((response) => response.payload).catch((err) => err);
+      var decoded = ret.then((data) => data).catch((err) => {
+        console.log('Signature verification of access file failed (fatal): '+err);
+        return access_denied(null, null, context);
       });
-    } catch(e) {
-      console.log('Error fetching access rules (fatal): '+e);
-      return access_denied(null, null, context);
-    }
+      global.access_rules = YAML.load(decoded).apps;
+      return cb(global.access_rules);
+    });
   }
 
-  // Check if array A has any occurence from array B
+  // Unsafe version (no signature verification)
+  function get_unverified_access_rules(cb, rules_url) {
+    var options = { method: 'GET', url: rules_url};
+    request(options, function (error, response, body) {
+      if (error) throw new Error(error);
+      global.access_rules = YAML.load(body).apps;
+      return cb(global.access_rules);
+    });
+  }
+
+  // Check if array A has any occurrence from array B
   function array_in_array(A, B) {
     var found = A.some(
       function(item) {
@@ -170,8 +171,6 @@ function (user, context, callback) {
 
 
   // "Main" starts here
-  var access_file_url = get_access_file_url();
-  var access_rules = get_verified_access_rules(access_file_url);
-
-  return access_decision(access_rules);
+  //get_access_file_url(function(url) { return get_verified_access_rules(access_decision, url) });
+  return get_unverified_access_rules(access_decision, 'https://cdn.sso.mozilla.com/apps.yml');
 }
