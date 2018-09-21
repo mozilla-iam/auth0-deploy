@@ -241,7 +241,7 @@ function (user, context, callback) {
       "LOW": [],
       "MEDIUM": [],
       "HIGH": [],
-      "MAXIMUM: []
+      "MAXIMUM": []
     },
     aai_mapping: {
       "LOW": [],
