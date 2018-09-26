@@ -1,2 +1,2 @@
 auth0-ci
-authzero
+authzerolib
