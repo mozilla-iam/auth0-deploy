@@ -20,4 +20,5 @@ function (user, context, callback) {
     // indicator of what the authenticator supports at this time for Google accounts
     Array.prototype.push.apply(user.aai, ["HIGH_ASSURANCE_IDP"]);
   }
+  callback(null, user, context);
 }
