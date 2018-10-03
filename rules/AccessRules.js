@@ -52,7 +52,6 @@ function (user, context, callback) {
         var ret = verifier.verify(body).then((response) => response.payload).catch((err) => err);
         decoded = ret.then((data) => data).catch((err) => {
           throw new Error('Signature verification of access file failed (fatal): '+err);
-          return access_denied(null, null, context);
         });
       }
 
@@ -125,7 +124,13 @@ function (user, context, callback) {
       //           'aai': 'LOW'
       //          };
 
+      // Defaut app requested aai level to MEDIUM for all apps which do not have this set in access file
+      var required_aai_level = "MEDIUM";
+
+
       if (app.client_id && (app.client_id.indexOf(context.clientID) >= 0)) {
+        // Set app AAI level if present
+        required_aai_level = app.aai || required_aai_level;
 
         // EXPIRATION OF ACCESS
         // Note that the expiration check MUST always run first
@@ -151,43 +156,6 @@ function (user, context, callback) {
           }
         }
 
-        // AAI (AUTHENTICATOR ASSURANCE INDICATOR) REQUIREMENTS
-        // Defauts to MEDIUM for all apps which do not have this set in access file
-        var aai = app.aai || "MEDIUM";
-        // User.aai is set in another rule (rules/aai.js)
-
-        // Mapping logic and verification
-        // Ex: our mapping says 2FA for MEDIUM AAI and app AAI is MEDIUM as well, and the user has 2FA AAI, looks like:
-        // access_file_conf.aai_mapping['MEDIUM'] = ['2FA'];
-        // app.aai = 'MEDIUM;
-        // user.aai = ['2FA'];
-        // Thus user should be allowed for this app (it requires MEDIUM, and MEDIUM requires 2FA, and user has 2FA
-        // indeed)
-
-        var aai_pass = false;
-        if (access_file_conf.aai_mapping[app.aai].length === 0) {
-          // No required (aai_mapping for this app's requested AAI is empty
-          aai_pass = true;
-        } else {
-          for (var y=0; y<user.aai.length; y++) {
-            var this_aai = user.aai[y];
-            if (access_file_conf.aai_mapping[app.aai].indexOf(this_aai) >= 0) {
-              aai_pass = true;
-              break;
-            }
-          }
-        }
-
-        if (!aai_pass) {
-          console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - due to " +
-            "Identity Assurance Verification being to low for this RP: Required AAI: "+app.aai+" ("+aai_pass+")");
-          return access_denied(null, user, global.postError('aai_failed', context));
-        } else {
-          // Inform RPs of which AAI level let the user in
-          var namespace = 'https://sso.mozilla.com/claim/';
-          context.IdToken[namespace+"AAI_LEVEL"] = app.aai;
-        }
-
         // AUTHORIZED_{GROUPS,USERS}
         // XXX this authorized_users SHOULD BE REMOVED as it's unsafe (too easy to make mistakes). USE GROUPS.
         // XXX This needs to be fixed in the dashboard first
@@ -209,6 +177,43 @@ function (user, context, callback) {
         return access_denied(null, user, global.postError('notingroup', context));
       } // correct client id / we matched the current RP
     } // for loop / next rule in apps.yml
+
+    // AAI (AUTHENTICATOR ASSURANCE INDICATOR) REQUIREMENTS
+    //
+    // Note that user.aai is set in another rule (rules/aai.js)
+    //
+    // Mapping logic and verification
+    // Ex: our mapping says 2FA for MEDIUM AAI and app AAI is MEDIUM as well, and the user has 2FA AAI, looks like:
+    // access_file_conf.aai_mapping['MEDIUM'] = ['2FA'];
+    // app.aai = 'MEDIUM;
+    // user.aai = ['2FA'];
+    // Thus user should be allowed for this app (it requires MEDIUM, and MEDIUM requires 2FA, and user has 2FA
+    // indeed)
+
+    var aai_pass = false;
+    if (access_file_conf.aai_mapping[required_aai_level].length === 0) {
+      // No required aai_mapping for this app's requested AAI
+      aai_pass = true;
+    } else {
+      for (var y=0; y<user.aai.length; y++) {
+        var this_aai = user.aai[y];
+        if (access_file_conf.aai_mapping[required_aai_level].indexOf(this_aai) >= 0) {
+          aai_pass = true;
+          break;
+        }
+      }
+    }
+
+    if (!aai_pass) {
+      console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - due to " +
+        "Identity Assurance Verification being too low for this RP: Required AAI: "+required_aai_level+
+        "("+aai_pass+")"); return access_denied(null, user, global.postError('aai_failed', context));
+    } else {
+      // Inform RPs of which AAI level let the user in
+      var namespace = 'https://sso.mozilla.com/claim/';
+      context.idToken[namespace+"AAI_LEVEL"] = required_aai_level;
+    }
+
     // We matched no rule, access is granted
     return access_granted(null, user, context);
   }
