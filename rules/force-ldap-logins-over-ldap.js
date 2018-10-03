@@ -10,7 +10,7 @@ var MOZILLA_STAFF_DOMAINS = [ 'mozilla.com', // Main corp domain
                               'getpocket.com', // Pocket
                               'mozilla.net', // Corp NetOps - should not happen, but just in case
                               'mozilla.org' // Corp org domain - should not happen, but just in case
-                            ]
+                            ];
 
 
   // Sanity checks
@@ -44,4 +44,5 @@ var MOZILLA_STAFF_DOMAINS = [ 'mozilla.com', // Main corp domain
       }
     }
   }
+  return callback(null, user, context);
 }
