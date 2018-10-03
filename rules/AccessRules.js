@@ -10,18 +10,21 @@ function (user, context, callback) {
   // Retrieve the access file information/configuration from well-known
   // See also https://github.com/mozilla-iam/cis/blob/profilev2/docs/.well-known/mozilla-iam.json
   function get_access_file_configuration(cb) {
-    var access_file = {};
-      var options = { method: 'GET', url: configuration.iam_well_known };
-      request(options, function (error, response, body) {
-        if (error) throw new Error(error);
-        access_file_conf = JSON.load(body).access_file;
+    var access_file_conf = {};
+    var options = { method: 'GET', url: configuration.iam_well_known };
+    request(options, function (error, response, body) {
+      if (error) throw new Error(error);
+      if (response.statusCode !== 200) {
+        console.log('Could not fetch access file URL: '+response.statusCode);
+      } else {
+        access_file_conf = JSON.parse(body).access_file;
         // contains mainly:
         // access_file_conf.endpoint  (URL)
-        // access_file_conf.jwks_keys[]{} (pub keys)
-        // access_file_conf.tai_mappings
+        // access_file_conf.jwks.keys[]{} (pub keys)
         // access_file_conf.aai_mappings
-        return cb(access_file_conf);
-      });
+      }
+      return cb(access_file_conf);
+    });
   }
 
   // Retrieve and verify access rule file itself
@@ -34,19 +37,20 @@ function (user, context, callback) {
     }
 
     var options = { method: 'GET', url: access_file_conf.endpoint };
+    var decoded;
     request(options, function (error, response, body) {
       if (error) throw new Error(error);
       // Convert key into jose-formatted-key
       // XXX remove this part of the code when well-known and signature exists
-      if (access_file_conf.jwks_keys === null) {
+      if (access_file_conf.jwks === null) {
         console.log('WARNING: Bypassing access file signature verification');
-        var decoded = body;
+        decoded = body;
       } else {
         // XXX verify key format when the well-known endpoint exists
-        var pubkey = jose.JWK.asKey(access_file_conf.jwks_keys.x5c[0], 'pem').then((jwk) => jwk);
+        var pubkey = jose.JWK.asKey(access_file_conf.jwks.keys.x5c[0], 'pem').then((jwk) => jwk);
         var verifier = jose.JWS.createVerify(pubkey);
         var ret = verifier.verify(body).then((response) => response.payload).catch((err) => err);
-        var decoded = ret.then((data) => data).catch((err) => {
+        decoded = ret.then((data) => data).catch((err) => {
           throw new Error('Signature verification of access file failed (fatal): '+err);
           return access_denied(null, null, context);
         });
@@ -82,10 +86,11 @@ function (user, context, callback) {
   // updateAccessExpiration()
   // Always returns - will attempt to update user.app_metadata.authoritativeGroups[].lastUsed timestamp
   // for the RP/client_id we're currently trying to login to
+  // XXX Use Profilev2 when available
   function updateAccessExpiration() {
       user.app_metadata = user.app_metadata || {};
       if (user.app_metadata.authoritativeGroups === undefined) {
-          console.log('ExpirationOfAccess: Not used here');
+          console.log('ExpirationOfAccess: not enabled for this user');
           return;
       }
 
@@ -117,7 +122,6 @@ function (user, context, callback) {
       //           'authorized_users': ['gdestuynder@mozilla.com'],
       //           'authorized_groups': ['okta_mfa'],
       //           'expire_access_when_unused_after': 86400,
-      //           'tai': 'LOW',
       //           'aai': 'LOW'
       //          };
 
@@ -147,22 +151,10 @@ function (user, context, callback) {
           }
         }
 
-        // TAI/AAI (TRUST ASSURANCE INDICATOR/AUTHENTICATOR ASSURANCE INDICATOR) REQUIREMENTS
+        // AAI (AUTHENTICATOR ASSURANCE INDICATOR) REQUIREMENTS
         // Defauts to MEDIUM for all apps which do not have this set in access file
-        var tai = app.tai || "MEDIUM";
         var aai = app.aai || "MEDIUM";
-
-        // TODO Move this part in a different rule that runs before our rule, so that it's clearer when we expand it
-        // Right now, it just checks if you used 2FA and if yes informs the user's AAI
-        user.aai = [];
-        user.tai = [];
-        if ((context.connection === 'github') && (user.two_factor_authentication === true)) {
-          Array.prototype.push.apply(user.aai, ["2FA"]);
-        } else if ((context.connection === 'firefoxaccounts') && (user.fxa_twoFactorAuthentication === true)) {
-          Array.prototype.push.apply(user.aai, ["2FA"]);
-        } else if ((context.connectionStrategy === 'ad') && (user.multifactor[0] == "duo")) {
-          Array.prototype.push.apply(user.aai, ["2FA"]);
-        }
+        // User.aai is set in another rule (rules/aai.js)
 
         // Mapping logic and verification
         // Ex: our mapping says 2FA for MEDIUM AAI and app AAI is MEDIUM as well, and the user has 2FA AAI, looks like:
@@ -173,12 +165,12 @@ function (user, context, callback) {
         // indeed)
 
         var aai_pass = false;
-        if (access_file_conf.aai_mapping[app.aai].length == 0) {
+        if (access_file_conf.aai_mapping[app.aai].length === 0) {
           // No required (aai_mapping for this app's requested AAI is empty
           aai_pass = true;
         } else {
-          for (var i=0; i<user.aai.length; i++) {
-            var this_aai = user.aai[i];
+          for (var y=0; y<user.aai.length; y++) {
+            var this_aai = user.aai[y];
             if (access_file_conf.aai_mapping[app.aai].indexOf(this_aai) >= 0) {
               aai_pass = true;
               break;
@@ -186,25 +178,14 @@ function (user, context, callback) {
           }
         }
 
-        var tai_pass = false;
-        if (access_file_conf.tai_mapping[app.tai].length == 0) {
-          // No required (tai_mapping for this app's requested TAI is empty
-          tai_pass = true;
-        } else {
-          for (var i=0; i<user.tai.length; i++) {
-            var this_tai = user.tai[i];
-            if (access_file_conf.tai_mapping[app.tai].indexOf(this_tai) >= 0) {
-              tai_pass = true;
-              break;
-            }
-          }
-        }
-
-        if (!aai_pass || !tai_pass) {
+        if (!aai_pass) {
           console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - due to " +
-            "Identity Assurance Verification being to low for this RP: Required AAI: "+app.aai+" ("+aai_pass+") TAI:" +
-            app.tai+" ("+tai_pass+")");
-          return access_denied(null, user, global.postError('aai_tai_failed', context));
+            "Identity Assurance Verification being to low for this RP: Required AAI: "+app.aai+" ("+aai_pass+")");
+          return access_denied(null, user, global.postError('aai_failed', context));
+        } else {
+          // Inform RPs of which AAI level let the user in
+          var namespace = 'https://sso.mozilla.com/claim/';
+          context.IdToken[namespace+"AAI_LEVEL"] = app.aai;
         }
 
         // AUTHORIZED_{GROUPS,USERS}
@@ -236,23 +217,17 @@ function (user, context, callback) {
   // "Main" starts here
   // This is a fake access file conf similar to the well-known endpoint,
   // until the well-known endpoint is actually available - it is also not signed and disables signing verification
-  const fake_access_file_conf = { endpoint: 'https://cdn.sso.mozilla.com/apps.yml', jws_keys: null,
-    tai_mapping: {
-      "LOW": [],
-      "MEDIUM": [],
-      "HIGH": [],
-      "MAXIMUM": []
-    },
+  const fake_access_file_conf = { endpoint: 'https://cdn.sso.mozilla.com/apps.yml', jwks: null,
     aai_mapping: {
       "LOW": [],
       "MEDIUM": ["2FA"],
       "HIGH": [],
       "MAXIMUM": []
     }
-  }
+  };
   // Get access file configuration, then get the access rules (apps.yml), then give all this to the access_decision()
   // function to decide if the user should be allowed or not. Any failure along the way will forbid the user to get in.
   return get_access_file_configuration(function(access_file_conf) {
-    return get_verified_access_rules(access_decision, fake_access_file_conf)
+    return get_verified_access_rules(access_decision, fake_access_file_conf);
   });
 }
