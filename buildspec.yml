@@ -2,9 +2,9 @@ version: 0.2
 
 env:
   parameter-store:
-    CLIENTID=AUTH0_RULE_DEPLOY_CLIENTID
-    CLIENTSECRET=AUTH0_RULE_DEPLOY_CLIENTSECRET
-    URI=AUTH0_URI
+    CLIENTID=/iam/auth0-deploy/stage/AUTH0_RULE_DEPLOY_CLIENTID
+    CLIENTSECRET=/iam/auth0-deploy/stage/AUTH0_RULE_DEPLOY_CLIENTSECRET
+    URI=/iam/auth0-deploy/stage/AUTH0_URI
 phases:
   build:
     commands:
