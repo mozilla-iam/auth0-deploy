@@ -113,6 +113,9 @@ function (user, context, callback) {
 
   // Process the access cache decision
   function access_decision(access_rules, access_file_conf) {
+    // Defaut app requested aai level to MEDIUM for all apps which do not have this set in access file
+    var required_aai_level = "MEDIUM";
+
     for (var i=0; i<access_rules.length; i++) {
       var app = access_rules[i].application;
 
@@ -123,10 +126,6 @@ function (user, context, callback) {
       //           'expire_access_when_unused_after': 86400,
       //           'aai': 'LOW'
       //          };
-
-      // Defaut app requested aai level to MEDIUM for all apps which do not have this set in access file
-      var required_aai_level = "MEDIUM";
-
 
       if (app.client_id && (app.client_id.indexOf(context.clientID) >= 0)) {
         // Set app AAI level if present
@@ -225,7 +224,7 @@ function (user, context, callback) {
   const fake_access_file_conf = { endpoint: 'https://cdn.sso.mozilla.com/apps.yml', jwks: null,
     aai_mapping: {
       "LOW": [],
-      "MEDIUM": ["2FA"],
+      "MEDIUM": ["2FA", "HIGH_ASSURANCE_IDP"],
       "HIGH": [],
       "MAXIMUM": []
     }
