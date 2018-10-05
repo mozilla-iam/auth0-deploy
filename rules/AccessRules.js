@@ -190,8 +190,8 @@ function (user, context, callback) {
     // indeed)
 
     var aai_pass = false;
-    if (access_file_conf.aai_mapping[required_aai_level].length === 0) {
-      // No required aai_mapping for this app's requested AAI
+    if ((access_file_conf.aai_mapping !== undefined) && (access_file_conf.aai_mapping[required_aai_level].length === 0)) {
+      // No required indicator in aai_mapping for this app's requested AAI
       aai_pass = true;
     } else {
       for (var y=0; y<user.aai.length; y++) {

@@ -19,6 +19,9 @@ function (user, context, callback) {
     // Note that this is not the same as "2FA" and other indicators, as we simply do not have a technically accurate
     // indicator of what the authenticator supports at this time for Google accounts
     Array.prototype.push.apply(user.aai, ["HIGH_ASSURANCE_IDP"]);
+  } else {
+    // Ensure all users have some AAI attribute, even if its empty
+    user.aai = user.aai || [];
   }
   callback(null, user, context);
 }
