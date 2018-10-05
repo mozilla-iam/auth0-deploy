@@ -7,7 +7,7 @@ function (user, context, callback) {
   user.app_metadata = user.app_metadata || {};
   user.app_metadata.groups = user.app_metadata.groups || [];
   
-  if (user.app_metadata.groups.indexOf('everyone') >= 0) {
+  if (user.app_metadata.groups.indexOf('everyone') < 0) {
     Array.prototype.push.apply(user.app_metadata.groups, ['everyone']);
   }
   auth0.users.updateAppMetadata(user.user_id, user.app_metadata)

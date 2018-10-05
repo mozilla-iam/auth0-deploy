@@ -154,7 +154,7 @@ function (user, context, callback) {
     user.email_aliases = undefined;
     user.dn = undefined;
     user.organizationUnits = undefined;
-    
+
     // Re-map old and new profile claims to namespaced claims
     // Basically that's `groups`
     old_authzero_claims.forEach(function(claim) {
@@ -166,7 +166,11 @@ function (user, context, callback) {
         console.log("Undefined claim (non-fatal): "+e);
       }
     });
-    
+
+    // AAI value
+    user.aai = user.aai || [];
+    context.idToken[namespace+'AAI'] = user.aai;
+
     // Give info about CIS API
     context.idToken[namespace+'README_FIRST'] = 'Please refer to https://github.com/mozilla-iam/person-api in order to query Mozilla IAM CIS user profile data';
     return callback(null, user, context);
