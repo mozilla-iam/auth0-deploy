@@ -1,11 +1,8 @@
 function (user, context, callback) {
   // Imports
-  var request = require('request');
-  var YAML = require('js-yaml');
-  var jose = require('node-jose');
-
-  // Define global variables that need some kind of initialization in case they're missing from Auth0
-  var groups = user.groups || [];
+  const request = require('request');
+  const YAML = require('js-yaml');
+  const jose = require('node-jose');
 
   // Retrieve the access file information/configuration from well-known
   // See also https://github.com/mozilla-iam/cis/blob/profilev2/docs/.well-known/mozilla-iam.json
@@ -113,6 +110,9 @@ function (user, context, callback) {
 
   // Process the access cache decision
   function access_decision(access_rules, access_file_conf) {
+    // Use whatever is available from the group struct. Sometimes there's a race condition where user.app_metadata.*
+    // isnt reintegrated to user.* for example
+    var groups = user.app_metadata.groups || user.groups || [];
     // Defaut app requested aai level to MEDIUM for all apps which do not have this set in access file
     var required_aai_level = "MEDIUM";
 
