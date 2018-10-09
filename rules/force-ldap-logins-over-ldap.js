@@ -12,7 +12,6 @@ var MOZILLA_STAFF_DOMAINS = [ 'mozilla.com', // Main corp domain
                               'mozilla.org' // Corp org domain - should not happen, but just in case
                             ];
 
-
   // Sanity checks
   if (!user) {
     return callback(null, null, context);
@@ -38,8 +37,8 @@ var MOZILLA_STAFF_DOMAINS = [ 'mozilla.com', // Main corp domain
   if (context.connectionStrategy !== 'ad') {
     for (var index = 0; index < MOZILLA_STAFF_DOMAINS.length; ++index) {
       if (user.email.endsWith(MOZILLA_STAFF_DOMAINS[index])) {
-        var code = 'staffmustuselda';
-        console.log('Staff user attempted to login with the wrong login method. We only allow ad (LDAP) for staff.');
+        var code = 'staffmustuseldap';
+        console.log('Staff or LDAP user attempted to login with the wrong login method. We only allow ad (LDAP) for staff: '+user.user_id);
         return callback(null, user, global.postError(code, context));
       }
     }

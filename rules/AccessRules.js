@@ -1,11 +1,8 @@
 function (user, context, callback) {
   // Imports
-  var request = require('request');
-  var YAML = require('js-yaml');
-  var jose = require('node-jose');
-
-  // Define global variables that need some kind of initialization in case they're missing from Auth0
-  var groups = user.groups || [];
+  const request = require('request');
+  const YAML = require('js-yaml');
+  const jose = require('node-jose');
 
   // Retrieve the access file information/configuration from well-known
   // See also https://github.com/mozilla-iam/cis/blob/profilev2/docs/.well-known/mozilla-iam.json
@@ -113,6 +110,11 @@ function (user, context, callback) {
 
   // Process the access cache decision
   function access_decision(access_rules, access_file_conf) {
+    // Use whatever is available from the group struct. Sometimes there's a race condition where user.app_metadata.*
+    // isnt reintegrated to user.* for example
+    var groups = user.app_metadata.groups || user.groups || [];
+    // This is used for authorized user/groups
+    var authorized = false;
     // Defaut app requested aai level to MEDIUM for all apps which do not have this set in access file
     var required_aai_level = "MEDIUM";
 
@@ -166,14 +168,18 @@ function (user, context, callback) {
 
         // Check if the user is authorized to access
         if ((app.authorized_users.length > 0 ) && (app.authorized_users.indexOf(user.email) >= 0)) {
-          return access_granted(null, user, context);
+          authorized = true;
         // Same dance as above, but for groups
         } else if ((app.authorized_groups.length > 0) && array_in_array(app.authorized_groups, groups)) {
-          return access_granted(null, user, context);
+          authorized = true;
+        } else {
+          authorized = false;
         }
 
-        console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - not in authorized group or not an authorized user");
-        return access_denied(null, user, global.postError('notingroup', context));
+        if (!authorized) {
+          console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - not in authorized group or not an authorized user");
+          return access_denied(null, user, global.postError('notingroup', context));
+        }
       } // correct client id / we matched the current RP
     } // for loop / next rule in apps.yml
 
