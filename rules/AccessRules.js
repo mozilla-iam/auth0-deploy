@@ -131,7 +131,7 @@ function (user, context, callback) {
 
       if (app.client_id && (app.client_id.indexOf(context.clientID) >= 0)) {
         // Set app AAI level if present
-        required_aai_level = app.aai || required_aai_level;
+        required_aai_level = app.AAI || required_aai_level;
 
         // EXPIRATION OF ACCESS
         // Note that the expiration check MUST always run first
@@ -190,7 +190,7 @@ function (user, context, callback) {
     // Mapping logic and verification
     // Ex: our mapping says 2FA for MEDIUM AAI and app AAI is MEDIUM as well, and the user has 2FA AAI, looks like:
     // access_file_conf.aai_mapping['MEDIUM'] = ['2FA'];
-    // app.aai = 'MEDIUM;
+    // app.AAI = 'MEDIUM;
     // user.aai = ['2FA'];
     // Thus user should be allowed for this app (it requires MEDIUM, and MEDIUM requires 2FA, and user has 2FA
     // indeed)
@@ -211,8 +211,9 @@ function (user, context, callback) {
 
     if (!aai_pass) {
       console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - due to " +
-        "Identity Assurance Verification being too low for this RP: Required AAI: "+required_aai_level+
-        "("+aai_pass+")"); return access_denied(null, user, global.postError('aai_failed', context));
+        "Identity Assurance Verification being too low for this RP. Required AAI: "+required_aai_level+
+        " ("+aai_pass+")");
+      return access_denied(null, user, global.postError('aai_failed', context));
     } else {
       // Inform RPs of which AAI level let the user in
       var namespace = 'https://sso.mozilla.com/claim/';
