@@ -46,9 +46,7 @@ var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH', // mozillians.org account v
   var userApiUrl = auth0.baseUrl + '/users';
   
   // Lower is better
-  var matchOrder = {'Mozilla-LDAP': 0,
-                    'Mozilla-LDAP-Dev': 0,
-                    'firefoxaccounts': 1,
+  var matchOrder = {'ad': 0,
                     'github': 1,
                     'google-oauth2': 2,
                     'email': 3
@@ -66,7 +64,7 @@ var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH', // mozillians.org account v
   },
   function(err, response, body) {
     if (err) return callback(err);
-
+    
     if (response.statusCode !== 200) return callback(new Error(body));
 
     var data = JSON.parse(body);
@@ -77,13 +75,12 @@ var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH', // mozillians.org account v
         // Only list "not us" ;-)
         if (targetUser.user_id !== user.user_id) {
           // XXX This currently assumes single identity/no linked account /!\
-          var connection = targetUser.identities[0].connection;
-          var previous_connection = selected_user.identities[0].connection;
-
-          if (matchOrder[connection] < matchOrder[previous_connection]) {
+          var provider = targetUser.identities[0].provider;
+          var previous_provider = selected_user.identities[0].provider;
+          if (matchOrder[provider] < matchOrder[previous_provider]) {
             selected_user = targetUser;
           }
-          console.log(targetUser.user_id+'is of match order '+matchOrder[connection]+'. Selecting: '+selected_user.user_id);
+          console.log(targetUser.user_id+'is of match order '+matchOrder[provider]+'. Selecting: '+selected_user.user_id);
         }
         cb();
       }, function(err) {

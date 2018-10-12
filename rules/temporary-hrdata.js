@@ -6,8 +6,7 @@ function (user, context, callback) {
   // Applications that are ALLOWED to see _HRData
   var ALLOWED_CLIENTIDS = [
     'IU80mVpKPtIZyUZtya9ZnSTs6fKLt3JO', //biztera.com
-    'R4djNlyXSl3i8N2KXWkfylghDa9kFQ84', //mozilla.tap.thinksmart.com
-    'fNzzMG3XfkxQJcnUpgrGyH2deII3nFFM' //pto1.dmz.mdc1.mozilla.com
+    'R4djNlyXSl3i8N2KXWkfylghDa9kFQ84' //mozilla.tap.thinksmart.com
   ];
 
   if (ALLOWED_CLIENTIDS.indexOf(context.clientID) >= 0) {
