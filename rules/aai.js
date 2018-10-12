@@ -7,7 +7,7 @@ function (user, context, callback) {
     Array.prototype.push.apply(user.aai, ["2FA"]);
   } else if ((context.connection === 'firefoxaccounts') && (user.fxa_twoFactorAuthentication === true)) {
     Array.prototype.push.apply(user.aai, ["2FA"]);
-  } else if ((context.connectionStrategy === 'ad') && (user.multifactor[0] === "duo")) {
+  } else if ((context.connectionStrategy === 'ad') && (context.multifactor || user.multifactor[0] === "duo")) {
     Array.prototype.push.apply(user.aai, ["2FA"]);
   } else if (context.connection === 'google-oauth2') {
     // We set Google to HIGH_ASSURANCE_IDP which is a special indicator, this is what it represents:
