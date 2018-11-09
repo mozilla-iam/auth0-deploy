@@ -115,8 +115,8 @@ function (user, context, callback) {
     var groups = user.app_metadata.groups || user.groups || [];
     // This is used for authorized user/groups
     var authorized = false;
-    // Defaut app requested aai level to MEDIUM for all apps which do not have this set in access file
-    var required_aai_level = "MEDIUM";
+    // Defaut app requested aal to MEDIUM for all apps which do not have this set in access file
+    var required_aal = "MEDIUM";
 
     for (var i=0; i<access_rules.length; i++) {
       var app = access_rules[i].application;
@@ -126,12 +126,12 @@ function (user, context, callback) {
       //           'authorized_users': ['gdestuynder@mozilla.com'],
       //           'authorized_groups': ['okta_mfa'],
       //           'expire_access_when_unused_after': 86400,
-      //           'aai': 'LOW'
+      //           'aal': 'LOW'
       //          };
 
       if (app.client_id && (app.client_id.indexOf(context.clientID) >= 0)) {
-        // Set app AAI level if present
-        required_aai_level = app.AAI || required_aai_level;
+        // Set app AAL (AA level) if present
+        required_aal = app.AAL || required_aal;
 
         // EXPIRATION OF ACCESS
         // Note that the expiration check MUST always run first
@@ -186,23 +186,24 @@ function (user, context, callback) {
     // AAI (AUTHENTICATOR ASSURANCE INDICATOR) REQUIREMENTS
     //
     // Note that user.aai is set in another rule (rules/aai.js)
+    // This file sets the user.aal (authenticator assurance level) which is the result of a map lookup against user.aai
     //
     // Mapping logic and verification
-    // Ex: our mapping says 2FA for MEDIUM AAI and app AAI is MEDIUM as well, and the user has 2FA AAI, looks like:
+    // Ex: our mapping says 2FA for MEDIUM AAL and app AAL is MEDIUM as well, and the user has 2FA AAI, looks like:
     // access_file_conf.aai_mapping['MEDIUM'] = ['2FA'];
-    // app.AAI = 'MEDIUM;
+    // app.AAL = 'MEDIUM;
     // user.aai = ['2FA'];
     // Thus user should be allowed for this app (it requires MEDIUM, and MEDIUM requires 2FA, and user has 2FA
     // indeed)
 
     var aai_pass = false;
-    if ((access_file_conf.aai_mapping !== undefined) && (access_file_conf.aai_mapping[required_aai_level].length === 0)) {
-      // No required indicator in aai_mapping for this app's requested AAI
+    if ((access_file_conf.aai_mapping !== undefined) && (access_file_conf.aai_mapping[required_aal].length === 0)) {
+      // No required indicator in aai_mapping for this app's requested AAIs
       aai_pass = true;
     } else {
       for (var y=0; y<user.aai.length; y++) {
         var this_aai = user.aai[y];
-        if (access_file_conf.aai_mapping[required_aai_level].indexOf(this_aai) >= 0) {
+        if (access_file_conf.aai_mapping[required_aal].indexOf(this_aai) >= 0) {
           aai_pass = true;
           break;
         }
@@ -211,13 +212,13 @@ function (user, context, callback) {
 
     if (!aai_pass) {
       console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - due to " +
-        "Identity Assurance Verification being too low for this RP. Required AAI: "+required_aai_level+
+        "Identity Assurance Verification being too low for this RP. Required AAI: "+required_aal+
         " ("+aai_pass+")");
       return access_denied(null, user, global.postError('aai_failed', context));
     } else {
-      // Inform RPs of which AAI level let the user in
+      // Inform RPs of which AAL let the user in
       var namespace = 'https://sso.mozilla.com/claim/';
-      context.idToken[namespace+"AAI_LEVEL"] = required_aai_level;
+      context.idToken[namespace+"AAL"] = required_aal;
     }
 
     // We matched no rule, access is granted
