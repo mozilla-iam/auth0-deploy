@@ -1,6 +1,6 @@
 function (user, context, callback) {
   // AAI (AUTHENTICATOR ASSURANCE INDICATOR)
-  // Sets the AAI for the user. This is later used by the AccessRules.js rule for example
+  // Sets the AAI for the user. This is later used by the AccessRules.js rule which also sets the AAL.
 
   user.aai = [];
   if ((context.connection === 'github') && (user.two_factor_authentication === true)) {
@@ -20,8 +20,9 @@ function (user, context, callback) {
     // indicator of what the authenticator supports at this time for Google accounts
     Array.prototype.push.apply(user.aai, ["HIGH_ASSURANCE_IDP"]);
   } else {
-    // Ensure all users have some AAI attribute, even if its empty
+    // Ensure all users have some AAI and AAL attributes, even if its empty
     user.aai = user.aai || [];
+    user.aal = user.aal || [];
   }
   callback(null, user, context);
 }
