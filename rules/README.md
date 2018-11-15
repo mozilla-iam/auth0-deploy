@@ -42,3 +42,5 @@ This is the list of keys we're using for secrets (and abuse for certain configur
   removed and replaced by person-api v2 calls eventually
 - `temporary-hrdata.json` Temporary rule that adds HRIS data in a special `_HRData` structure until person-apiv2 is
   available.
+- `temporary-hris-connector.json` Temporary rule that fix the missing `hris_is_staff` group for Mozillians.org, until
+  person-apiv2 is available.
