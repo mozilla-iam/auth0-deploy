@@ -19,8 +19,9 @@ function (user, context, callback) {
     if (user.app_metadata.groups.indexOf('hris_is_staff') < 0) {
       // But user is staff?
       if (user._HRData.cost_center !== undefined) {
-        //Reintegrate this specific group group
+        //Reintegrate this specific group
         Array.prototype.push.apply(user.app_metadata.groups, ['hris_is_staff']);
+        Array.prototype.push.apply(user.groups, ['hris_is_staff']);
         console.log('Re-integrated hris_is_staff group for '+user.user_id);
       }
     }
