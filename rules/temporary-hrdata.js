@@ -7,7 +7,10 @@ function (user, context, callback) {
   var ALLOWED_CLIENTIDS = [
     'IU80mVpKPtIZyUZtya9ZnSTs6fKLt3JO', //biztera.com
     'R4djNlyXSl3i8N2KXWkfylghDa9kFQ84', //mozilla.tap.thinksmart.com
-    'fNzzMG3XfkxQJcnUpgrGyH2deII3nFFM' //pto1.dmz.mdc1.mozilla.com
+    'fNzzMG3XfkxQJcnUpgrGyH2deII3nFFM', //pto1.dmz.mdc1.mozilla.com
+    'T2tB7Ss8It7PKrw3ijazoXu9PgZniLPD', //https://web-mozillians-staging.production.paas.mozilla.community (dev auth0)
+    'FQw134gwheaK3KkW6fQf0JPV6P7h2yo1', //https://web-mozillians-staging.production.paas.mozilla.community (prod auth0)
+    'HdfEiM1SZibaQnOYTxLoMdxSh4a6ZKD3', //mozillians.org
   ];
 
   if (ALLOWED_CLIENTIDS.indexOf(context.clientID) >= 0) {
