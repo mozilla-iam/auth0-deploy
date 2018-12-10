@@ -18,6 +18,17 @@ function (user, context, callback) {
     return callback(null, user, context);
   }
 
+  // Lower is better - used by linking ratcheting logic
+  const matchOrder = {'Mozilla-LDAP': 0,
+                      'Mozilla-LDAP-Dev': 0,
+                      'firefoxaccounts': 1,
+                      'github': 2,
+                      'google-oauth2': 3,
+                      'email': 4
+                     };
+  // How old an account should be to be considered "new" to the system for linking, in seconds
+  const user_ratchet_link_delay_sec = 300;
+
   const userApiUrl = auth0.baseUrl + '/users';
   const userSearchApiUrl = auth0.baseUrl + '/users-by-email';
 
@@ -40,20 +51,36 @@ function (user, context, callback) {
       return u.email_verified && (u.user_id !== user.user_id);
     });
 
-//    if (data.length > 1) {
-      // We already have  more than one match, so we need to decide which account is going to be main
-      // This code is only triggered by accounts that were present before automatic linking was enabled
-      
-//    }
     if (data.length === 0) {
       // Already linked or no matching email found, continue with login
       return callback(null, user, context);
     }
 
-    const originalUser = data[0];
+    // Default to ourselves as main profile
+    var originalUser = user;
+
+    // We have matches in Auth0, so we need to decide which account is going to be main
+    // Please see https://github.com/mozilla-iam/mozilla-iam/blob/master/docs/deratcheting-user-flows.md#user-logs-in-with-the-mozilla-iam-system-for-the-first-time 
+    // for detailed explanation of what happens here.
+    // NOTE: No date time check is made here as the current/new user is not yet present in Auth0 database (anymore?)
+    // thus we do not need to verify that the current profile (`user`) has a "new" `user.created_at` value. Yay!
+    for (var i = 0, len = data.length; i < len; i++) {
+      var targetUser = data[i];
+
+      var otherConnection = targetUser.identities[0].connection;
+      var curConnection = originalUser.identities[0].connection;
+      console.log(otherConnection, curConnection);
+
+      if (matchOrder[otherConnection] < matchOrder[curConnection]) {
+        console.log("Found user_id that should be main profile used for linking, according to ratcheting logic: " + targetUser.user_id);
+        originalUser = targetUser;
+      }
+    }
+
+    // Current user providers
     const provider = user.identities[0].provider;
     const providerUserId = user.identities[0].user_id;
-    
+
     console.log("Performing automatic profile linking: main profile: "+originalUser.user_id+" is now also main for: "+user.user_id);
 
     user.app_metadata = user.app_metadata || {};

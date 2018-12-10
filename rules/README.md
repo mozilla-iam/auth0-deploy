@@ -45,4 +45,4 @@ This is the list of keys we're using for secrets (and abuse for certain configur
 - `temporary-hris-connector.json` Temporary rule that fix the missing `hris_is_staff` group for Mozillians.org, until
   person-apiv2 is available.
 - `link-users-by-email-with-metadata.js` Links user profiles by primary email (GH x@x.x and FxA x@x.x become the same
-  profile). The first-ever used account is the main profile.
+  profile). The user profile to be main (ie main user_id) is decided by ratcheting logic.
