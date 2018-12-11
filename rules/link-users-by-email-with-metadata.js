@@ -32,7 +32,7 @@ function (user, context, callback) {
   const userApiUrl = auth0.baseUrl + '/users';
   const userSearchApiUrl = auth0.baseUrl + '/users-by-email';
 
-  // currentUser : The user that just logged in, same as "user"
+ 
   // primaryUser : The user profile that all other user profiles will be linked
   //               to as children
   // targetUser : The iterator that we use as we iterate over the search results
