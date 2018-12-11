@@ -81,7 +81,7 @@ function (user, context, callback) {
     const providerUserId = user.identities[0].user_id;
 
     if (originalUser.user_id === user.user_id) {
-      // The profile we're trying to link is the same as the one we're login as
+      // The profile we're trying to link is the same as the one we're logged in as
       // This happens if the linking ratcheting logic selects the same profile and other profiles are not yet linked
       // These will be linked the first time the user login with them instead
       console.log("No automatic profile linking performed due to main profile matching current profile for: " + user.user_id);
