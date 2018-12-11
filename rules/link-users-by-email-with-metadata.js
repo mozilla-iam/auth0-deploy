@@ -69,7 +69,6 @@ function (user, context, callback) {
 
       var otherConnection = targetUser.identities[0].connection;
       var curConnection = originalUser.identities[0].connection;
-      console.log(otherConnection, curConnection);
 
       if (matchOrder[otherConnection] < matchOrder[curConnection]) {
         console.log("Found user_id that should be main profile used for linking, according to ratcheting logic: " + targetUser.user_id);
@@ -81,7 +80,15 @@ function (user, context, callback) {
     const provider = user.identities[0].provider;
     const providerUserId = user.identities[0].user_id;
 
-    console.log("Performing automatic profile linking: main profile: "+originalUser.user_id+" is now also main for: "+user.user_id);
+    if (originalUser.user_id === user.user_id) {
+      // The profile we're trying to link is the same as the one we're login as
+      // This happens if the linking ratcheting logic selects the same profile and other profiles are not yet linked
+      // These will be linked the first time the user login with them instead
+      console.log("No automatic profile linking performed due to main profile matching current profile for: " + user.user_id);
+      return callback(null, user, context);
+    }
+
+    console.log("Performing automatic profile linking: main profile: "+originalUser.user_id+" is now also main for: " + user.user_id);
 
     user.app_metadata = user.app_metadata || {};
     user.user_metadata = user.user_metadata || {};
