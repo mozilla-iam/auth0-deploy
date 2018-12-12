@@ -11,6 +11,13 @@ function (user, context, callback) {
     'HdfEiM1SZibaQnOYTxLoMdxSh4a6ZKD3', //mozillians.org
   ];
 
+  // We only care about LDAP
+  var ALLOWED_CONNECTIONS = [ 'Mozilla-LDAP', 'Mozilla-LDAP-Dev' ];
+
+  if (ALLOWED_CONNECTIONS.indexOf(context.connection) < 0) {
+    return callback(null, user, context);
+  }
+
   if (ALLOWED_CLIENTIDS.indexOf(context.clientID) >= 0) {
     user.app_metadata = user.app_metadata || {};
     user.app_metadata.groups = user.app_metadata.groups || [];
@@ -18,7 +25,7 @@ function (user, context, callback) {
     // Group not present?
     if (user.app_metadata.groups.indexOf('hris_is_staff') < 0) {
       // But user is staff?
-      if (user._HRData.cost_center !== undefined) {
+      if (user._HRData !== undefined && user._HRData.cost_center !== undefined) {
         //Reintegrate this specific group
         Array.prototype.push.apply(user.app_metadata.groups, ['hris_is_staff']);
         Array.prototype.push.apply(user.groups, ['hris_is_staff']);

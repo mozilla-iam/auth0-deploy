@@ -36,8 +36,11 @@ function (user, context, callback) {
         Array.prototype.push.apply(non_ldap_groups, [value]);
       }
     });
-    //reconstruct groups...
-    var groups = theuser[0].groups || [];
+    //reconstruct groups if there was a match...
+    var groups = [];
+    if (theuser.length !== 0) {
+      groups = theuser[0].groups || [];
+    }
     Array.prototype.push.apply(groups, ['everyone']);
     Array.prototype.push.apply(groups, non_ldap_groups);
     user.app_metadata.groups = groups;
