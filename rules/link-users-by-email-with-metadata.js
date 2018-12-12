@@ -72,11 +72,19 @@ function (user, context, callback) {
     for (var i = 0, len = data.length; i < len; i++) {
       var targetUser = data[i];
 
-      var targetConnection = targetUser.identities[0].connection;
-      var primaryConnection = primaryUser.identities[0].connection;
+      // If we only find a single account in the Auth0 database, we do not apply ratcheting logic as this means
+      // 1) `user` is a new user not in the database
+      // 2) `targetUser` is already linked to something, or is a single unlinked account and thus should be
+      // `primaryUser` as well.
+      if (data.length !== 1) {
+        var targetConnection = targetUser.identities[0].connection;
+        var primaryConnection = primaryUser.identities[0].connection;
 
-      if (matchOrder[targetConnection] < matchOrder[primaryConnection]) {
-        console.log("Found user_id that should be primary profile used for linking, according to ratcheting logic: " + targetUser.user_id);
+        if (matchOrder[targetConnection] < matchOrder[primaryConnection]) {
+          console.log("Found user_id that should be primary profile used for linking, according to ratcheting logic: " + targetUser.user_id);
+          primaryUser = targetUser;
+        }
+      } else {
         primaryUser = targetUser;
       }
     }
