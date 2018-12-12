@@ -6,7 +6,8 @@ function (user, context, callback) {
 
   user.app_metadata = user.app_metadata || {};
   user.app_metadata.groups = user.app_metadata.groups || [];
-  
+  user.groups = user.groups || [];
+
   if (user.app_metadata.groups.indexOf('everyone') < 0) {
     Array.prototype.push.apply(user.app_metadata.groups, ['everyone']);
   }
