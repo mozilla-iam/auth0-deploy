@@ -7,6 +7,9 @@
  * This rule will link any accounts that have the same email address while merging metadata.
  * Source/Original: https://github.com/auth0/rules/blob/master/src/rules/link-users-by-email-with-metadata.js
  *
+ * Please see https://github.com/mozilla-iam/mozilla-iam/blob/master/docs/deratcheting-user-flows.md#user-logs-in-with-the-mozilla-iam-system-for-the-first-time
+ * for detailed explanation of what happens here.
+ *
  */
 
 function (user, context, callback) {
@@ -32,11 +35,6 @@ function (user, context, callback) {
   const userApiUrl = auth0.baseUrl + '/users';
   const userSearchApiUrl = auth0.baseUrl + '/users-by-email';
 
- 
-  // primaryUser : The user profile that all other user profiles will be linked
-  //               to as children
-  // targetUser : The iterator that we use as we iterate over the search results
-
   request({
    url: userSearchApiUrl,
    headers: {
@@ -61,22 +59,48 @@ function (user, context, callback) {
       return callback(null, user, context);
     }
 
-    // Default to ourselves as the primary profile
+    // @primaryUser JSON The user profile that all other user profiles will be linked to as children
+    // @targetUser JSON The iterator that we use as we iterate over the search results, the to-be primaryUser
+    //
+    // Default to ourselves as the primaryUser and the targetUser as the first search result from Auth0 DB
     var primaryUser = user;
+    var targetUser = data[0];
 
-    // We have matches in Auth0, so we need to decide which account is going to be primary
-    // Please see https://github.com/mozilla-iam/mozilla-iam/blob/master/docs/deratcheting-user-flows.md#user-logs-in-with-the-mozilla-iam-system-for-the-first-time
-    // for detailed explanation of what happens here.
-    // NOTE: No date time check is made here as the current user is not yet present in Auth0 database (anymore?)
-    // thus we do not need to verify that the current profile (`user`) has a "new" `user.created_at` value. Yay!
-    for (var i = 0, len = data.length; i < len; i++) {
-      var targetUser = data[i];
+    // CASE 1:
+    // If we have a single account in auth0 database, AND we are logging in with a linked account, use the linked
+    // account as primaryUser, always (and thus just bail out)
+    // Example test case: LDAP, FxA, GitHub account with kang@insecure.ws `user.email` exist
+    // FxA logins: CASE 3 is hit (LDAP primary, Fxa linked)
+    // FxA logins again: No change, due to this case
+    // Eventually GitHub login and hits CASE 2
+    if (data.length === 1 && user.identities && user.identities.length > 1) {
+      primaryUser = user;
 
-      // If we only find a single account in the Auth0 database, we do not apply ratcheting logic as this means
-      // 1) `user` is a new user not in the database
-      // 2) `targetUser` is already linked to something, or is a single unlinked account and thus should be
-      // `primaryUser` as well.
-      if (data.length !== 1) {
+    // CASE 2:
+    // If we only find a single account in the Auth0 database, we do not apply ratcheting logic as this means
+    // 1) `user` is a new user not in the database
+    // 2) `targetUser` is already linked to something, or is a single unlinked account and thus should be
+    // `primaryUser` as well.
+    // Example test case A: LDAP or a linked LDAP account exists as well as Github, all with kang@insecure.ws `user.email`
+    // LDAP logins: Github is set as target here and will therefore be linked to LDAP or linked LDAP as primary
+    // Example test case B: same setup but
+    // GitHub logins: CASE 1 is hit if LDAP is already linked
+    //                CASE 3 is hit if neither accounts are linked but GitHub already existed
+    //                CASE 2 (THIS CASE) is hit if GitHub is a new account and it will be the primary account, LDAP will
+    //                be linked to it
+    } else if (data.length === 1) {
+      primaryUser = targetUser;
+
+    // CASE 3:
+    // This is the "linking racheting" loop/logic which emulates the deprecated login racheting, while linking
+    // Example test case: FxA, GitHub, and Google accounts exist all with kang@insecure.ws `user.email`
+    // Google logins: this loop finds all 3 accounts and selects FxA as primary due to ratcheting
+    //                FxA will be primary and Google will be linked to it. Nothing happens to GitHub, until the user
+    //                logins again and hits CASE 1
+    } else {
+      for (var i = 0, len = data.length; i < len; i++) {
+        targetUser = data[i];
+
         var targetConnection = targetUser.identities[0].connection;
         var primaryConnection = primaryUser.identities[0].connection;
 
@@ -84,14 +108,8 @@ function (user, context, callback) {
           console.log("Found user_id that should be primary profile used for linking, according to ratcheting logic: " + targetUser.user_id);
           primaryUser = targetUser;
         }
-      } else {
-        primaryUser = targetUser;
       }
-    }
-
-    // Current user providers
-    const provider = user.identities[0].provider;
-    const providerUserId = user.identities[0].user_id;
+    } // End of CASEs
 
     if (primaryUser.user_id === user.user_id) {
       // The primary user we're trying to link is the same as the one we're logged in as
@@ -103,10 +121,16 @@ function (user, context, callback) {
 
     console.log("Performing automatic profile linking: primary profile: "+primaryUser.user_id+" is now also primary for: " + user.user_id);
 
+    // Current user providers
+    const provider = user.identities[0].provider;
+    const providerUserId = user.identities[0].user_id;
+
+    // Update app, user metadata as auth0 won't back this up in user.identities[x].profileData
     user.app_metadata = user.app_metadata || {};
     user.user_metadata = user.user_metadata || {};
     auth0.users.updateAppMetadata(primaryUser.user_id, user.app_metadata)
     .then(auth0.users.updateUserMetadata(primaryUser.user_id, user.user_metadata))
+    // Link the accounts
     .then(function() {
       request.post({
         url: userApiUrl + '/' + primaryUser.user_id + '/identities',
@@ -119,12 +143,14 @@ function (user, context, callback) {
             console.log("Error linking account: " + response.statusMessage);
             return callback(new Error('Error linking account: ' + response.statusMessage));
           }
+          // Finally, swap user_id so that the current login process has the correct data
           context.primaryUser = primaryUser.user_id;
-          callback(null, user, context);
+          return callback(null, user, context);
       });
     })
     .catch(function (err) {
-      callback(err);
+      console.log("An unknown error occured while linking accounts: " + err);
+      return callback(err);
     });
   });
 }
