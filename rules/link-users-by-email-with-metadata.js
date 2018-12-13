@@ -89,7 +89,7 @@ function (user, context, callback) {
     //                CASE 3 is hit if LDAP is already linked (because LDAP, i.e. targetUser.identities.length > 1)
     //                CASE 2 (THIS CASE) is hit if GitHub is a new account and it will be the primary account, LDAP will
     //                be linked to it as LDAP is not already linked
-    } else if (data.length === 1 && targetUser.identities && targetUser.identities.length <= 1) {
+    } else if (data.length === 1 && (targetUser.identities && targetUser.identities.length > 1)) {
       primaryUser = targetUser;
 
     // CASE 3:
