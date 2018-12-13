@@ -135,6 +135,7 @@ function (user, context, callback) {
   function cb(new_groups) {
     user.app_metadata = user.app_metadata || {};
     if (new_groups !== undefined) {
+      user.groups = new_groups;
       user.app_metadata.groups = new_groups;
       // Save app_metadata changes
       auth0.users.updateAppMetadata(user.user_id, user.app_metadata)
