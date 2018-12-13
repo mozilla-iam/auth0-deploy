@@ -84,11 +84,12 @@ function (user, context, callback) {
     // Example test case A: LDAP or a linked LDAP account exists as well as Github, all with kang@insecure.ws `user.email`
     // LDAP logins: Github is set as target here and will therefore be linked to LDAP or linked LDAP as primary
     // Example test case B: same setup but
-    // GitHub logins: CASE 1 is hit if LDAP is already linked
-    //                CASE 3 is hit if neither accounts are linked but GitHub already existed
+    // GitHub logins: CASE 1 is hit if GitHub is already linked
+    //                CASE 3 is hit if neither accounts are linked but GitHub already exist
+    //                CASE 3 is hit if LDAP is already linked (because LDAP, i.e. targetUser.identities.length > 1)
     //                CASE 2 (THIS CASE) is hit if GitHub is a new account and it will be the primary account, LDAP will
-    //                be linked to it
-    } else if (data.length === 1) {
+    //                be linked to it as LDAP is not already linked
+    } else if (data.length === 1 && targetUser.identities && targetUser.identities.length <= 1) {
       primaryUser = targetUser;
 
     // CASE 3:
