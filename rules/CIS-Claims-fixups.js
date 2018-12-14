@@ -172,6 +172,29 @@ function (user, context, callback) {
     user.aai = user.aai || [];
     context.idToken[namespace+'AAI'] = user.aai;
 
+    // Original connection method's user_id (useful when the account is a linked account, this lets you know what the actual IdP
+    // was used to login
+    // Default to current user_id
+    var originalConnection_user_id = user.user_id;
+    var targetIdentity;
+    // If we have linked account, check if we have a better match
+    if (user.identities && user.identities.length > 1) {
+      for (var i = 0; i < user.identities.length; i++) {
+        targetIdentity = user.identities[i];
+        // Find the identity which corresponding to the user logging in
+        if ((targetIdentity.connection === context.connection) && (targetIdentity.provider === context.connectionStrategy)) {
+          // If what we find has no `profileData` structure it means the user_id is the same as the one currently
+          // logging in, so we don't need to do anything.
+          // If it is, then we need to reconstruct a user_id from the identity data
+          if (targetIdentity.profileData !== undefined) {
+            originalConnection_user_id = targetIdentity.provider + '|' + targetIdentity.user_id;
+          }
+          break;
+        }
+      }
+    }
+    context.idToken[namespace+'original_connection_user_id'] = originalConnection_user_id;
+
     // Give info about CIS API
     context.idToken[namespace+'README_FIRST'] = 'Please refer to https://github.com/mozilla-iam/person-api in order to query Mozilla IAM CIS user profile data';
     return callback(null, user, context);
