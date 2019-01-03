@@ -44,6 +44,11 @@ class Auth0(Base):
     _fxa_passcode_field_locator = (By.CSS_SELECTOR, '.token-code-row input')
     _fxa_verify_passcode_button_locator = (By.CSS_SELECTOR, '.use-logged-in')
 
+    # fxa staging
+    _email_fxa_locator = (By.CSS_SELECTOR, 'input[type="email"]')
+    _fxa_continue_button_locator = (By.ID, 'submit-btn')
+    _password_fxa_locator = (By.ID, 'password')
+
     @property
     def is_spinner_shown(self):
         return self.is_element_visible(*self._spinner_locator)
@@ -63,7 +68,7 @@ class Auth0(Base):
 
     @property
     def is_authorize_github_button_shown(self):
-        return self.is_element_visible(*self._authorize_github_locator)
+        return self.is_element_enabled(*self._authorize_github_locator)
 
     def wait_for_spinner(self):
         WebDriverWait(self.selenium, self.timeout).until(lambda s: not self.is_spinner_shown)
@@ -147,4 +152,19 @@ class Auth0(Base):
     def enter_fxa_passcode(self, secret):
         passcode = pyotp.TOTP(secret).now()
         self.selenium.find_element(*self._fxa_passcode_field_locator).send_keys(passcode)
+        self.selenium.find_element(*self._fxa_verify_passcode_button_locator).click()
+
+    def login_with_fxa_staging(self, email, password, secret):
+        self.wait_for_element_visible(*self._login_with_firefox_accounts_locator)
+        self.selenium.find_element(*self._login_with_firefox_accounts_locator).click()
+        self.wait_for_element_visible(*self._email_fxa_locator)
+        self.selenium.find_element(*self._email_fxa_locator).send_keys(email)
+        self.selenium.find_element(*self._fxa_continue_button_locator).click()
+        self.wait_for_element_visible(*self._password_fxa_locator)
+        self.selenium.find_element(*self._password_fxa_locator).send_keys(password)
+        self.selenium.find_element(*self._fxa_continue_button_locator).click()
+
+        passcode = pyotp.TOTP(secret).now()
+        self.selenium.find_element(*self._fxa_passcode_field_locator).send_keys(passcode)
+        self.wait_for_element_visible(*self._fxa_passcode_field_locator)
         self.selenium.find_element(*self._fxa_verify_passcode_button_locator).click()

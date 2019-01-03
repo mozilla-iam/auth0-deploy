@@ -11,7 +11,7 @@ phases:
       - apt-get install firefox xvfb -y
       - Xvfb :10 -ac &
       - export DISPLAY=:10
-      - wget https://github.com/mozilla/geckodriver/releases/download/v0.20.0/geckodriver-v0.20.0-linux64.tar.gz
+      - wget https://github.com/mozilla/geckodriver/releases/download/v0.20.0/geckodriver-v0.23.0-linux64.tar.gz
       - tar -xvzf geckodriver-v0.20.0-linux64.tar.gz
       - chmod +x geckodriver
       - cp geckodriver /usr/local/bin/
