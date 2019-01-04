@@ -172,6 +172,39 @@ function (user, context, callback) {
     user.aai = user.aai || [];
     context.idToken[namespace+'AAI'] = user.aai;
 
+/* WARNING  this entire block can be removed when mozillians.org / DinoPark uses it's own verification method for
+ * accounts */
+/* START removable block */
+    var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH', // mozillians.org account verification
+                   't9bMi4eTCPpMp5Y6E1Lu92iVcqU0r1P1', // https://web-mozillians-staging.production.paas.mozilla.community Verification client
+                   'jijaIzcZmFCDRtV74scMb9lI87MtYNTA', // mozillians.org Verification Client
+                ];
+    if (WHITELIST.indexOf(context.clientID) >= 0) {
+      // Original connection method's user_id (useful when the account is a linked account, this lets you know what the actual IdP
+      // was used to login
+      // Default to current user_id
+      var originalConnection_user_id = user.user_id;
+      var targetIdentity;
+      // If we have linked account, check if we have a better match
+      if (user.identities && user.identities.length > 1) {
+        for (var i = 0; i < user.identities.length; i++) {
+          targetIdentity = user.identities[i];
+          // Find the identity which corresponding to the user logging in
+          if ((targetIdentity.connection === context.connection) && (targetIdentity.provider === context.connectionStrategy)) {
+            // If what we find has no `profileData` structure it means the user_id is the same as the one currently
+            // logging in, so we don't need to do anything.
+            // If it is, then we need to reconstruct a user_id from the identity data
+            if (targetIdentity.profileData !== undefined) {
+              originalConnection_user_id = targetIdentity.provider + '|' + targetIdentity.user_id;
+            }
+            break;
+          }
+        }
+      }
+      context.idToken[namespace+'original_connection_user_id'] = originalConnection_user_id;
+    }
+/* END of removable block */
+
     // Give info about CIS API
     context.idToken[namespace+'README_FIRST'] = 'Please refer to https://github.com/mozilla-iam/person-api in order to query Mozilla IAM CIS user profile data';
     return callback(null, user, context);

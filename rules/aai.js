@@ -3,11 +3,17 @@ function (user, context, callback) {
   // Sets the AAI for the user. This is later used by the AccessRules.js rule which also sets the AAL.
 
   user.aai = [];
-  if ((context.connection === 'github') && (user.two_factor_authentication === true)) {
+  // We go through each possible attribute as auth0 will translate these differently in the main profile 
+  // depending on the connection type
+
+  //GitHub attribute
+  if (user.two_factor_authentication && (user.two_factor_authentication === true)) {
     Array.prototype.push.apply(user.aai, ["2FA"]);
-  } else if ((context.connection === 'firefoxaccounts') && (user.fxa_twoFactorAuthentication === true)) {
+  // Firefox Accounts
+  } else if (user.fxa_twoFactorAuthentication && (user.fxa_twoFactorAuthentication === true)) {
     Array.prototype.push.apply(user.aai, ["2FA"]);
-  } else if ((context.connectionStrategy === 'ad') && (context.multifactor || user.multifactor[0] === "duo")) {
+  // LDAP/DuoSecurity
+  } else if (context.multifactor || user.multifactor[0] === "duo") {
     Array.prototype.push.apply(user.aai, ["2FA"]);
   } else if (context.connection === 'google-oauth2') {
     // We set Google to HIGH_ASSURANCE_IDP which is a special indicator, this is what it represents:
