@@ -212,7 +212,7 @@ function (user, context, callback) {
 
     if (!aai_pass) {
       console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - due to " +
-        "Identity Assurance Verification being too low for this RP. Required AAI: "+required_aal+
+        "Identity Assurance Level being too low for this RP. Required AAL: "+required_aal+
         " ("+aai_pass+")");
       return access_denied(null, user, global.postError('aai_failed', context));
     } else {
