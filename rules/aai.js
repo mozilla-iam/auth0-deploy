@@ -7,19 +7,19 @@ function (user, context, callback) {
   // depending on the connection type
 
   //GitHub attribute
-  if (user.two_factor_authentication && (user.two_factor_authentication === true)) {
+  if ((user.two_factor_authentication !== undefined) && (user.two_factor_authentication === true)) {
     Array.prototype.push.apply(user.aai, ["2FA"]);
   // Firefox Accounts
-  } else if (user.fxa_twoFactorAuthentication && (user.fxa_twoFactorAuthentication === true)) {
+  } else if ((user.fxa_twoFactorAuthentication !== undefined) && (user.fxa_twoFactorAuthentication === true)) {
     Array.prototype.push.apply(user.aai, ["2FA"]);
   // LDAP/DuoSecurity
-  } else if (context.multifactor || user.multifactor[0] === "duo") {
+  } else if ((context.multifactor !== undefined) && context.multifactor || user.multifactor[0] === "duo")) {
     Array.prototype.push.apply(user.aai, ["2FA"]);
   } else if (context.connection === 'google-oauth2') {
     // We set Google to HIGH_ASSURANCE_IDP which is a special indicator, this is what it represents:
     // - has fraud detection
     // - will inform users when their account is used or logged through push notifications on their devices
-    // - will actively block detected fraudulous logins even with correct credentials
+    // - will actively block detected fraudulent logins even with correct credentials
     // - will fallback to phone 2FA in most cases (old accounts may still bypass that in some cases)
     // - will fallback to phone 2FA on all recent accounts
     // Note that this is not the same as "2FA" and other indicators, as we simply do not have a technically accurate
