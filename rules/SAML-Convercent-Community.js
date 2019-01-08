@@ -21,7 +21,7 @@ function (user, context, callback) {
   context.samlConfiguration = context.samlConfiguration || {};
 
   context.samlConfiguration.mappings = {
-     "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier":     "myemail",
+     "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier":     "alt_email",
      "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress":       "alt_email",
      "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/email":       "alt_email",
   };
