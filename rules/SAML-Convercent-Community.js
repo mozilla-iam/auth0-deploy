@@ -23,7 +23,7 @@ function (user, context, callback) {
   context.samlConfiguration.mappings = {
      "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier":     "myemail",
      "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress":       "myemail",
-     "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/email":       "myemail",
+     "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/email":       "alt_email",
   };
   context.samlConfiguration.nameIdentifierFormat = "urn:oasis:names:tc:SAML:2.0:nameid-format:email";
 
