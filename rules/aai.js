@@ -13,7 +13,7 @@ function (user, context, callback) {
   } else if ((user.fxa_twoFactorAuthentication !== undefined) && (user.fxa_twoFactorAuthentication === true)) {
     Array.prototype.push.apply(user.aai, ["2FA"]);
   // LDAP/DuoSecurity
-  } else if ((context.multifactor !== undefined) && context.multifactor || user.multifactor[0] === "duo")) {
+  } else if ((context.multifactor !== undefined) && (context.multifactor || user.multifactor[0] === "duo")) {
     Array.prototype.push.apply(user.aai, ["2FA"]);
   } else if (context.connection === 'google-oauth2') {
     // We set Google to HIGH_ASSURANCE_IDP which is a special indicator, this is what it represents:
@@ -28,7 +28,7 @@ function (user, context, callback) {
   } else {
     // Ensure all users have some AAI and AAL attributes, even if its empty
     user.aai = user.aai || [];
-    user.aal = user.aal || [];
+    user.aal = user.aal || "UNKNOWN";
   }
   callback(null, user, context);
 }
