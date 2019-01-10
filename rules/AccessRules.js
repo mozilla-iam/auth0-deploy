@@ -195,17 +195,38 @@ function (user, context, callback) {
     // user.aai = ['2FA'];
     // Thus user should be allowed for this app (it requires MEDIUM, and MEDIUM requires 2FA, and user has 2FA
     // indeed)
-
+    //
     var aai_pass = false;
-    if ((access_file_conf.aai_mapping !== undefined) && (access_file_conf.aai_mapping[required_aal].length === 0)) {
-      // No required indicator in aai_mapping for this app's requested AAIs
-      aai_pass = true;
-    } else {
-      for (var y=0; y<user.aai.length; y++) {
-        var this_aai = user.aai[y];
-        if (access_file_conf.aai_mapping[required_aal].indexOf(this_aai) >= 0) {
-          aai_pass = true;
-          break;
+    if (access_file_conf.aai_mapping !== undefined) {
+      // 1 Set user.aal
+      // maps = [ "LOW", "MEDIUM", ...
+      // aal_nr = position in the maps (aai_mapping[maps[aal_nr=0]] is "LOW" for.ex)
+      // aai_nr = position in the array of AAIs (aai_mapping[maps[aal_nr=0]] returns ["2FA", .., aai_nr=0 would be the
+      // position for "2FA")
+      // Note that the list is ordered so that the highest AAL always wins
+      const maps = Object.keys(access_file_conf.aai_mapping);
+      for (var aal_nr = 0; aal_nr < maps.length; aal_nr++) {
+        for (var aai_nr = 0; aai_nr < access_file_conf.aai_mapping[maps[aal_nr]].length; aai_nr++) {
+          var cur_aai = access_file_conf.aai_mapping[maps[aal_nr]][aai_nr];
+          if (user.aai.indexOf(cur_aai) >= 0) {
+            user.aal = maps[aal_nr];
+            console.log("User AAL set to "+user.aal+" because AAI contains "+user.aai);
+            break;
+          }
+        }
+      }
+      // 2 Check if user.aal is allowed for this RP
+      if (access_file_conf.aai_mapping[required_aal].length === 0) {
+        console.log("No required indicator in aai_mapping for this RP (mapping empty for this AAL), access will be granted");
+        aai_pass = true;
+      } else {
+        for (var y = 0; y < user.aai.length; y++) {
+          var this_aai = user.aai[y];
+          if (access_file_conf.aai_mapping[required_aal].indexOf(this_aai) >= 0) {
+            console.log("User AAL is included in this RP's AAL requirements, access will be granted");
+            aai_pass = true;
+            break;
+          }
         }
       }
     }
@@ -215,10 +236,6 @@ function (user, context, callback) {
         "Identity Assurance Level being too low for this RP. Required AAL: "+required_aal+
         " ("+aai_pass+")");
       return access_denied(null, user, global.postError('aai_failed', context));
-    } else {
-      // Inform RPs of which AAL let the user in
-      var namespace = 'https://sso.mozilla.com/claim/';
-      context.idToken[namespace+"AAL"] = required_aal;
     }
 
     // We matched no rule, access is granted
