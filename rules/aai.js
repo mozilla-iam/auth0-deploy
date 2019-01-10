@@ -6,12 +6,34 @@ function (user, context, callback) {
   // We go through each possible attribute as auth0 will translate these differently in the main profile 
   // depending on the connection type
 
+  function getProfileData(connection) {
+   // Return a single identity by connection name, from the user structure
+   var i = 0;
+   for (i=0; i < user.identities.length; i++) {
+     var cid = user.identities[i];
+     if (cid.connection === connection) {
+       return cid.profileData;
+     }
+   }
+    return undefined;
+  }
+
+  const profileData = getProfileData(context.connection);
+
   //GitHub attribute
-  if ((user.two_factor_authentication !== undefined) && (user.two_factor_authentication === true)) {
-    Array.prototype.push.apply(user.aai, ["2FA"]);
+  if (context.connection === "github") {
+    if ((user.two_factor_authentication !== undefined) && (user.two_factor_authentication === true)) {
+      Array.prototype.push.apply(user.aai, ["2FA"]);
+    } else if ((profileData !== undefined) && (profileData.two_factor_authentication === true)) {
+      Array.prototype.push.apply(user.aai, ["2FA"]);
+    }
   // Firefox Accounts
-  } else if ((user.fxa_twoFactorAuthentication !== undefined) && (user.fxa_twoFactorAuthentication === true)) {
-    Array.prototype.push.apply(user.aai, ["2FA"]);
+  } else if (context.connection === "firefoxaccounts") {
+    if ((user.fxa_twoFactorAuthentication !== undefined) && (user.fxa_twoFactorAuthentication === true)) {
+      Array.prototype.push.apply(user.aai, ["2FA"]);
+    } else if ((profileData !== undefined) && (profileData.fxa_twoFactorAuthentication === true)) {
+      Array.prototype.push.apply(user.aai, ["2FA"]);
+    }
   // LDAP/DuoSecurity
   } else if ((context.multifactor !== undefined) && (context.multifactor || user.multifactor[0] === "duo")) {
     Array.prototype.push.apply(user.aai, ["2FA"]);
