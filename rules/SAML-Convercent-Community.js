@@ -16,7 +16,7 @@ function (user, context, callback) {
   const domain = emailSplit[emailSplit.length - 1].toLowerCase();
   const emailFirstPart = emailSplit[0].toLowerCase().split(altString)[0];
   
-  user.alt_email = emailFirstPart+altString+'@'+domain
+  user.alt_email = emailFirstPart+altString+'@'+domain;
 
   context.samlConfiguration = context.samlConfiguration || {};
 
