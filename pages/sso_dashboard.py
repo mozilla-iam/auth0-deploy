@@ -4,7 +4,6 @@ from selenium.webdriver.support.wait import WebDriverWait
 from pages.auth0 import Auth0
 from pages.base import Base
 from pages.discourse import Discourse
-from pages.two_factor_authentication_page import TwoFactorAuthenticationPage
 
 
 class SsoDashboard(Base):
@@ -23,19 +22,17 @@ class SsoDashboard(Base):
         auth0.click_github_sign_in()
         auth0.enter_github_passcode(secret)
 
-    def login_with_ldap(self, email_address, password):
+    def login_with_ldap(self, email_address, password, secret):
         auth0 = Auth0(self.base_url, self.selenium)
         auth0.enter_email(email_address)
         auth0.click_email_enter()
         auth0.enter_ldap_password(password)
         auth0.click_enter_button()
-        return TwoFactorAuthenticationPage(self.base_url, self.selenium)
+        auth0.enter_ldap_passcode(secret)
 
-    def click_discourse(self, message):
+    def click_discourse(self):
         initial_windows = len(self.selenium.window_handles)
         self.selenium.find_element(*self._discourse_app_locator).click()
         WebDriverWait(self.selenium, self.timeout).until(lambda s: len(self.selenium.window_handles) == initial_windows + 1)
         self.selenium.switch_to.window(self.selenium.window_handles[1])
-        auth = Auth0(self.base_url, self.selenium)
-        auth.wait_for_message(message)
         return Discourse(self.base_url, self.selenium)

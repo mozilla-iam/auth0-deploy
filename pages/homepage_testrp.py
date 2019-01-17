@@ -2,8 +2,7 @@ from selenium.webdriver.common.by import By
 
 from pages.auth0 import Auth0
 from pages.base import Base
-from pages.two_factor_authentication_page import TwoFactorAuthenticationPage
-from tests import conftest
+from tests import restmail
 
 
 class HomepageTestRp(Base):
@@ -34,20 +33,20 @@ class HomepageTestRp(Base):
         self.wait_for_page_loaded()
         self.selenium.find_element(*self._logout_button_locator).click()
 
-    def login_with_ldap(self, email_address, password):
+    def login_with_ldap(self, email_address, password, secret):
         auth0 = Auth0(self.base_url, self.selenium)
         auth0.enter_email(email_address)
         auth0.click_email_enter()
         auth0.enter_ldap_password(password)
         auth0.click_enter_button()
-        return TwoFactorAuthenticationPage(self.base_url, self.selenium)
+        auth0.enter_ldap_passcode(secret)
 
     def login_passwordless(self, email_address):
         auth0 = Auth0(self.base_url, self.selenium)
         auth0.enter_email(email_address)
         auth0.click_email_enter()
         auth0.click_send_email()
-        login_link = conftest.login_link(email_address)
+        login_link = restmail.get_mail(email_address)
         self.selenium.get(login_link)
 
     def login_with_github(self, username, password, secret):
