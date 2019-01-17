@@ -22,6 +22,7 @@ class Auth0(Base):
     _enter_passcode_button = (By.CSS_SELECTOR, '.passcode-label .positive.auth-button')
     _duo_iframe_locator = (By.ID, 'duo_iframe')
     _successfull_passcode_message_locator = (By.CSS_SELECTOR, '#messages-view .message-content')
+    _login_form_locator = (By.ID, 'login-form')
 
     # Github locators
     _login_with_github_button_locator = (By.CSS_SELECTOR, 'button[data-handler="authorise-github"]')
@@ -102,7 +103,7 @@ class Auth0(Base):
 
     def enter_ldap_passcode(self, secret):
         self.selenium.switch_to_frame('duo_iframe')
-        time.sleep(1)
+        self.wait_for_element_visible(*self._login_form_locator)
         self.wait_for_element_visible(*self._enter_passcode_button)
         self.selenium.find_element(*self._enter_passcode_button).click()
         passcode = pyotp.TOTP(secret).now()
