@@ -1,4 +1,5 @@
 import pyotp
+import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -18,6 +19,9 @@ class Auth0(Base):
     _loading_spinner_locator = (By.CSS_SELECTOR, 'form[lock-state="loading"]')
     _spinner_locator = (By.CSS_SELECTOR, '.loading__spinner')
     _autologin_message_locator = (By.ID, 'loading__status')
+    _enter_passcode_button = (By.CSS_SELECTOR, '.passcode-label .positive.auth-button')
+    _duo_iframe_locator = (By.ID, 'duo_iframe')
+    _successfull_passcode_message_locator = (By.CSS_SELECTOR, '#messages-view .message-content')
 
     # Github locators
     _login_with_github_button_locator = (By.CSS_SELECTOR, 'button[data-handler="authorise-github"]')
@@ -95,6 +99,16 @@ class Auth0(Base):
 
     def click_enter_button(self):
         self.selenium.find_element(*self._enter_button_locator).click()
+
+    def enter_ldap_passcode(self, secret):
+        self.selenium.switch_to_frame('duo_iframe')
+        time.sleep(1)
+        self.wait_for_element_visible(*self._enter_passcode_button)
+        self.selenium.find_element(*self._enter_passcode_button).click()
+        passcode = pyotp.TOTP(secret).now()
+        self.selenium.find_element(*self._passcode_field_locator).send_keys(passcode)
+        self.selenium.find_element(*self._enter_passcode_button).click()
+        self.selenium.switch_to_default_content()
 
     def click_login_with_github(self):
         self.wait_for_element_visible(*self._login_with_github_button_locator)
