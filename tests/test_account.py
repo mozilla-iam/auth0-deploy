@@ -30,7 +30,6 @@ class TestAccount:
         test_rp.click_logout()
         assert test_rp.is_sign_in_button_displayed
 
-    @pytest.mark.nondestructive
     def test_login_with_firefox_accounts(self, base_url, selenium, firefox_accounts_user):
         test_rp = HomepageTestRp(base_url, selenium)
         test_rp.login_with_firefox_accounts(firefox_accounts_user['email'], firefox_accounts_user['password'],
