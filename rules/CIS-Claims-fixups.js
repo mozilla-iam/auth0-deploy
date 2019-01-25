@@ -100,7 +100,7 @@ function (user, context, callback) {
 
         // Add non-LDAP groups to new_groups
         var new_groups = [];
-        
+
         for (index = 0; index < ugroups.length; ++index) {
           var cur_grp = ugroups[index];
           if (cur_grp === null) {
@@ -114,7 +114,7 @@ function (user, context, callback) {
             new_groups.push(cur_grp);
           }
         }
-        
+
         // Re-add groups that are in LDAP (ie udata.groups)
         for (index = 0; index < udata.groups.length; ++index) {
             new_groups.push(udata.groups[index]);
@@ -140,7 +140,7 @@ function (user, context, callback) {
       // Save app_metadata changes
       auth0.users.updateAppMetadata(user.user_id, user.app_metadata)
         .catch(function(err){
-          console.log('CIS: Error updating app_metadata (groups) for user '+user.user_id+': '+err);     
+          console.log('CIS: Error updating app_metadata (groups) for user '+user.user_id+': '+err);
       });
     }
     // XXX NOTE WARNING XXX
@@ -168,9 +168,11 @@ function (user, context, callback) {
       }
     });
 
-    // AAI value
+    // AAI & AAL values
     user.aai = user.aai || [];
     context.idToken[namespace+'AAI'] = user.aai;
+    user.aal = user.aal || "UNKNOWN";
+    context.idToken[namespace+'AAL'] = user.aal;
 
 /* WARNING  this entire block can be removed when mozillians.org / DinoPark uses it's own verification method for
  * accounts */
