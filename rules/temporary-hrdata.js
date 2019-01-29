@@ -11,6 +11,8 @@ function (user, context, callback) {
     'T2tB7Ss8It7PKrw3ijazoXu9PgZniLPD', //https://web-mozillians-staging.production.paas.mozilla.community (dev auth0)
     'FQw134gwheaK3KkW6fQf0JPV6P7h2yo1', //https://web-mozillians-staging.production.paas.mozilla.community (prod auth0)
     'HdfEiM1SZibaQnOYTxLoMdxSh4a6ZKD3', //mozillians.org
+    'dcdQ6M9yaZfyy1fPLiXIzORHFHEiwjNc', //Staples - Gear Store - Stage
+    'wsvwqDk1Z2zYa6AU4mMT5Dq4H40lfvF2', //Staples - Gear Store - Production
   ];
 
   if (ALLOWED_CLIENTIDS.indexOf(context.clientID) >= 0) {
