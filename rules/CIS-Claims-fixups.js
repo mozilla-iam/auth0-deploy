@@ -94,7 +94,8 @@ function (user, context, callback) {
       if (!err) {
         var udata = JSON.parse(body);
         // If user has no LDAP groups, return immediately
-        if (udata.groups === undefined) {
+        udata.groups = udata.groups || [];
+        if (udata.groups.length === 0) {
           return cb();
         }
 
