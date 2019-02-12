@@ -54,30 +54,43 @@ function (user, context, callback) {
       return u.email_verified && (u.user_id !== user.user_id);
     });
 
-    if (data.length === 0) {
-      // Already linked or no matching email found, continue with login
-      return callback(null, user, context);
-    }
 
     // @primaryUser JSON The user profile that all other user profiles will be linked to as children
     // @targetUser JSON The iterator that we use as we iterate over the search results, the to-be primaryUser
     //
     // Default to ourselves as the primaryUser and the targetUser as the first search result from Auth0 DB
     var primaryUser = user;
-    var targetUser = data[0];
+    var targetUser = data.length === 0 ? null : data[0];
+
+    // CASE 0:
+    // If the only account in auth0 database is the one they just logged in with (data.length === 0)
+    // the user is logging in with either a linked or unlinked account and there are no other accounts
+    // continue with login
+    if (data.length === 0) {
+      return callback(null, user, context);
 
     // CASE 1:
-    // If we have a single account in auth0 database, AND we are logging in with a linked account, use the linked
-    // account as primaryUser, always (and thus just bail out)
+    // If user has a single account in auth0 database other than the one they just logged in with (data.length === 1),
+    // AND they are logging in with an account which is already linked to other accounts (user.identities.length > 1),
+    // set primaryUser to the account that the user just logged in with (primaryUser = user)
     // Example test case: LDAP, FxA, GitHub account with kang@insecure.ws `user.email` exist
     // FxA logins: CASE 3 is hit (LDAP primary, Fxa linked)
     // FxA logins again: No change, due to this case
     // Eventually GitHub login and hits CASE 2
-    if (data.length === 1 && user.identities && user.identities.length > 1) {
+    } else if (data.length === 1 && user.identities && user.identities.length > 1) {
       primaryUser = user;
 
+    // ERROR CASE
+    // user.identities.length should never be 0
+    // it should always contain at least the identity of the profile that it lives within
+    } else if (data.length === 1 && user.identities && user.identities.length === 0) {
+      return callback(new Error(body));
+
     // CASE 2:
-    // If we only find a single account in the Auth0 database, we do not apply ratcheting logic as this means
+    // If user has a single account in auth0 database other than the one they just logged in with (data.length === 1),
+    // AND they are logging in with an account which is linked to one other account (user.identities.length === 1),
+    // AND that one other account has one or more additional accounts linked to it (targetUser.identities.length >= 1)
+    // we do not apply ratcheting logic as this means
     // 1) `user` is a new user not in the database
     // 2) `targetUser` is already linked to something, or is a single unlinked account and thus should be
     // `primaryUser` as well.
@@ -89,16 +102,18 @@ function (user, context, callback) {
     //                CASE 3 is hit if LDAP is already linked (because LDAP, i.e. targetUser.identities.length > 1)
     //                CASE 2 (THIS CASE) is hit if GitHub is a new account and it will be the primary account, LDAP will
     //                be linked to it as LDAP is not already linked
-    } else if (data.length === 1 && (targetUser.identities && targetUser.identities.length > 1)) {
+    } else if (data.length === 1 && user.identities && user.identities.length === 1
+               && targetUser.identities && targetUser.identities.length >= 1) {
       primaryUser = targetUser;
 
     // CASE 3:
+    // If the user has 2+ accounts in auth0 database other than the one they just logged in with, (data.length > 1)
     // This is the "linking racheting" loop/logic which emulates the deprecated login racheting, while linking
     // Example test case: FxA, GitHub, and Google accounts exist all with kang@insecure.ws `user.email`
     // Google logins: this loop finds all 3 accounts and selects FxA as primary due to ratcheting
     //                FxA will be primary and Google will be linked to it. Nothing happens to GitHub, until the user
     //                logins again and hits CASE 1
-    } else {
+    } else if (data.length > 1) {
       for (var i = 0, len = data.length; i < len; i++) {
         targetUser = data[i];
 
@@ -110,6 +125,15 @@ function (user, context, callback) {
           primaryUser = targetUser;
         }
       }
+
+    // ERROR CASE
+    // If user has a single account in auth0 database other than the one they just logged in with (data.length === 1),
+    // AND they are logging in with an account which is linked to one other account (user.identities.length === 1),
+    // AND that one other account has an empty identities list (targetUser.identities.length === 0)
+    // Error out because targetuser.identities.length should never be 0, it should always contain at least the identity
+    // of the profile that it lives within
+    } else {
+      return callback(new Error(body));
     } // End of CASEs
 
     if (primaryUser.user_id === user.user_id) {
