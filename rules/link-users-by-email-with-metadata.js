@@ -60,7 +60,7 @@ function (user, context, callback) {
     //
     // Default to ourselves as the primaryUser and the targetUser as the first search result from Auth0 DB
     var primaryUser = user;
-    var targetUser = data.length === 0 ? null : data[0];
+    var targetUser = data[0] || undefined ;
 
     // CASE 0:
     // If the only account in auth0 database is the one they just logged in with (data.length === 0)
@@ -77,13 +77,13 @@ function (user, context, callback) {
     // FxA logins: CASE 3 is hit (LDAP primary, Fxa linked)
     // FxA logins again: No change, due to this case
     // Eventually GitHub login and hits CASE 2
-    } else if (data.length === 1 && user.identities && user.identities.length > 1) {
+    } else if (data.length === 1 && (user.identities && user.identities.length > 1)) {
       primaryUser = user;
 
     // ERROR CASE
     // user.identities.length should never be 0
     // it should always contain at least the identity of the profile that it lives within
-    } else if (data.length === 1 && user.identities && user.identities.length === 0) {
+    } else if (data.length === 1 && (user.identities && user.identities.length === 0)) {
       return callback(new Error(body));
 
     // CASE 2:
@@ -102,7 +102,7 @@ function (user, context, callback) {
     //                CASE 3 is hit if LDAP is already linked (because LDAP, i.e. targetUser.identities.length > 1)
     //                CASE 2 (THIS CASE) is hit if GitHub is a new account and it will be the primary account, LDAP will
     //                be linked to it as LDAP is not already linked
-    } else if (data.length === 1 && user.identities && user.identities.length === 1
+    } else if (data.length === 1 && (user.identities && user.identities.length === 1)
                && targetUser.identities && targetUser.identities.length >= 1) {
       primaryUser = targetUser;
 
