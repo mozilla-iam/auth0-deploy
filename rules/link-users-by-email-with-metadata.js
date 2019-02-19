@@ -111,6 +111,7 @@ function (user, context, callback) {
       //                CASE 2 (THIS CASE) is hit if GitHub is a new account and it will be the primary account, LDAP will
       //                be linked to it as LDAP is not already linked
       } else if ((user.identities && user.identities.length === 1) && (targetUser.identities && targetUser.identities.length >= 1)) {
+        console.log("Account linking case 2 reached for "+user.user_id);
         primaryUser = targetUser;
       }
     } // end data.length === 1
