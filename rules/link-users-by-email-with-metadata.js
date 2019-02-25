@@ -52,12 +52,19 @@ function (user, context, callback) {
     // Ignore non-verified users and current user, if present
     // The user_ratchet_link_delay_sec dictate if we consider this user to be present pre or post-ratcheting
     data = data.filter(function (u) {
-      var ret = u.email_verified;
-      var creation_time_distance = Date.now() - Date.parse(u.created_at);
-      if (creation_time_distance > user_ratchet_link_delay_sec) {
-        ret = ret &&  (u.user_id !== user.user_id);
+      if (!u.email_verified) {
+        return false;
       }
-      return ret;
+
+      if (u.user_id === user.user_id) {
+        // Convert the Date() objects to seconds (instead of milliseconds)
+        var creation_time_distance = (Date.now()/1000) - (Date.parse(u.created_at)/1000);
+        if (creation_time_distance < user_ratchet_link_delay_sec) {
+          console.log(`User account was just created (creation_time_distance ${creation_time_distance} < user_ratchet_link_delay_sec ${user_ratchet_link_delay_sec}) and is considered new: ${u.user_id}`);
+          return false;
+        }
+      }
+      return true;
     });
 
 
@@ -74,7 +81,7 @@ function (user, context, callback) {
       return callback(null, user, context);
     }
 
-    // We have a single match in the auth0 database
+    // We have a single match in the auth0 database (after the filtering function ran)
     if (data.length === 1) {
       // ERROR CASE (should never be reached)
       // user.identities.length should never be 0
@@ -111,6 +118,7 @@ function (user, context, callback) {
       //                CASE 2 (THIS CASE) is hit if GitHub is a new account and it will be the primary account, LDAP will
       //                be linked to it as LDAP is not already linked
       } else if ((user.identities && user.identities.length === 1) && (targetUser.identities && targetUser.identities.length >= 1)) {
+        console.log("Account linking case 2 reached for "+user.user_id);
         primaryUser = targetUser;
       }
     } // end data.length === 1
