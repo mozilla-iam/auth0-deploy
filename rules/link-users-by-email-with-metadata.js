@@ -57,7 +57,8 @@ function (user, context, callback) {
       }
 
       if (u.user_id === user.user_id) {
-        var creation_time_distance = Date.now() - Date.parse(u.created_at);
+        // Convert the Date() objects to seconds (instead of milliseconds)
+        var creation_time_distance = (Date.now()/1000) - (Date.parse(u.created_at)/1000);
         if (creation_time_distance < user_ratchet_link_delay_sec) {
           console.log(`User account was just created (creation_time_distance ${creation_time_distance} < user_ratchet_link_delay_sec ${user_ratchet_link_delay_sec}) and is considered new: ${u.user_id}`);
           return false;
