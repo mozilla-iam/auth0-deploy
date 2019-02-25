@@ -27,7 +27,8 @@ function (user, context, callback) {
                       'firefoxaccounts': 1,
                       'github': 2,
                       'google-oauth2': 3,
-                      'email': 4
+                      'email': 4,
+                      'unknown': 5 // Always lowest
                      };
   // How old an account should be to be considered "new" to the system for linking, in seconds
   const user_ratchet_link_delay_sec = 300;
@@ -59,8 +60,10 @@ function (user, context, callback) {
       if (u.user_id === user.user_id) {
         // Convert the Date() objects to seconds (instead of milliseconds)
         var creation_time_distance = (Date.now()/1000) - (Date.parse(u.created_at)/1000);
+        user.user_is_new = false;
         if (creation_time_distance < user_ratchet_link_delay_sec) {
           console.log(`User account was just created (creation_time_distance ${creation_time_distance} < user_ratchet_link_delay_sec ${user_ratchet_link_delay_sec}) and is considered new: ${u.user_id}`);
+          user.user_is_new = true;
           return false;
         }
       }
@@ -137,6 +140,12 @@ function (user, context, callback) {
 
         var targetConnection = targetUser.identities[0].connection;
         var primaryConnection = primaryUser.identities[0].connection;
+        // If we have a new user, its connection type should not be factored in the choice, and thus is set to unknown
+        // instead
+        if (primaryUser.user_is_new !== undefined && primaryUser.user_is_new === true) {
+          primaryConnection = 'unknown';
+        }
+        console.log(`Case 3: comparing targetConnection: ${targetConnection} (user_id: ${targetUser.user_id}) with primaryConnection: ${primaryConnection} (user_id: ${primaryUser.user_id})`);
 
         if (matchOrder[targetConnection] < matchOrder[primaryConnection]) {
           console.log("Found user_id that should be primary profile used for linking, according to ratcheting logic: " + targetUser.user_id);
