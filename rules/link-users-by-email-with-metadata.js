@@ -81,7 +81,7 @@ function (user, context, callback) {
       return callback(null, user, context);
     }
 
-    // We have a single match in the auth0 database
+    // We have a single match in the auth0 database (after the filtering function ran)
     if (data.length === 1) {
       // ERROR CASE (should never be reached)
       // user.identities.length should never be 0
