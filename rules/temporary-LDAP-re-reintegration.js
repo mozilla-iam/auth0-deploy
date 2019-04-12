@@ -12,6 +12,7 @@ function (user, context, callback) {
   // Just for safety
   user.app_metadata = user.app_metadata || {};
   user.app_metadata.groups = user.app_metadata.groups || [];
+  user.identities = user.identities || [];
   
   // Retrieve LDAP groups from the API since the rule does not have direct access
   // as auth0 will remap user.app_metadata.groups to user.groups in the rule context
@@ -41,9 +42,25 @@ function (user, context, callback) {
     if (theuser.length !== 0) {
       groups = theuser[0].groups || [];
     }
+    // With account linking its possible that LDAP is not the main account on contributor LDAP accounts
+    var profile;
+    for (var i = 0, len = user.identities.length;i<len;i++) {
+      profile = user.identities[i];
+      if ('profileData' in profile) {
+       if ('groups' in profile.profileData) {
+         // Re-integrate LDAP
+         console.log("reintegrating additional profile groups for "+user.user_id);
+         Array.prototype.push.apply(groups, profile.profileData.groups);
+       }
+      }
+    }
+
     Array.prototype.push.apply(groups, ['everyone']);
     Array.prototype.push.apply(groups, non_ldap_groups);
+
+    // save groups everywhere
     user.app_metadata.groups = groups;
+    user.groups = groups;
     auth0.users.updateAppMetadata(user.user_id, user.app_metadata)
        .then(function(){
          console.log("reintegration complete for " + user.user_id);
