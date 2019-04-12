@@ -29,9 +29,11 @@ function (user, context, callback) {
     // Bypass if we have a cached version present already
     // Cache is very short lived in webtask, it just means we hit a "hot" task which nodejs process hasn't yet been
     // terminated. Generally this means we hit the same task within 60s.
-    if (global.access_rules) {
-      return cb(global.access_rules, access_file_conf);
-    }
+
+    // XXX cache disabled
+    //if (global.access_rules) {
+    //  return cb(global.access_rules, access_file_conf);
+    //}
 
     var options = { method: 'GET', url: access_file_conf.endpoint };
     var decoded;
