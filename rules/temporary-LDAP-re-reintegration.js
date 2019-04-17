@@ -58,9 +58,7 @@ function (user, context, callback) {
     Array.prototype.push.apply(groups, ['everyone']);
     Array.prototype.push.apply(groups, non_ldap_groups);
 
-    // save groups everywhere
     user.app_metadata.groups = groups;
-    user.groups = groups;
     auth0.users.updateAppMetadata(user.user_id, user.app_metadata)
        .then(function(){
          console.log("reintegration complete for " + user.user_id);
