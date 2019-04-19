@@ -152,7 +152,8 @@ function (user, context, callback) {
 
 
     // Reduce profile size further
-    user.app_metadata = undefined;
+    // Note: do not wipe user.app_metadata as auth0 now re-overlays it in memory
+//    user.app_metadata = undefined;
     user.email_aliases = undefined;
     user.dn = undefined;
     user.organizationUnits = undefined;
