@@ -13,6 +13,7 @@ function (user, context, callback) {
     'HdfEiM1SZibaQnOYTxLoMdxSh4a6ZKD3', //mozillians.org
     'dcdQ6M9yaZfyy1fPLiXIzORHFHEiwjNc', //Staples - Gear Store - Stage
     'wsvwqDk1Z2zYa6AU4mMT5Dq4H40lfvF2', //Staples - Gear Store - Production
+    'TnqNECyCfoQYd1X7c4xwMF4PMsEfyWPj', //mozilla.zoom.us
   ];
 
   if (ALLOWED_CLIENTIDS.indexOf(context.clientID) >= 0) {
