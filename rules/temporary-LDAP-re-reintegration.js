@@ -8,7 +8,7 @@ function (user, context, callback) {
   
   // With account linking its possible that LDAP is not the main account on contributor LDAP accounts
   var profile;
-  var groups;
+  var groups = [];
   for (var i = 0, len = user.identities.length;i<len;i++) {
     profile = user.identities[i];
     if ('profileData' in profile) {
@@ -33,7 +33,6 @@ function (user, context, callback) {
   auth0.users.updateAppMetadata(user.user_id, user.app_metadata)
      .then(function(){
        console.log("reintegration complete for " + user.user_id);
-       console.log("groups: " + user.groups);
        return callback(null, user, context);
      })
      .catch(function(err){
