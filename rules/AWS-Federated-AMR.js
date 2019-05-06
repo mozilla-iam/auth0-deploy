@@ -5,7 +5,8 @@ function (user, context, callback) {
   ];
   if (WHITELIST.indexOf(context.clientID) >= 0) {
     const token = '&quot;';
-    var filtered = [];
+    var filtered = "";
+    var tmp = "";
     console.log("Enriching id_token with amr for AWS Federated CLI");
 
     user.groups = user.groups || [];
@@ -15,14 +16,14 @@ function (user, context, callback) {
     // and does not know how to parse the list
     // See also
     // https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_condition_operators.html#Conditions_String
+    // String will look like:
+    // 'amr': ''groupA""groupB""groupC"'
     Array.prototype.forEach.call(user.groups, function(value) {
-      Array.prototype.push.apply(filtered, [value.replace('"', token)]);
+      tmp = value.replace('"', token);
+      filtered += '"'+value.replace('"', token)+'"';
     });
 
-    // String will look like:
-    // 'amr': 'groupA"groupB"groupC"'
-    var tmp = user.groups.join('"');
-    context.idToken['amr'] = tmp;
+    context.idToken['amr'] = filtered;
   }
   return callback(null, user, context);
 }
