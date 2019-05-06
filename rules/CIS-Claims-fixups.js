@@ -1,10 +1,10 @@
 function (user, context, callback) {
   var namespace = 'https://sso.mozilla.com/claim/';
   var whitelist = ['']; // claim whitelist
-  
+
   // If you're not OIDC Conformant, stop right there as this INCREASES the profile size
   // significantly! The metadata is set by us, manually.
-  
+
   if (!context.clientMetadata || !context.clientMetadata.oidc_conformant || context.clientMetadata.oidc_conformant !== 'true') {
     console.log('Client '+context.clientID+' is not OIDC conformant yet, please fix!');
     // Bare minimum conversion to help migrating clients to OIDC conformant
@@ -12,8 +12,14 @@ function (user, context, callback) {
     //context.idToken[namespace+'groups'] = user.groups;
     return callback(null, user, context);
   }
-  
-  
+
+
+  // If the only scope requested is openid, do not overload with custom claims
+  if (context.request.query.scope === "openid") {
+    console.log('Client '+context.clientID+' only requested scope:openid, not adding custom claims');
+    return callback(null, user, context);
+  }
+
   // CIS is our only functionality that can set app_metadata
   // Auth0 auto-integrate user.app_metadata.* into user.*
   // This rule cleans up the left overs for conciseness, clarity and size
@@ -22,14 +28,14 @@ function (user, context, callback) {
   // settings)
   // Additional integration into user.app_metadata itself is at:
   // https://github.com/mozilla-iam/cis_functions/tree/master/functions/idvtoauth0
-  
+
 
   // Fixup claims to be namespaced, for compat
   // Auth0 in the "OIDC-Conformant" mode will only allow these claims. That mode
   // enforces more than the OIDC spec in at least one regard:
   // Auth0 forbids the use of optional claims UNLESS these are namespaced by a URL.
   // See also https://auth0.com/docs/api-auth/tutorials/adoption/scope-custom-claims
-  
+
   // These claims can be used directly and/or are preserved if integrated by Auth0
   // See also: https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
   var std_oidc_claims = [
@@ -72,11 +78,11 @@ function (user, context, callback) {
     //"clientID"
     //"created_at"
   ];
-  
+
   // XXX This code is no longer required once we get an LDAP identity driver
   // It reintegrates LDAP groups into the user's app_metadata/profile
   if (user.app_metadata !== undefined && user.app_metadata.length > 0) {
-    
+
     // Force re-integrate LDAP groups until we have a LDAP CIS publisher
     // See https://github.com/mozilla-iam/cis_functions/blob/master/functions/idvtoauth0/main.py#L87
     // which this very code below supersedes as idvauth0 code only gets triggered if a profile is being actively published
