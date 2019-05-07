@@ -34,14 +34,16 @@ function (user, context, callback) {
     request(options, function (error, response, body) {
       if (error) throw new Error(error);
       if (response.statusCode !== 200) {
-        console.log('Could not AWS amr mappings URL: '+response.statusCode);
+        console.log('Could not fetch AWS amr mappings URL: '+response.statusCode);
       } else {
         aws_groups = Object.keys(JSON.parse(body));
         user.groups = user.groups || [];
-        context.idToken.amr = user.groups).filter(function(n) { return aws_groups.indexOf(n)  > -1 });
+        context.idToken.amr = user.groups.filter(function(n) { return aws_groups.indexOf(n)  > -1 ;});
+        console.log("Returning idToken with idToken.amr size == "+context.idToken.amr.length+" (should be ~< 26 and idToken < 2048) for user_id "+user.user_id);
         return callback(null, user, context);
       }
     });
+  } else {
+    return callback(null, user, context);
   }
-  return callback(null, user, context);
 }
