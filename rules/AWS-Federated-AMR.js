@@ -39,6 +39,12 @@ function (user, context, callback) {
         aws_groups = Object.keys(JSON.parse(body));
         user.groups = user.groups || [];
         context.idToken.amr = user.groups.filter(function(n) { return aws_groups.indexOf(n)  > -1 ;});
+
+        // If Duo will be called, Auth0 will add an `amr` claim in list slot 0 and overwrite our entry, so we need to
+        // care for this. Note that sometimes it'll get replaced, sometimes not. This is always replaced by Duo is
+        // triggered by Auth0 and replaced by "mfa" but could be any valid amr value.
+        context.idToken.amr.splice(0, 0, "");
+
         console.log("Returning idToken with idToken.amr size == "+context.idToken.amr.length+" (should be ~< 26 and idToken < 2048) for user_id "+user.user_id);
         return callback(null, user, context);
       }
