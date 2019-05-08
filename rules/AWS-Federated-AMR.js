@@ -39,6 +39,18 @@ function (user, context, callback) {
         aws_groups = Object.keys(JSON.parse(body));
         user.groups = user.groups || [];
         context.idToken.amr = user.groups.filter(function(n) { return aws_groups.indexOf(n)  > -1 ;});
+
+        // If Auth0 is going to send the user to Duo, Auth0 will modify the `amr` claim. Auth0 will specifically
+        // overwrite the first element in the `amr` list (slot 0) with the string `mfa`. Anything put in slot 0
+        // of the list by this rule may be overwritten by this `mfa` value. In cases where the user already has a
+        // valid session with Duo, Auth0 will not overwrite slot 0 of the `amr` claim. As a result, this rule adds
+        // a single element at the beginning of the `amr` claim list, an empty string. This slot 0 empty string
+        // will be overwritten by the string `mfa` when users log into Duo and will be left in place when users have
+        // a valid Duo session already. In the future it's possible that Auth0 will either add a different valid
+        // `amr` value (other than `mfa`) or possibly additional `amr` values which could overwrite additional
+        // elements in the `amr` claim list. This rule does not account for these possible future issues.
+        context.idToken.amr.splice(0, 0, "");
+
         console.log("Returning idToken with idToken.amr size == "+context.idToken.amr.length+" (should be ~< 26 and idToken < 2048) for user_id "+user.user_id);
         return callback(null, user, context);
       }
