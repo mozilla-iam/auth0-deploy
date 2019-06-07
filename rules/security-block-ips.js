@@ -14,6 +14,7 @@ function (user, context, callback) {
         console.log("WARNING: Refusing login because IP address RANGE is blacklisted: "+context.request.ip);
         return callback(new UnauthorizedError('Access denied.'));
       }
+    }
   }
   callback(null, user, context);
 }
