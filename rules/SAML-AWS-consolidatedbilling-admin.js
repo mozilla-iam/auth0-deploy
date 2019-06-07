@@ -18,7 +18,7 @@ function (user, context, callback) {
         return user.groups.indexOf(group) >= 0;
     });
     if (groupHasAccess) {
-      user.awsRole = 'arn:aws:iam::329567179436:role/sso/sso_admin,arn:aws:iam::329567179436:saml-provider/sso_readonly';
+      user.awsRole = 'arn:aws:iam::329567179436:role/sso/sso_admin,arn:aws:iam::329567179436:saml-provider/sso_admin';
       user.awsRoleSession = user.email;
       context.samlConfiguration.mappings = {
         'https://aws.amazon.com/SAML/Attributes/Role': 'awsRole',
