@@ -31,6 +31,14 @@ How do I know which nodejs modules are available to me?
 At this time Auth0 runs nodejs8. The module list that is cached inside webtasks is listed here:
 https://auth0-extensions.github.io/canirequire/#rsa
 
+### Style
+
+The primary goal is to follow the style of the [Auth0 example rules](https://github.com/auth0/rules/tree/master/src/rules).
+This appears to follow the [Google JavaScript Style Guide](https://google.github.io/styleguide/jsguide.html)
+in some ways as there are trailing semi-colon characters. In other ways the 
+Auth0 rules do not follow the Google style as some contain [`var` declarations](https://google.github.io/styleguide/jsguide.html#features-use-const-and-let)
+Try to follow the Google style in the Mozilla rules in this repo.
+
 ### Development cycle
 
 This is the cycle today. In the future we hopefully add CI driven tests. 
