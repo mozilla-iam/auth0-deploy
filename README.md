@@ -67,3 +67,32 @@ This cycle could be improved.
 12. During change window, merge PR. This may trigger CI to deploy to prod, or
     if CI isn't yet enabled in prod, manually deploy to prod
 13. Test in prod to make sure everything works and rollback if it doesn't.  
+
+## Known Issues
+
+### Auth0 Rule Web UI jshint configuration
+
+The Auth0 web UI where you can view and modify rules, for example at
+https://manage-dev.mozilla.auth0.com/dashboard/pi/auth-dev/rules
+has a jshint built in which isn't aware that Auth0 rules are run under
+Node version `8.11.4` and as a result shows errors for things like
+`require` and `let`. To work around this add this to the top of your rule
+
+```
+/*jshint esversion: 6 */
+```
+
+### Auth0 Rule Web UI save button buggy
+
+The Auth0 web UI where you can view and modify rules, for example at
+https://manage-dev.mozilla.auth0.com/dashboard/pi/auth-dev/rules
+when you click the `Save` button, a green banner saying
+`The rule script has been saved` shows up. The script however hasn't
+been saved and if you refresh the page you'll see your original content
+still there.
+
+To workaround this
+* click the `Save` button
+* get the `The rule script has been saved` message
+* click the `Save` button a second time which is still blue
+* The `Save` button turns grey and your content is saved
