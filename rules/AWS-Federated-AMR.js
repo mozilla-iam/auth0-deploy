@@ -1,11 +1,23 @@
+/*jshint esversion: 6 */
+
 function (user, context, callback) {
-  var WHITELIST = ['7PQFR1tyqr6TIqdHcgbRcYcbmbgYflVE', // ldap-pwless.testrp.security.allizom.org
-                   'xRFzU2bj7Lrbo3875aXwyxIArdkq1AOT', // Federated AWS CLI auth0-dev
-                   'N7lULzWtfVUDGymwDs0yDEq6ZcwmFazj', // Federated AWS CLI auth0-prod
+  const WHITELIST = [
+    '7PQFR1tyqr6TIqdHcgbRcYcbmbgYflVE', // ldap-pwless.testrp.security.allizom.org
+    'xRFzU2bj7Lrbo3875aXwyxIArdkq1AOT', // Federated AWS CLI auth0-dev
+    'N7lULzWtfVUDGymwDs0yDEq6ZcwmFazj', // Federated AWS CLI auth0-prod
   ];
   if (WHITELIST.indexOf(context.clientID) >= 0) {
-    const request = require('request');
-    var aws_groups;
+    const S3_BUCKET_NAME = configuration.group_role_map_s3_bucket;
+    const S3_FILE_NAME = "access-group-iam-role-map.json";
+    const ACCESS_KEY_ID = configuration.group_role_map_aws_access_key_id;
+    const SECRET_KEY = configuration.group_role_map_aws_secret_key;
+
+    if (!("group_role_map_s3_bucket" in configuration) ||
+        !("group_role_map_aws_access_key_id" in configuration) ||
+        !("group_role_map_aws_secret_key" in configuration)) {
+      console.log("Enriching id_token with amr for AWS Federated CLI");
+      throw new Error("missing configuration values");
+    }
     console.log("Enriching id_token with amr for AWS Federated CLI");
     // Amazon will read in the id token's `amr` list and allow you to match on policies with a string condition.
     // See
@@ -20,7 +32,7 @@ function (user, context, callback) {
     // experimenting with sizes, this is about 26 groups of "reasonable size" (15-20 characters). This means we
     // shouldn't send too many groups in the `amr` or things will fail.
 
-    // Fetching valid groups as we need to reduce `amr` 
+    // Fetching valid groups as we need to reduce `amr`
     // NOTE: This rule REQUIRES configuration.aws_mapping_url to be set. The file looks like this:
     // {
     //  "team_opsec": [
@@ -30,31 +42,54 @@ function (user, context, callback) {
     //      "arn:aws:iam::656532927350:role/federated-aws-cli-test-may2019"
     //    ]
     // }
-    var options = { method: 'GET', url: configuration.aws_mapping_url };
-    request(options, function (error, response, body) {
-      if (error) throw new Error(error);
-      if (response.statusCode !== 200) {
-        console.log('Could not fetch AWS amr mappings URL: '+response.statusCode);
-      } else {
-        aws_groups = Object.keys(JSON.parse(body));
-        user.groups = user.groups || [];
-        context.idToken.amr = user.groups.filter(function(n) { return aws_groups.indexOf(n)  > -1 ;});
+    const updateAmr = function(user, context, callback) {
+      let aws_groups = Object.keys(global.awsGroupRoleMap);
+      user.groups = user.groups || [];
+      context.idToken.amr = user.groups.filter(function(n) { return aws_groups.indexOf(n)  > -1 ;});
+      console.log("Intersection of user groups and AWS groups : " + context.idToken.amr);
 
-        // If Auth0 is going to send the user to Duo, Auth0 will modify the `amr` claim. Auth0 will specifically
-        // overwrite the first element in the `amr` list (slot 0) with the string `mfa`. Anything put in slot 0
-        // of the list by this rule may be overwritten by this `mfa` value. In cases where the user already has a
-        // valid session with Duo, Auth0 will not overwrite slot 0 of the `amr` claim. As a result, this rule adds
-        // a single element at the beginning of the `amr` claim list, an empty string. This slot 0 empty string
-        // will be overwritten by the string `mfa` when users log into Duo and will be left in place when users have
-        // a valid Duo session already. In the future it's possible that Auth0 will either add a different valid
-        // `amr` value (other than `mfa`) or possibly additional `amr` values which could overwrite additional
-        // elements in the `amr` claim list. This rule does not account for these possible future issues.
-        context.idToken.amr.splice(0, 0, "");
+      // If Auth0 is going to send the user to Duo, Auth0 will modify the `amr` claim. Auth0 will specifically
+      // overwrite the first element in the `amr` list (slot 0) with the string `mfa`. Anything put in slot 0
+      // of the list by this rule may be overwritten by this `mfa` value. In cases where the user already has a
+      // valid session with Duo, Auth0 will not overwrite slot 0 of the `amr` claim. As a result, this rule adds
+      // a single element at the beginning of the `amr` claim list, an empty string. This slot 0 empty string
+      // will be overwritten by the string `mfa` when users log into Duo and will be left in place when users have
+      // a valid Duo session already. In the future it's possible that Auth0 will either add a different valid
+      // `amr` value (other than `mfa`) or possibly additional `amr` values which could overwrite additional
+      // elements in the `amr` claim list. This rule does not account for these possible future issues.
+      context.idToken.amr.splice(0, 0, "");
 
-        console.log("Returning idToken with idToken.amr size == "+context.idToken.amr.length+" (should be ~< 26 and idToken < 2048) for user_id "+user.user_id);
-        return callback(null, user, context);
-      }
-    });
+      console.log("Returning idToken with idToken.amr size == "+context.idToken.amr.length+" (should be ~< 26 and idToken < 2048) for user_id "+user.user_id);
+      return callback(null, user, context);
+    };
+    // Try to take advantage of a cached copy of the awsGroupRoleMap from a previous webtask run
+    // If there is no cached copy, fetch a new one. At the moment it appears that the caching
+    // does not work and it always fetches from S3
+    if (!global.awsGroupRoleMap) {
+      let AWS = require('aws-sdk');
+      let s3 = new AWS.S3({
+        apiVersion: '2006-03-01',
+        accessKeyId: ACCESS_KEY_ID,
+        secretAccessKey: SECRET_KEY,
+        region: 'us-west-2',
+        logger: console
+      });
+      s3.getObject({Bucket: S3_BUCKET_NAME, Key: S3_FILE_NAME},
+        function(error, data) {
+          if (error) {
+            console.error(
+                'Could not fetch AWS group role map from S3: ' + error + ' : ' + error.stack);
+            global.awsGroupRoleMap = {};
+          } else {
+            console.log('Fetched ' + S3_BUCKET_NAME + '/' + S3_FILE_NAME + ' from S3');
+            global.awsGroupRoleMap = JSON.parse(data.Body.toString());
+          }
+          return updateAmr(user, context, callback);
+        }
+      );
+    } else {
+      return updateAmr(user, context, callback);
+    }
   } else {
     return callback(null, user, context);
   }
