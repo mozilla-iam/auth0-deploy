@@ -7,10 +7,10 @@ function (user, context, callback) {
     'N7lULzWtfVUDGymwDs0yDEq6ZcwmFazj', // Federated AWS CLI auth0-prod
   ];
   if (WHITELIST.indexOf(context.clientID) >= 0) {
-    const S3_BUCKET_NAME = configuration.group_role_map_s3_bucket;
+    const S3_BUCKET_NAME = configuration.auth0_aws_assests_s3_bucket;
     const S3_FILE_NAME = "access-group-iam-role-map.json";
-    const ACCESS_KEY_ID = configuration.group_role_map_aws_access_key_id;
-    const SECRET_KEY = configuration.group_role_map_aws_secret_key;
+    const ACCESS_KEY_ID = configuration.auth0_aws_assests_access_key_id;
+    const SECRET_KEY = configuration.auth0_aws_assests_access_secret_key;
 
     if (!("group_role_map_s3_bucket" in configuration) ||
         !("group_role_map_aws_access_key_id" in configuration) ||
