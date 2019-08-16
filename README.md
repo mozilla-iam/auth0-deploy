@@ -82,17 +82,12 @@ Node version `8.11.4` and as a result shows errors for things like
 /*jshint esversion: 6 */
 ```
 
-### Auth0 Rule Web UI save button buggy
+### Auth0 Rule Web UI save button
 
 The Auth0 web UI where you can view and modify rules, for example at
 https://manage-dev.mozilla.auth0.com/dashboard/pi/auth-dev/rules
 when you click the `Save` button, a green banner saying
-`The rule script has been saved` shows up. The script however hasn't
-been saved and if you refresh the page you'll see your original content
-still there.
-
-To workaround this
-* click the `Save` button
-* get the `The rule script has been saved` message
-* click the `Save` button a second time which is still blue
-* The `Save` button turns grey and your content is saved
+`The rule script has been saved` shows up. The content however won't
+always be saved and the `Save` button won't always turn from blue to
+gray. If waiting on the page for the async save to complete isn't working
+you can click the `Save` button a second time.
