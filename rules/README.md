@@ -30,33 +30,33 @@ This is the list of keys we're using for secrets (and abuse for certain configur
 - `configuration.auth0_aws_assests_access_secret_key` The AWS IAM API Secret Key of the dedicated service AWS IAM user.
 
 # Rules
-- `aai.json` Sets the user AAI (Authenticator Assurance Indicator)
-- `AccessRules.json` Reads apps.yml, verify it's signature, and uses it's setting to figure out if the user should be
+- `aai.js` Sets the user AAI (Authenticator Assurance Indicator)
+- `AccessRules.js` Reads apps.yml, verify it's signature, and uses it's setting to figure out if the user should be
   allowed to login or not. The RP should still do it's own access checks. This is what we call the 2 stages access
   validation (and this is stage 1)
-- `AWS-Federated-AMR.json` Adds and `AMR` OIDC claim to the user containing the groups which they are a member of and
+- `AWS-Federated-AMR.js` Adds and `AMR` OIDC claim to the user containing the groups which they are a member of and
   which are used in AWS IAM Role policies to govern federated access to AWS accounts.
-- `duosecurity.json` Ensure the user is authenticated with DuoSecurity when using an LDAP account
-- `force-ldap-logins-over-ldap.json` Ensure LDAP users only login with LDAP (i.e. "Staff uses Staff login"). This
+- `duosecurity.js` Ensure the user is authenticated with DuoSecurity when using an LDAP account
+- `force-ldap-logins-over-ldap.js` Ensure LDAP users only login with LDAP (i.e. "Staff uses Staff login"). This
   forbids using passwordless, GitHub, etc. login methods with a `@mozilla.com` email for example.
-- `CIS-Claims-fixups.json` Adds custom OIDC claims in our namespace, like groups or AAI
-- `Everyone-is-in-the-everyone-group.json` Adds all users in a group called `everyone` to function correctly with the
+- `CIS-Claims-fixups.js` Adds custom OIDC claims in our namespace, like groups or AAI
+- `Everyone-is-in-the-everyone-group.js` Adds all users in a group called `everyone` to function correctly with the
   apps.yml file, which assume you have this group, historically
-- `Global-Function-Declarations.json` A place to have a cache of functions. This cache dies when the webtasks die, so
+- `Global-Function-Declarations.js` A place to have a cache of functions. This cache dies when the webtasks die, so
   every 60s
-- `SAML-AWS-consolidatedbilling-readonly.json` Custom claim mapping for SAML
-- `SAML-AWS-mozillaiam-account-readonly.json` Ditto
-- `SAML-temporary-AWS-consolidatedbilling-admin.json` Ditto
-- `SAML-test-mozilla-com-google.json` Ditto
-- `SAML-thinksmart.json` Ditto
-- `gcp-gsuite-SAML-claims.json` Ditto
-- `default-deny-for-maintenance.json` A default "OFF" rule, that can be manually turned on to refuse all logins and
+- `SAML-AWS-consolidatedbilling-readonly.js` Custom claim mapping for SAML
+- `SAML-AWS-mozillaiam-account-readonly.js` Ditto
+- `SAML-temporary-AWS-consolidatedbilling-admin.js` Ditto
+- `SAML-test-mozilla-com-google.js` Ditto
+- `SAML-thinksmart.js` Ditto
+- `gcp-gsuite-SAML-claims.js` Ditto
+- `default-deny-for-maintenance.js` A default "OFF" rule, that can be manually turned on to refuse all logins and
   indicate to the user that we're in maintenance mode. Used for emergencies only!
-- `temporary-LDAP-re-reintegration.json` Temporary rule that reintegrates LDAP groups to the profile. This should be
+- `temporary-LDAP-re-reintegration.js` Temporary rule that reintegrates LDAP groups to the profile. This should be
   removed and replaced by person-api v2 calls eventually
-- `temporary-hrdata.json` Temporary rule that adds HRIS data in a special `_HRData` structure until person-apiv2 is
+- `temporary-hrdata.js` Temporary rule that adds HRIS data in a special `_HRData` structure until person-apiv2 is
   available.
-- `temporary-hris-connector.json` Temporary rule that fix the missing `hris_is_staff` group for Mozillians.org, until
+- `temporary-hris-connector.js` Temporary rule that fix the missing `hris_is_staff` group for Mozillians.org, until
   person-apiv2 is available.
 - `link-users-by-email-with-metadata.js` Links user profiles by primary email (GH x@x.x and FxA x@x.x become the same
   profile). The user profile to be main (ie main user_id) is decided by ratcheting logic.
