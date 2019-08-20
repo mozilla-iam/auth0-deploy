@@ -31,6 +31,14 @@ How do I know which nodejs modules are available to me?
 At this time Auth0 runs nodejs8. The module list that is cached inside webtasks is listed here:
 https://auth0-extensions.github.io/canirequire/#rsa
 
+### Style
+
+The primary goal is to follow the style of the [Auth0 example rules](https://github.com/auth0/rules/tree/master/src/rules).
+This appears to follow the [Google JavaScript Style Guide](https://google.github.io/styleguide/jsguide.html)
+in some ways as there are trailing semi-colon characters. In other ways the 
+Auth0 rules do not follow the Google style as some contain [`var` declarations](https://google.github.io/styleguide/jsguide.html#features-use-const-and-let)
+Try to follow the Google style in the Mozilla rules in this repo.
+
 ### Development cycle
 
 This is the cycle today. In the future we hopefully add CI driven tests. 
@@ -59,3 +67,27 @@ This cycle could be improved.
 12. During change window, merge PR. This may trigger CI to deploy to prod, or
     if CI isn't yet enabled in prod, manually deploy to prod
 13. Test in prod to make sure everything works and rollback if it doesn't.  
+
+## Known Issues
+
+### Auth0 Rule Web UI jshint configuration
+
+The Auth0 web UI where you can view and modify rules, for example at
+https://manage-dev.mozilla.auth0.com/dashboard/pi/auth-dev/rules
+has a jshint built in which isn't aware that Auth0 rules are run under
+Node version `8.11.4` and as a result shows errors for things like
+`require` and `let`. To work around this add this to the top of your rule
+
+```
+/*jshint esversion: 6 */
+```
+
+### Auth0 Rule Web UI save button
+
+The Auth0 web UI where you can view and modify rules, for example at
+https://manage-dev.mozilla.auth0.com/dashboard/pi/auth-dev/rules
+when you click the `Save` button, a green banner saying
+`The rule script has been saved` shows up. The content however won't
+always be saved and the `Save` button won't always turn from blue to
+gray. If waiting on the page for the async save to complete isn't working
+you can click the `Save` button a second time.
