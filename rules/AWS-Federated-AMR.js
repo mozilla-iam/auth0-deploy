@@ -63,8 +63,7 @@ function (user, context, callback) {
       return callback(null, user, context);
     };
     // Try to take advantage of a cached copy of the awsGroupRoleMap from a previous webtask run
-    // If there is no cached copy, fetch a new one. At the moment it appears that the caching
-    // does not work and it always fetches from S3
+    // If there is no cached copy, fetch a new one.
     if (!global.awsGroupRoleMap) {
       let AWS = require('aws-sdk');
       let s3 = new AWS.S3({
