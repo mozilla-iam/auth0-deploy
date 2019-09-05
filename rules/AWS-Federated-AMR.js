@@ -1,6 +1,26 @@
 /*jshint esversion: 6 */
 
 function (user, context, callback) {
+  // modules/group-intersection.js
+  const groupIntersection = (groups, filter) => {
+    const overlap = new Set();
+
+    const filters = filter.map(i => {
+      return new RegExp(i.replace(/\./g, '\.').replace(/\?/g, '.').replace(/\*/g, '.*'));
+    });
+
+    groups.forEach(group => {
+      for (let filter of filters) {
+        if (filter.test(group)) {
+          overlap.add(group);
+          break;
+        }
+      }
+    });
+
+    return [...overlap];
+  };
+
   const WHITELIST = [
     '7PQFR1tyqr6TIqdHcgbRcYcbmbgYflVE', // ldap-pwless.testrp.security.allizom.org
     'xRFzU2bj7Lrbo3875aXwyxIArdkq1AOT', // Federated AWS CLI auth0-dev
@@ -45,8 +65,10 @@ function (user, context, callback) {
     const updateAmr = function(user, context, callback) {
       let aws_groups = Object.keys(global.awsGroupRoleMap);
       user.groups = user.groups || [];
-      context.idToken.amr = user.groups.filter(function(n) { return aws_groups.indexOf(n)  > -1 ;});
-      console.log("Intersection of user groups and AWS groups : " + context.idToken.amr);
+      context.idToken.amr = groupIntersection(user.groups, aws_groups);
+      console.log(`User groups: ${user.groups.join(", ")}`);
+      console.log(`AWS groups: ${aws_groups.join(", ")}`);
+      console.log("Intersection of user groups and AWS groups: " + context.idToken.amr);
 
       // If Auth0 is going to send the user to Duo, Auth0 will modify the `amr` claim. Auth0 will specifically
       // overwrite the first element in the `amr` list (slot 0) with the string `mfa`. Anything put in slot 0
