@@ -65,3 +65,10 @@ test('filter with only asterisk', () => {
     'secret_admin_group_2',
   ]);
 });
+
+test('filter with plus sign', () => {
+  filter = ['normal_user_group+plus_sign'];
+  expect(groupIntersection(['normal_user_group+plus_sign'], filter).sort()).toEqual([
+    'normal_user_group+plus_sign',
+  ]);
+});
