@@ -1,6 +1,38 @@
 /*jshint esversion: 6 */
 
 function (user, context, callback) {
+  // modules/group-intersection.js
+  // Given a set of groups that a user is in (groups), and a filter upon those groups,
+  // return the intersection of the two
+  const groupIntersection = (groups, filter) => {
+    // from lodash.escapeRegExp, except without ? and *
+    const reRegExpChar = /[\\^$.+()[\]{}|]/g,
+          reHasRegExpChar = RegExp(reRegExpChar.source),
+          overlap = new Set();
+
+    const escapeRegExp = (string) => {
+      string = (string && reHasRegExpChar.test(string))? string.replace(reRegExpChar, '\\$&') : string;
+
+      // in AWS, we support ? and * as wildcard characters
+      return string.replace(/\?/g, '.').replace(/\*/g, '.*');
+    };
+
+    const filters = filter.map(i => new RegExp(escapeRegExp(i)));
+
+    groups.forEach(group => {
+      // This is not a foreach loop, simply because we want to break.
+      // We do this to slightly reduce this looping structure from O(n * m).
+      for (let filter of filters) {
+        if (filter.test(group)) {
+          overlap.add(group);
+          break;
+        }
+      }
+    });
+
+    return [...overlap];
+  };
+
   const WHITELIST = [
     '7PQFR1tyqr6TIqdHcgbRcYcbmbgYflVE', // ldap-pwless.testrp.security.allizom.org
     'xRFzU2bj7Lrbo3875aXwyxIArdkq1AOT', // Federated AWS CLI auth0-dev
@@ -45,8 +77,10 @@ function (user, context, callback) {
     const updateAmr = function(user, context, callback) {
       let aws_groups = Object.keys(global.awsGroupRoleMap);
       user.groups = user.groups || [];
-      context.idToken.amr = user.groups.filter(function(n) { return aws_groups.indexOf(n)  > -1 ;});
-      console.log("Intersection of user groups and AWS groups : " + context.idToken.amr);
+      context.idToken.amr = groupIntersection(user.groups, aws_groups);
+      console.log(`User groups: ${user.groups.join(", ")}`);
+      console.log(`AWS groups: ${aws_groups.join(", ")}`);
+      console.log("Intersection of user groups and AWS groups: " + context.idToken.amr);
 
       // If Auth0 is going to send the user to Duo, Auth0 will modify the `amr` claim. Auth0 will specifically
       // overwrite the first element in the `amr` list (slot 0) with the string `mfa`. Anything put in slot 0
