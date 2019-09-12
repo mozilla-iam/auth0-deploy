@@ -8,7 +8,7 @@ function (user, context, callback) {
     'XA2fOQITX6rGNHy8DI3KuuRdccaKwsM6' //AWS Consolidated Billing - Temporary Admin
   ];
 
-  var ALLOWED_GROUPS = ['aws_consolidatedbilling_temporary_admin'];
+  var ALLOWED_GROUPS = ['aws_consolidatedbilling_admin'];
 
   if (APPS.indexOf(context.clientID) >= 0) {
     var groupHasAccess = ALLOWED_GROUPS.some(
@@ -18,7 +18,7 @@ function (user, context, callback) {
         return user.groups.indexOf(group) >= 0;
     });
     if (groupHasAccess) {
-      user.awsRole = 'arn:aws:iam::329567179436:role/auth0_consolidatedbilling_temporary_admin,arn:aws:iam::329567179436:saml-provider/auth0_consolidatedbilling_temporary_admin';
+      user.awsRole = 'arn:aws:iam::329567179436:role/sso/sso_admin,arn:aws:iam::329567179436:saml-provider/sso_admin';
       user.awsRoleSession = user.email;
       context.samlConfiguration.mappings = {
         'https://aws.amazon.com/SAML/Attributes/Role': 'awsRole',

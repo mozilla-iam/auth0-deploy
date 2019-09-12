@@ -6,16 +6,17 @@ function (user, context, callback) {
 
   user.app_metadata = user.app_metadata || {};
   user.app_metadata.groups = user.app_metadata.groups || [];
-  
-  if (user.app_metadata.groups.indexOf('everyone') >= 0) {
+  user.groups = user.groups || [];
+
+  if (user.app_metadata.groups.indexOf('everyone') < 0) {
     Array.prototype.push.apply(user.app_metadata.groups, ['everyone']);
   }
   auth0.users.updateAppMetadata(user.user_id, user.app_metadata)
-       .then(function(){
-         callback(null, user, context);
-       })
-       .catch(function(err){
-         console.log(err);
-         callback(err);
-  });
+    .then(function(){
+      callback(null, user, context);
+    })
+    .catch(function(err){
+      console.log(err);
+      callback(err);
+    });
 }

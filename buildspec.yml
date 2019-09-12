@@ -1,0 +1,14 @@
+version: 0.2
+
+env:
+  parameter-store:
+    CLIENTID: "/iam/auth0-deploy/stage/AUTH0_RULE_DEPLOY_CLIENTID"
+    CLIENTSECRET: "/iam/auth0-deploy/stage/AUTH0_RULE_DEPLOY_CLIENTSECRET"
+    URI: "/iam/auth0-deploy/stage/AUTH0_URI"
+phases:
+  build:
+    commands:
+      - make install
+  post_build:
+    commands:
+      - make CLIENTID=${CLIENTID} CLIENTSECRET=${CLIENTSECRET} URI=${URI} deploy
