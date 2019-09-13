@@ -15,11 +15,10 @@ function (user, context, callback) {
     "account_role_group_mapping" : {
       "320464205386" : {
         "arn:aws:iam::320464205386:role/FederatedAWSAccountRead" : [
-          "mozilliansorg_mozilla-iam-aws-access",
-          "mozilla-iam-aws-access-read-only"
+          "aws_320464205386_admin"
         ],
         "arn:aws:iam::320464205386:role/FederatedAWSAccountAdmin" : [
-          "mozilliansorg_mozilla-iam-aws-access"
+          "aws_320464205386_admin"
         ]
 
       }
