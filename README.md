@@ -77,7 +77,7 @@ This cycle could be improved.
       setup
     * Instead, manually deploy to prod using [`uploader_rules.py`](https://github.com/mozilla-iam/auth0-ci/blob/master/uploader_rules.py)
      from the [`auth0-ci`](https://github.com/mozilla-iam/auth0-ci) project.
-13. Test in prod to make sure everything works and rollback if it doesn't.  
+13. [Test in prod](https://mana.mozilla.org/wiki/display/SECURITY/Auth0+manual+testing) to make sure everything works and rollback if it doesn't.  
 
 ## Known Issues
 
