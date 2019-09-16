@@ -1,38 +1,6 @@
 /*jshint esversion: 6 */
 
 function (user, context, callback) {
-  // modules/group-intersection.js
-  // Given a set of groups that a user is in (groups), and a filter upon those groups,
-  // return the intersection of the two
-  const groupIntersection = (groups, filter) => {
-    // from lodash.escapeRegExp, except without ? and *
-    const reRegExpChar = /[\\^$.+()[\]{}|]/g,
-          reHasRegExpChar = RegExp(reRegExpChar.source),
-          overlap = new Set();
-
-    const escapeRegExp = (string) => {
-      string = (string && reHasRegExpChar.test(string))? string.replace(reRegExpChar, '\\$&') : string;
-
-      // in AWS, we support ? and * as wildcard characters
-      return string.replace(/\?/g, '.').replace(/\*/g, '.*');
-    };
-
-    const filters = filter.map(i => new RegExp(escapeRegExp(i)));
-
-    groups.forEach(group => {
-      // This is not a foreach loop, simply because we want to break.
-      // We do this to slightly reduce this looping structure from O(n * m).
-      for (let filter of filters) {
-        if (filter.test(group)) {
-          overlap.add(group);
-          break;
-        }
-      }
-    });
-
-    return [...overlap];
-  };
-
   const WHITELIST = [
     '7PQFR1tyqr6TIqdHcgbRcYcbmbgYflVE', // ldap-pwless.testrp.security.allizom.org
     'xRFzU2bj7Lrbo3875aXwyxIArdkq1AOT', // Federated AWS CLI auth0-dev
@@ -43,6 +11,38 @@ function (user, context, callback) {
     const S3_FILE_NAME = "access-group-iam-role-map.json";
     const ACCESS_KEY_ID = configuration.auth0_aws_assests_access_key_id;
     const SECRET_KEY = configuration.auth0_aws_assests_access_secret_key;
+
+    // modules/group-intersection.js
+    // Given a set of groups that a user is in (groups), and a filter upon those groups,
+    // return the intersection of the two
+    const groupIntersection = (groups, filter) => {
+      // from lodash.escapeRegExp, except without ? and *
+      const reRegExpChar = /[\\^$.+()[\]{}|]/g,
+            reHasRegExpChar = RegExp(reRegExpChar.source),
+            overlap = new Set();
+
+      const escapeRegExp = (string) => {
+        string = (string && reHasRegExpChar.test(string))? string.replace(reRegExpChar, '\\$&') : string;
+
+        // in AWS, we support ? and * as wildcard characters
+        return string.replace(/\?/g, '.').replace(/\*/g, '.*');
+      };
+
+      const filters = filter.map(i => new RegExp(escapeRegExp(i)));
+
+      groups.forEach(group => {
+        // This is not a foreach loop, simply because we want to break.
+        // We do this to slightly reduce this looping structure from O(n * m).
+        for (let filter of filters) {
+          if (filter.test(group)) {
+            overlap.add(group);
+            break;
+          }
+        }
+      });
+
+      return [...overlap];
+    };
 
     if (!("group_role_map_s3_bucket" in configuration) ||
         !("group_role_map_aws_access_key_id" in configuration) ||
