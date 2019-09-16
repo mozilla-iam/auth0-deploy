@@ -44,6 +44,8 @@ Try to follow the Google style in the Mozilla rules in this repo.
 This is the cycle today. In the future we hopefully add CI driven tests. 
 This cycle could be improved.
 
+Please note that for any large change (i.e. anything but a single rule change), it is recommended to backup the current rules before deploying. You can do this by following the run-book at https://mana.mozilla.org/wiki/display/SECURITY/Create+and+reload+auth0+rules+backup
+
 1. Write a rule in your local fork of the repo
 2. Run `uploader_rules.py -r rules` to deploy the uncommitted rule to auth0-dev
 3. Do manual testing in auth0-dev to determine if the rule does what you want
