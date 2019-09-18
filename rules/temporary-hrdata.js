@@ -6,7 +6,14 @@ function (user, context, callback) {
   // Applications that are ALLOWED to see _HRData
   var ALLOWED_CLIENTIDS = [
     'IU80mVpKPtIZyUZtya9ZnSTs6fKLt3JO', //biztera.com
-    'R4djNlyXSl3i8N2KXWkfylghDa9kFQ84' //mozilla.tap.thinksmart.com
+    'R4djNlyXSl3i8N2KXWkfylghDa9kFQ84', //mozilla.tap.thinksmart.com
+    'fNzzMG3XfkxQJcnUpgrGyH2deII3nFFM', //pto1.dmz.mdc1.mozilla.com
+    'T2tB7Ss8It7PKrw3ijazoXu9PgZniLPD', //https://web-mozillians-staging.production.paas.mozilla.community (dev auth0)
+    'FQw134gwheaK3KkW6fQf0JPV6P7h2yo1', //https://web-mozillians-staging.production.paas.mozilla.community (prod auth0)
+    'HdfEiM1SZibaQnOYTxLoMdxSh4a6ZKD3', //mozillians.org
+    'dcdQ6M9yaZfyy1fPLiXIzORHFHEiwjNc', //Staples - Gear Store - Stage
+    'wsvwqDk1Z2zYa6AU4mMT5Dq4H40lfvF2', //Staples - Gear Store - Production
+    'TnqNECyCfoQYd1X7c4xwMF4PMsEfyWPj', //mozilla.zoom.us
   ];
 
   if (ALLOWED_CLIENTIDS.indexOf(context.clientID) >= 0) {

@@ -4,12 +4,12 @@ function (user, context, callback) {
     return callback(null, null, context);
   }
 
-  if (context.clientID !== 'q0tFB9QyFIKqPOOKvkFnHMj2VwrLjX46') return callback(null, user, context); // Google (test.mozilla.com)
+  if (context.clientID !== 'uYFDijsgXulJ040Os6VJLRxf0GG30OmC') return callback(null, user, context); // Google (test.mozilla.com)
 
   // This rule simply remaps @mozilla.com e-mail addresses to @test.mozilla.com to be used with the test.mozilla.com GSuite domain.
   // Be careful when adding replacements not to do "double-replacements" where a replace replaces another rule. If that happens,
   // you probably want to improve this code instead
-  user.myemail = user.email.replace("mozilla.com", "test.mozilla.com").replace("mozillafoundation.org", "test.mozillafoundation.org").replace("getpocket.com", "test-gsuite.getpocket.com");
+  user.myemail = user.email.replace("mozilla.com", "gcp.infra.mozilla.com").replace("mozillafoundation.org", "gcp.infra.mozilla.com").replace("getpocket.com", "gcp.infra.mozilla.com");
 
   context.samlConfiguration = context.samlConfiguration || {};
 

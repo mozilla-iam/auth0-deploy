@@ -11,9 +11,11 @@ function (user, context, callback) {
   }
   if (WHITELIST.indexOf(user.email) >= 0) {
     console.log('duosecurity: whitelisted account '+user.email+', no 2FA check performed');
+    // Fake 2FA
+    context.multifactor = true;
     return callback(null, user, context);
   }
-  // LDAP group okta_mfa requires MFA authentication everywhere.
+  // Any user logging in with LDAP (ad) requires MFA authentication.
   if (context.connectionStrategy === 'ad') {
     context.multifactor = {
       provider: 'duo',
