@@ -55,7 +55,7 @@ class TestAccount:
         auth0.enter_email(invalid_email)
         auth0.click_email_enter()
         auth0.click_send_email()
-        error_login_confirmation_message = 'Invalid Destination Email Address: Invalid@mail'
+        error_login_confirmation_message = 'Error In Email - Email Format Validation Failed: Invalid@mail'
         assert auth0.passwordless_login_confirmation_message == error_login_confirmation_message
 
     @pytest.mark.nondestructive
