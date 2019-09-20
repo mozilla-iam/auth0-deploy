@@ -11,6 +11,7 @@ phases:
       - python params2json.py
       - pip install tox
       - apt-get install firefox xvfb -y
+      - apt-get install zip -y
       - Xvfb :10 -ac &
       - export DISPLAY=:10
       - wget https://github.com/mozilla/geckodriver/releases/download/v0.25.0/geckodriver-v0.25.0-linux64.tar.gz
@@ -24,3 +25,9 @@ phases:
   post_build:
     commands:
       - echo Testing complete...
+      - zip -r results.zip results/
+artifacts:
+  files:
+     - results/*
+     - results/assets/*
+     - results.zip
