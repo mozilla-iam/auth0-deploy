@@ -38,7 +38,6 @@ class TestAccount:
         test_rp.click_logout()
         assert test_rp.is_sign_in_button_displayed
 
-    @pytest.mark.xfail
     @pytest.mark.nondestructive
     def test_login_with_google(self, base_url, selenium, google_user):
         test_rp = HomepageTestRp(base_url, selenium)
@@ -55,7 +54,7 @@ class TestAccount:
         auth0.enter_email(invalid_email)
         auth0.click_email_enter()
         auth0.click_send_email()
-        error_login_confirmation_message = 'Invalid Destination Email Address: Invalid@mail'
+        error_login_confirmation_message = 'Error In Email - Email Format Validation Failed: Invalid@mail'
         assert auth0.passwordless_login_confirmation_message == error_login_confirmation_message
 
     @pytest.mark.nondestructive
@@ -82,7 +81,6 @@ class TestAccount:
         auth0.wait_for_error_message_shown()
         assert auth0.ldap_error_message == ldap_global_error_message
 
-    @pytest.mark.xfail("'social-ldap-pwless' in config.getvalue('base_url')")
     @pytest.mark.nondestructive
     def test_github_autologin(self, base_url, selenium, github_user):
         sso_dashboard = SsoDashboard(base_url, selenium)
@@ -90,7 +88,6 @@ class TestAccount:
         discourse = sso_dashboard.click_discourse()
         assert discourse.is_avatar_displayed
 
-    @pytest.mark.xfail("'social-ldap-pwless' in config.getvalue('base_url')")
     @pytest.mark.nondestructive
     def test_ldap_autologin(self, base_url, selenium, ldap_user):
         sso_dashboard = SsoDashboard(base_url, selenium)
