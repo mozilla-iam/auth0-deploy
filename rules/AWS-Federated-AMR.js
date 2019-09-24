@@ -44,11 +44,11 @@ function (user, context, callback) {
       return [...overlap];
     };
 
-    if (!("group_role_map_s3_bucket" in configuration) ||
-        !("group_role_map_aws_access_key_id" in configuration) ||
-        !("group_role_map_aws_secret_key" in configuration)) {
+    if (!("auth0_aws_assests_s3_bucket" in configuration) ||
+        !("auth0_aws_assests_access_key_id" in configuration) ||
+        !("auth0_aws_assests_access_secret_key" in configuration)) {
       console.log("Enriching id_token with amr for AWS Federated CLI");
-      throw new Error("missing configuration values");
+      throw new Error("Missing Auth0 AWS Federated AMR rule configuration values");
     }
     console.log("Enriching id_token with amr for AWS Federated CLI");
     // Amazon will read in the id token's `amr` list and allow you to match on policies with a string condition.
@@ -65,7 +65,8 @@ function (user, context, callback) {
     // shouldn't send too many groups in the `amr` or things will fail.
 
     // Fetching valid groups as we need to reduce `amr`
-    // NOTE: This rule REQUIRES configuration.aws_mapping_url to be set. The file looks like this:
+    // NOTE: This rule REQUIRES configuration settings to be set indicating the S3 bucket and AWS API keys to use.
+    // The file looks like this:
     // {
     //  "team_opsec": [
     //    "arn:aws:iam::656532927350:role/gene-test-federated-role-mozlando"
