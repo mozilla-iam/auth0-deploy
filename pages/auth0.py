@@ -1,9 +1,15 @@
+import time
 import pyotp
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.common.exceptions import WebDriverException
 
 from pages.base import Base
 
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
 
 class Auth0(Base):
     # Email / LDAP locators
@@ -20,6 +26,22 @@ class Auth0(Base):
     _autologin_message_locator = (By.ID, 'loading__status')
     _enter_passcode_button = (By.CSS_SELECTOR, '.passcode-label .positive.auth-button')
     _duo_iframe_locator = (By.ID, 'duo_iframe')
+    _duo_response = (
+        By.XPATH,
+        "//span[@class='message-text']"
+        "[contains(text(), 'Success. Logging you in...') or "
+        "contains(text(), 'Incorrect passcode. Enter a passcode from a hardware token.')]|"
+        "//div[@id='main-content']/h1[contains(text(), 'Authentication status')]")
+
+    _incorrect_duo_passcode = (
+        By.XPATH,
+        "//span[@class='message-text']"
+        "[contains(text(), 'Incorrect passcode. Enter a passcode from a hardware token.')]")
+    _correct_duo_passcode = (
+        By.XPATH,
+        "//span[@class='message-text']"
+        "[contains(text(), 'Success. Logging you in...')]")
+
     _successfull_passcode_message_locator = (By.CSS_SELECTOR, '#messages-view .message-content')
     _login_form_locator = (By.ID, 'login-form')
 
@@ -105,9 +127,27 @@ class Auth0(Base):
         self.wait_for_element_visible(*self._login_form_locator)
         self.wait_for_element_visible(*self._enter_passcode_button)
         self.selenium.find_element(*self._enter_passcode_button).click()
-        passcode = pyotp.TOTP(secret).now()
-        self.selenium.find_element(*self._passcode_field_locator).send_keys(passcode)
-        self.selenium.find_element(*self._enter_passcode_button).click()
+        tries = 0
+        while tries < 2:
+            tries += 1
+            passcode = pyotp.TOTP(secret).now()
+            self.selenium.find_element(*self._passcode_field_locator).clear()
+            self.selenium.find_element(*self._passcode_field_locator).send_keys(passcode)
+            self.selenium.find_element(*self._enter_passcode_button).click()
+            try:
+                self.wait_for_element_visible(*self._duo_response)
+                if self.is_element_visible(*self._correct_duo_passcode):
+                    logger.info('detected duo success')
+                    break
+                if self.is_element_visible(*self._incorrect_duo_passcode):
+                    logger.info('detected duo incorrect OTP')
+                    time.sleep(1)  # wait until we're out from in between OTPs
+            except WebDriverException as e:
+                if "TypeError: can't access dead object" in str(e):
+                    logger.info(
+                        'duo iframe has been closed before we could look at '
+                        'it indicating successful login')
+                    break
         self.selenium.switch_to_default_content()
 
     def click_login_with_github(self):
