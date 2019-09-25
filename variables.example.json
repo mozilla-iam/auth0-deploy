@@ -10,11 +10,17 @@
     },
     "github": {
       "username": "",
-      "password": ""
+      "password": "",
+      "secret_seed": ""
     },
     "google": {
       "email": "",
       "password": ""
+    },
+    "fxa": {
+      "email": "",
+      "password": "",
+      "secret_seed": ""
     }
   }
 }
