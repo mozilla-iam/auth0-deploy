@@ -28,6 +28,9 @@ This is the list of keys we're using for secrets (and abuse for certain configur
   with the [`group_role_map_builder.yaml`](https://github.com/mozilla-iam/federated-aws-cli/blob/211bafd660928813c750ef240c2e3d2cb66ddba3/cloudformation/group_role_map_builder.yaml#L128-L149)
   CloudFormation template
 - `configuration.auth0_aws_assests_access_secret_key` The AWS IAM API Secret Key of the dedicated service AWS IAM user.
+- `configuration.CIS_access_key_id` The AWS IAM API Key Id for the dedicated Auth0 Publisher hook invocation function.
+- `configuration.CIS_secret_access_key` The AWS IAM API Secret Key for the dicated Auth0 Publisher hook invocation
+  function.
 
 # Rules
 - `aai.js` Sets the user AAI (Authenticator Assurance Indicator)
@@ -40,6 +43,8 @@ This is the list of keys we're using for secrets (and abuse for certain configur
 - `force-ldap-logins-over-ldap.js` Ensure LDAP users only login with LDAP (i.e. "Staff uses Staff login"). This
   forbids using passwordless, GitHub, etc. login methods with a `@mozilla.com` email for example.
 - `CIS-Claims-fixups.js` Adds custom OIDC claims in our namespace, like groups or AAI
+- `CIS-New-User-hook.js` Invoke the Auth0 CIS Publisher hook with a user_id, in order to notify it of potentially new
+  or modified users.
 - `Everyone-is-in-the-everyone-group.js` Adds all users in a group called `everyone` to function correctly with the
   apps.yml file, which assume you have this group, historically
 - `Global-Function-Declarations.js` A place to have a cache of functions. This cache dies when the webtasks die, so
