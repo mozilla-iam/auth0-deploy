@@ -6,6 +6,10 @@ from pages.homepage_testrp import HomepageTestRp
 
 class TestAccount:
 
+    # Fixture arguments for each test come from
+    #   conftest.py : https://docs.pytest.org/en/2.7.3/plugins.html?highlight=re#conftest-py-local-per-directory-plugins
+    #   pytest-selenium plugin for "selenium"
+    #   pytest-base-url plugin for "base_url"
     @pytest.mark.nondestructive
     def test_login_with_ldap(self, base_url, selenium, ldap_user):
         test_rp = HomepageTestRp(base_url, selenium)
