@@ -14,7 +14,7 @@ phases:
       - apt-get install zip -y
       - Xvfb :10 -ac &
       - export DISPLAY=:10
-      - wget https://github.com/mozilla/geckodriver/releases/download/v0.25.0/geckodriver-v0.25.0-linux64.tar.gz
+      - wget --no-verbose https://github.com/mozilla/geckodriver/releases/download/v0.25.0/geckodriver-v0.25.0-linux64.tar.gz
       - tar -xvzf geckodriver-v0.25.0-linux64.tar.gz
       - chmod +x geckodriver
       - cp geckodriver /usr/local/bin/
