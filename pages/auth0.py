@@ -140,8 +140,8 @@ class Auth0(Base):
                     logger.info('detected duo success')
                     break
                 if self.is_element_visible(*self._incorrect_duo_passcode):
-                    logger.info('detected duo incorrect OTP')
-                    time.sleep(1)  # wait until we're out from in between OTPs
+                    logger.info('Detected Duo incorrect OTP. Sleeping for 30 seconds')
+                    time.sleep(30)  # wait until we're guaranteed to have a new TOTP
             except WebDriverException as e:
                 if "TypeError: can't access dead object" in str(e):
                     logger.info(
