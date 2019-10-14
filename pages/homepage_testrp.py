@@ -6,13 +6,14 @@ from tests import restmail
 
 
 class HomepageTestRp(Base):
-    _sign_in_button = (By.CSS_SELECTOR, 'a[href="https://prod.testrp.security.allizom.org"]')
-    _logout_button_locator = (By.CSS_SELECTOR, '#main-content a[href="/logout"]')
 
     def __init__(self, base_url, selenium, open_url=True):
         Base.__init__(self, base_url, selenium)
         if open_url:
             self.selenium.get(self.base_url)
+        self._sign_in_button = (By.CSS_SELECTOR, 'a[href="{}"]'.format(self.base_url))
+        self._logout_button_locator = (By.CSS_SELECTOR, '#main-content a[href="/logout"]')
+
 
     @property
     def auth(self):
@@ -32,6 +33,10 @@ class HomepageTestRp(Base):
     def click_logout(self):
         self.wait_for_page_loaded()
         self.selenium.find_element(*self._logout_button_locator).click()
+
+    def click_login(self):
+        self.wait_for_page_loaded()
+        self.selenium.find_element(*self._sign_in_button).click()
 
     def login_with_ldap(self, email_address, password, secret):
         auth0 = Auth0(self.base_url, self.selenium)
@@ -67,7 +72,7 @@ class HomepageTestRp(Base):
 
     def login_with_firefox_accounts(self, email, password, secret):
         auth0 = Auth0(self.base_url, self.selenium)
-        if self.base_url == "https://aai-low-social-ldap-pwless.testrp.security.allizom.org/":
+        if self.base_url == "https://aai-low-social-ldap-pwless.testrp.security.allizom.org":
             auth0.login_with_fxa_staging(email, password, secret)
         else:
             auth0.click_login_with_firefox_accounts()

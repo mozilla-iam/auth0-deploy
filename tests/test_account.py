@@ -6,13 +6,20 @@ from pages.homepage_testrp import HomepageTestRp
 
 class TestAccount:
 
+    # Fixture arguments for each test come from
+    #   conftest.py : https://docs.pytest.org/en/2.7.3/plugins.html?highlight=re#conftest-py-local-per-directory-plugins
+    #   pytest-selenium plugin for "selenium"
+    #   pytest-base-url plugin for "base_url"
     @pytest.mark.nondestructive
     def test_login_with_ldap(self, base_url, selenium, ldap_user):
         test_rp = HomepageTestRp(base_url, selenium)
         test_rp.login_with_ldap(ldap_user['email'], ldap_user['password'], ldap_user['secret_seed'])
-        assert test_rp.is_logout_button_displayed
+        assert test_rp.is_logout_button_displayed, 'interactive LDAP login failed as the logout button is not present after logging in'
         test_rp.click_logout()
-        assert test_rp.is_sign_in_button_displayed
+        assert test_rp.is_sign_in_button_displayed, 'logout failed as the sign in button is not present after clicking logout'
+        test_rp.click_login()
+        assert test_rp.is_logout_button_displayed, 'autologin failed as the logout button is not shown after clicking the login button '
+
 
     @pytest.mark.nondestructive
     def test_login_passwordless(self, base_url, selenium, passwordless_user):
@@ -85,12 +92,5 @@ class TestAccount:
     def test_github_autologin(self, base_url, selenium, github_user):
         sso_dashboard = SsoDashboard(base_url, selenium)
         sso_dashboard.login_with_github(github_user['username'], github_user['password'], github_user['secret_seed'])
-        discourse = sso_dashboard.click_discourse()
-        assert discourse.is_avatar_displayed
-
-    @pytest.mark.nondestructive
-    def test_ldap_autologin(self, base_url, selenium, ldap_user):
-        sso_dashboard = SsoDashboard(base_url, selenium)
-        sso_dashboard.login_with_ldap(ldap_user['email'], ldap_user['password'], ldap_user['secret_seed'])
         discourse = sso_dashboard.click_discourse()
         assert discourse.is_avatar_displayed
