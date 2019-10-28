@@ -7,6 +7,14 @@ function (user, context, callback) {
   const ACCESS_KEY_ID = configuration.CIS_access_key_id;
   const SECRET_KEY = configuration.CIS_access_secret_key;
 
+  let now = new Date();
+  let created = new Date(user.created_at);
+
+  // User is older than 20 seconds? Bail - we only process newly added users
+  if ((now-created)/1000 > 20) {
+    return callback(null, user, context);
+  }
+
   let AWS = require('aws-sdk');
   var lambda = new AWS.Lambda({
     apiVersion: '2015-03-31',
@@ -23,5 +31,5 @@ function (user, context, callback) {
   // In case of any error, these should be caught in the function itself
   // If the invocation itself fails (i.e. there won't be logs), there is a backup batch job every 15min
   let res = lambda.invokeAsync(params);
-  AWS.Request.send(res);
+  return callback(null, user, context);
 }
