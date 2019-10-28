@@ -1,15 +1,15 @@
 /*jshint esversion: 6 */
 
-// Note: This function could be optimized to only call when
-// 1 - we know it's a new user because created == updated dates
-// 2 - we know the `blocked` attribute has changed, and we should reflect that (can we know this?)
 function (user, context, callback) {
   const ACCESS_KEY_ID = configuration.CIS_access_key_id;
   const SECRET_KEY = configuration.CIS_access_secret_key;
-
   let now = new Date();
   let created = new Date(user.created_at);
 
+  // User is LDAP? Bail
+  if (context.connection.startsWith("Mozilla-LDAP")) {
+    return callback(null, user, context);
+  }
   // User is older than 20 seconds? Bail - we only process newly added users
   if ((now-created)/1000 > 20) {
     return callback(null, user, context);
@@ -24,12 +24,17 @@ function (user, context, callback) {
     logger: console
   });
 
-  params = {FunctionName: configuration.CIS_hook_arn,
-    InvokeArgs: [user.user_id]
+ // We invoke async (Event) as to not block login flow
+ // See also https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html#invoke-property
+ var params = {FunctionName: configuration.CIS_hook_arn,
+               InvocationType: "Event", // Change to RequestResponse to block / debugging
+               Payload: `["${user.user_id}"]`,
+               LogType: "None" // Change to Tail for debugging
   };
-  // We invoke fully async as to not block login flow
-  // In case of any error, these should be caught in the function itself
-  // If the invocation itself fails (i.e. there won't be logs), there is a backup batch job every 15min
-  let res = lambda.invokeAsync(params);
+  lambda.invoke(params, function(err, data) {
+         if (err) {
+            console.log(`Error ${err}`);
+         }
+  });
   return callback(null, user, context);
 }
