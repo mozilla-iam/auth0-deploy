@@ -6,7 +6,7 @@ function (user, context, callback) {
   let now = new Date();
   let created = new Date(user.created_at);
 
-  // User is LDAP? Bail
+  // User is LDAP? Bail because the user is created by the LDAP publisher
   if (context.connection.startsWith("Mozilla-LDAP")) {
     return callback(null, user, context);
   }
