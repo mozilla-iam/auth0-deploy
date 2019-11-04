@@ -1,38 +1,6 @@
 /*jshint esversion: 6 */
 
 function (user, context, callback) {
-  // modules/group-intersection.js
-  // Given a set of groups that a user is in (groups), and a filter upon those groups,
-  // return the intersection of the two
-  const groupIntersection = (groups, filter) => {
-    // from lodash.escapeRegExp, except without ? and *
-    const reRegExpChar = /[\\^$.+()[\]{}|]/g,
-          reHasRegExpChar = RegExp(reRegExpChar.source),
-          overlap = new Set();
-
-    const escapeRegExp = (string) => {
-      string = (string && reHasRegExpChar.test(string))? string.replace(reRegExpChar, '\\$&') : string;
-
-      // in AWS, we support ? and * as wildcard characters
-      return string.replace(/\?/g, '.').replace(/\*/g, '.*');
-    };
-
-    const filters = filter.map(i => new RegExp(escapeRegExp(i)));
-
-    groups.forEach(group => {
-      // This is not a foreach loop, simply because we want to break.
-      // We do this to slightly reduce this looping structure from O(n * m).
-      for (let filter of filters) {
-        if (filter.test(group)) {
-          overlap.add(group);
-          break;
-        }
-      }
-    });
-
-    return [...overlap];
-  };
-
   const WHITELIST = [
     '7PQFR1tyqr6TIqdHcgbRcYcbmbgYflVE', // ldap-pwless.testrp.security.allizom.org
     'xRFzU2bj7Lrbo3875aXwyxIArdkq1AOT', // Federated AWS CLI auth0-dev
@@ -44,11 +12,43 @@ function (user, context, callback) {
     const ACCESS_KEY_ID = configuration.auth0_aws_assests_access_key_id;
     const SECRET_KEY = configuration.auth0_aws_assests_access_secret_key;
 
-    if (!("group_role_map_s3_bucket" in configuration) ||
-        !("group_role_map_aws_access_key_id" in configuration) ||
-        !("group_role_map_aws_secret_key" in configuration)) {
+    // modules/group-intersection.js
+    // Given a set of groups that a user is in (groups), and a filter upon those groups,
+    // return the intersection of the two
+    const groupIntersection = (groups, filter) => {
+      // from lodash.escapeRegExp, except without ? and *
+      const reRegExpChar = /[\\^$.+()[\]{}|]/g,
+            reHasRegExpChar = RegExp(reRegExpChar.source),
+            overlap = new Set();
+
+      const escapeRegExp = (string) => {
+        string = (string && reHasRegExpChar.test(string))? string.replace(reRegExpChar, '\\$&') : string;
+
+        // in AWS, we support ? and * as wildcard characters
+        return string.replace(/\?/g, '.').replace(/\*/g, '.*');
+      };
+
+      const filters = filter.map(i => new RegExp(escapeRegExp(i)));
+
+      groups.forEach(group => {
+        // This is not a foreach loop, simply because we want to break.
+        // We do this to slightly reduce this looping structure from O(n * m).
+        for (let filter of filters) {
+          if (filter.test(group)) {
+            overlap.add(group);
+            break;
+          }
+        }
+      });
+
+      return [...overlap];
+    };
+
+    if (!("auth0_aws_assests_s3_bucket" in configuration) ||
+        !("auth0_aws_assests_access_key_id" in configuration) ||
+        !("auth0_aws_assests_access_secret_key" in configuration)) {
       console.log("Enriching id_token with amr for AWS Federated CLI");
-      throw new Error("missing configuration values");
+      throw new Error("Missing Auth0 AWS Federated AMR rule configuration values");
     }
     console.log("Enriching id_token with amr for AWS Federated CLI");
     // Amazon will read in the id token's `amr` list and allow you to match on policies with a string condition.
@@ -65,7 +65,8 @@ function (user, context, callback) {
     // shouldn't send too many groups in the `amr` or things will fail.
 
     // Fetching valid groups as we need to reduce `amr`
-    // NOTE: This rule REQUIRES configuration.aws_mapping_url to be set. The file looks like this:
+    // NOTE: This rule REQUIRES configuration settings to be set indicating the S3 bucket and AWS API keys to use.
+    // The file looks like this:
     // {
     //  "team_opsec": [
     //    "arn:aws:iam::656532927350:role/gene-test-federated-role-mozlando"
