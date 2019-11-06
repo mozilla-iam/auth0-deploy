@@ -151,6 +151,7 @@ function (user, context, callback) {
                 if (delta > app.expire_access_when_unused_after) {
                     // Do not allow the user in, no matter what other access has been set
                     console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - access has expired");
+                    context.request.query.redirect_uri = app.url || "https://sso.mozilla.com";
                     return access_denied(null, user, global.postError('accesshasexpired', context));
                 }
                 break;
@@ -165,6 +166,7 @@ function (user, context, callback) {
         // Empty users or groups (length == 0) means no access in the dashboard apps.yml world
         if (app.authorized_users.length === app.authorized_groups.length === 0) {
           console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - this app denies ALL users and ALL groups");
+          context.request.query.redirect_uri = app.url || "https://sso.mozilla.com";
           return access_denied(null, user, global.postError('notingroup', context));
         }
 
@@ -180,6 +182,7 @@ function (user, context, callback) {
 
         if (!authorized) {
           console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - not in authorized group or not an authorized user");
+          context.request.query.redirect_uri = app.url || "https://sso.mozilla.com";
           return access_denied(null, user, global.postError('notingroup', context));
         }
       } // correct client id / we matched the current RP
@@ -237,6 +240,7 @@ function (user, context, callback) {
       console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - due to " +
         "Identity Assurance Level being too low for this RP. Required AAL: "+required_aal+
         " ("+aai_pass+")");
+      context.request.query.redirect_uri = app.url || "https://sso.mozilla.com";
       return access_denied(null, user, global.postError('aai_failed', context));
     }
 
