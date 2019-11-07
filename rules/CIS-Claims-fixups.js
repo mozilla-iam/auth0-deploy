@@ -18,7 +18,7 @@ function (user, context, callback) {
   // https:// then do not overload with custom claims
   let scopes_requested = context.request.query.scope.split(' ');
   let fixup_needed = function(scope) {
-    return scope === 'profile' || scope.startsWith('https://')
+    return scope === 'profile' || scope.startsWith('https://');
   };
   if (! scopes_requested.some(fixup_needed)) {
     console.log('Client '+context.clientID+' only requested '+scopes_requested+', not adding custom claims');
