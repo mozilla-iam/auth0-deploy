@@ -1,6 +1,7 @@
 function (user, context, callback) {
   var namespace = 'https://sso.mozilla.com/claim/';
   var whitelist = ['']; // claim whitelist
+  let isSetsEqual = (a, b) => a.size === b.size && [...a].every(value => b.has(value));
 
   // If you're not OIDC Conformant, stop right there as this INCREASES the profile size
   // significantly! The metadata is set by us, manually.
@@ -14,9 +15,11 @@ function (user, context, callback) {
   }
 
 
-  // If the only scope requested is openid, do not overload with custom claims
-  if (context.request.query.scope === "openid") {
-    console.log('Client '+context.clientID+' only requested scope:openid, not adding custom claims');
+  // If the only scopes requested are openid or email, do not overload with custom claims
+  let scopes = new Set(context.request.query.scope.split(' '));
+  let whitelisted_scopes = new Set(["openid", "email"]);
+  if (isSetsEqual(scopes, whitelisted_scopes)) {
+    console.log('Client '+context.clientID+' only requested scope:openid or scope:email, not adding custom claims');
     return callback(null, user, context);
   }
 
