@@ -67,7 +67,7 @@ class Auth0(Base):
     _fxa_email_locator = (By.CSS_SELECTOR, '.email')
     _fxa_password_locator = (By.ID, 'password')
     _fxa_sign_in_button_locator = (By.ID, 'submit-btn')
-    _fxa_passcode_field_locator = (By.CSS_SELECTOR, '.token-code-row input')
+    _fxa_passcode_field_locator = (By.CSS_SELECTOR, '.totp-code')
     _fxa_verify_passcode_button_locator = (By.CSS_SELECTOR, '.use-logged-in')
 
     # fxa staging
