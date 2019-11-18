@@ -15,6 +15,7 @@ function (user, context, callback) {
 
       context.samlConfiguration.mappings = {
         "grant_all_merchant_accounts":       "grant_all_merchant_accounts",
+        "roles":        "app_metadata.groups",
       };
 
     callback(null, user, context);
