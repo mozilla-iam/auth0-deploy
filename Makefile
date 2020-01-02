@@ -21,8 +21,12 @@ deploy-local:
 	# Useful for local tests
 	uploader_rules.py -r rules
 
-deploy:
-	@echo "Deploying to $(URI)"
+deploy-stage:
+	@echo "Deploying to Auth0 stage instace in: $(URI)"
+	uploader_rules.py -r rules -u $(URI) -c $(CLIENTID) -s $(CLIENTSECRET)
+
+deploy-prod:
+	@echo "Deploying to Auth0 Production instance in: $(URI)"
 	uploader_rules.py -r rules -u $(URI) -c $(CLIENTID) -s $(CLIENTSECRET)
 
 

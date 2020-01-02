@@ -74,11 +74,7 @@ Please note that for any large change (i.e. anything but a single rule change), 
     dev PR and this prod PR will be the same and the reviewer can leverage
     the dev PR's review. If that's not the case a new thorough review would be
     needed.
-12. During change window, merge PR.
-    * As of September 2019 this won't trigger CI to deploy to prod as it's not been
-      setup
-    * Instead, manually deploy to prod using [`uploader_rules.py`](https://github.com/mozilla-iam/auth0-ci/blob/master/uploader_rules.py)
-     from the [`auth0-ci`](https://github.com/mozilla-iam/auth0-ci) project.
+12. During change window, merge PR. Codebuild will deploy it to Auth0 Production instance.
 13. [Test in prod](https://mana.mozilla.org/wiki/display/SECURITY/Auth0+manual+testing) to make sure everything works and rollback if it doesn't.  
 
 ## Known Issues
