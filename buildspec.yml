@@ -1,13 +1,15 @@
 version: 0.2
 
-env:
-  parameter-store:
-    CLIENTID: "/iam/auth0-deploy/$ENV/AUTH0_RULE_DEPLOY_CLIENTID"
-    CLIENTSECRET: "/iam/auth0-deploy/$ENV/AUTH0_RULE_DEPLOY_CLIENTSECRET"
-    URI: "/iam/auth0-deploy/$ENV/AUTH0_URI"
+#env:
+#  parameter-store:
+#    CLIENTID: "/iam/auth0-deploy/$ENV/AUTH0_RULE_DEPLOY_CLIENTID"
+#    CLIENTSECRET: "/iam/auth0-deploy/$ENV/AUTH0_RULE_DEPLOY_CLIENTSECRET"
+#    URI: "/iam/auth0-deploy/$ENV/AUTH0_URI"
 phases:
   build:
     commands:
+      - echo "$ENV"
+      - aws ssm get-parameter --name "/iam/auth0-deploy/$ENV/AUTH0_RULE_DEPLOY_CLIENTID"
       - make install
   post_build:
     commands:
