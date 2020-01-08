@@ -8,8 +8,8 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "$ENV"
-      - aws ssm get-parameter --name "/iam/auth0-deploy/$ENV/AUTH0_RULE_DEPLOY_CLIENTID"
+      - CLIENTID=$(aws ssm get-parameter --name "/iam/auth0-deploy/$ENV/AUTH0_RULE_DEPLOY_CLIENTID" --with-decryption | jq ".Parameter.Value")
+      - CLIENTSECRET=$(aws ssm get-parameter --name "/iam/auth0-deploy/$ENV/AUTH0_RULE_DEPLOY_CLIENTSECRET" --with-decryption | jq ".Parameter.Value")
       - make install
   post_build:
     commands:
