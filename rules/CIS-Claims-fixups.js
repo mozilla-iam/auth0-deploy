@@ -16,7 +16,7 @@ function (user, context, callback) {
 
   // If the only scopes requested are neither profile nor any scope beginning with
   // https:// then do not overload with custom claims
-  let scopes_requested = context.request.query.scope.split(' ');
+  let scopes_requested = context.request.query.scope ? context.request.query.scope.split(' ') : [];
   let fixup_needed = function(scope) {
     return scope === 'profile' || scope.startsWith('https://')
   };
