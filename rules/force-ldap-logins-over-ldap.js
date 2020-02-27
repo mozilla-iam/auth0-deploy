@@ -10,6 +10,10 @@ function (user, context, callback) {
      'mozillafoundation.org',  // Main org domain
      'getpocket.com',
   ];
+var MOZILLA_STAFF_DOMAINS = [ 'mozilla.com', // Main corp domain
+                              'mozillafoundation.org', // Main org domain
+                              'getpocket.com' // Pocket
+                            ];
 
   // Sanity checks
   if (!user) {
