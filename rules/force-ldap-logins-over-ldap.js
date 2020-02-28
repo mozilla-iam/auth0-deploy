@@ -8,6 +8,7 @@ function (user, context, callback) {
   var MOZILLA_STAFF_DOMAINS = [
      'mozilla.com',            // Main corp domain
      'mozillafoundation.org',  // Main org domain
+     'getpocket.com',
   ];
 
   // Sanity checks
