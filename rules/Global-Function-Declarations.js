@@ -8,7 +8,7 @@ function (user, context, callback) {
   // @rcontext the current Auth0 rule context (passed from the rule)
   // Returns rcontext with redirect set to the error
   if (!global.postError) {
-    global.postError = postError(code, rcontext, prefered_connection_arg) => {
+    global.postError = (code, rcontext, prefered_connection_arg) => {
       var jwt = require('jsonwebtoken');
       var prefered_connection = prefered_connection_arg || ""; // Optional arg
 
