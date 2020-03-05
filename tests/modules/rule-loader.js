@@ -7,18 +7,17 @@ const requireFromString = require('require-from-string');
 
 module.exports = {
   // no idea from the docs what the first variable is
-  callbackHandler: (_ = null, user, context) => {
+  handler: (_ = null, user, context) => {
     return {
       context,
       user,
     }
   },
 
-  load: (ruleFile, preExportEval = '', silent = true) => {
-    ruleFile = path.join(__dirname, '../../rules', `${ruleFile}`);
+  load: (filename, preExportEval = '', silent = true) => {
+    const ruleFile = path.join(__dirname, '../../rules', `${filename}`);
 
     const silence = silent ? `console.log = console.error = () => {};` : '';
-    // const silence = '';
 
     // shim auth0 globals into each rule, and set each function to be the global export
     const ruleText = `
@@ -31,8 +30,7 @@ module.exports = {
       module.exports = ${fs.readFileSync(ruleFile, 'utf8')};
       `;
 
-//    console.log("ruletext is", ruleText);
-    const ruleModule = requireFromString(ruleText);
+    const ruleModule = requireFromString(ruleText, filename);
 
     return ruleModule;
   }
