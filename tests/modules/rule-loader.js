@@ -17,6 +17,12 @@ module.exports = {
   load: (filename, preExportEval = '', silent = true) => {
     const ruleFile = path.join(__dirname, '../../rules', `${filename}`);
 
+    // this is here because you can easily screw up your tests if you
+    // switch the order of preExportEval and silent
+    if (typeof silent !== 'boolean') {
+      throw 'Incorrect argument order in rule loader';
+    }
+
     const silence = silent ? `console.log = console.error = () => {};` : '';
 
     // shim auth0 globals into each rule, and set each function to be the global export
