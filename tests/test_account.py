@@ -53,16 +53,18 @@ class TestAccount:
         test_rp.click_logout()
         assert test_rp.is_sign_in_button_displayed
 
-    @pytest.mark.nondestructive
-    def test_cannot_login_passwordless_if_email_in_invalid_format(self, base_url, selenium):
-        test_rp = HomepageTestRp(base_url, selenium)
-        auth0 = test_rp.auth
-        invalid_email = "invalid@mail"
-        auth0.enter_email(invalid_email)
-        auth0.click_email_enter()
-        auth0.click_send_email()
-        error_login_confirmation_message = 'Error In Email - Email Format Validation Failed: Invalid@mail'
-        assert auth0.passwordless_login_confirmation_message == error_login_confirmation_message
+    # This test, as of March 2020, no longer works as it appears Auth0 no longer
+    # alerts when a user enters an invalid email address.
+    # @pytest.mark.nondestructive
+    # def test_cannot_login_passwordless_if_email_in_invalid_format(self, base_url, selenium):
+    #     test_rp = HomepageTestRp(base_url, selenium)
+    #     auth0 = test_rp.auth
+    #     invalid_email = "invalid@mail"
+    #     auth0.enter_email(invalid_email)
+    #     auth0.click_email_enter()
+    #     auth0.click_send_email()
+    #     error_login_confirmation_message = 'Error In Email - Email Format Validation Failed: Invalid@mail'
+    #     assert auth0.passwordless_login_confirmation_message == error_login_confirmation_message
 
     @pytest.mark.nondestructive
     def test_cannot_login_with_ldap_if_email_not_correct(self, base_url, selenium, ldap_user):
