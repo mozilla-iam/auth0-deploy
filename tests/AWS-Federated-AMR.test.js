@@ -14,6 +14,9 @@ beforeEach(() => {
   _user = _.cloneDeep(user);
   _context = _.cloneDeep(context);
   output = undefined;
+
+  // set the context and user groups necessary for the tests to function
+  _context.clientID = 'xRFzU2bj7Lrbo3875aXwyxIArdkq1AOT';  // force to Federated AWS CLI auth0-dev
 });
 
 
@@ -35,8 +38,7 @@ const testAMR = (description, awsGroups, userGroups, expectedAMR) => {
   });
 };
 
-// set the context and user groups necessary for the tests to function
-context.clientID = 'xRFzU2bj7Lrbo3875aXwyxIArdkq1AOT';  // force to Federated AWS CLI auth0-dev
+
 let userGroups = ['normal_user_group_1', 'qa_team_3_member_2', 'secret_admin_group_2'];
 
 testAMR(
@@ -125,4 +127,13 @@ test('error: cannot fetch group role map from aws', () => {
 
   output.toHaveProperty('context.idToken.amr', ['']);
   output.toHaveProperty('context.idTokenError', 'Could not fetch AWS group role map from S3');
+});
+
+test('not a whilelisted relier', () => {
+  // we have to reset _context, since it's modified by beforeEach()
+  _context = _.cloneDeep(context);
+  output = rule(_user, _context, configuration, Global);
+
+  expect(output.context).toEqual(context);
+  expect(output.user).toEqual(user);
 });
