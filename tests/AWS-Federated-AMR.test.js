@@ -1,28 +1,34 @@
+const _ = require('lodash');
+
+const configuration = require('./modules/global/configuration.js');
 const context = require('./modules/contexts/context.js');
+const Global = require('./modules/global/global.js');
 const user = require('./modules/users/user.js');
+
+const loader = require('./modules/rule-loader.js');
+const rule = loader.load('AWS-Federated-AMR.js');
+
+
+// jest setup to reset _user and _context, preventing tests from writing to objects
+beforeEach(() => {
+  _user = _.cloneDeep(user);
+  _context = _.cloneDeep(context);
+  output = undefined;
+});
+
 
 const testAMR = (description, awsGroups, userGroups, expectedAMR) => {
   test(description, () => {
-    const loader = require('./modules/rule-loader.js');
 
     // AWS groups are object where each key is a pattern match string, and it maps
     // to an array of role ARNs. To simplify things for the test we'll accept a simple
     // array and map into blank ARNs
-    awsGroups = awsGroups.reduce((k, v) => ({...k, [v]: []}), {});
-
-    // stringify the awsGroup for injection into the rule loader
-    awsGroups = JSON.stringify(awsGroups);
-
-    // load the rule
-    const rule = loader.load(
-      'AWS-Federated-AMR.js',
-      `global.awsGroupRoleMap = ${awsGroups};`
-    );
+    awsGroupRoleMap = awsGroups.reduce((k, v) => ({...k, [v]: []}), {});
 
     // set the user groups
-    user.groups = userGroups;
+    _user.groups = userGroups;
 
-    const output = rule(user, context, loader.handler);
+    output = rule(_user, _context, configuration, {...Global, awsGroupRoleMap});
 
     // the first element is always '', blame auth0
     expect(output.context.idToken.amr).toEqual(['', ...expectedAMR]);
@@ -106,32 +112,16 @@ testAMR(
 
 // test if auth0 is setup incorrectly
 test('error: auth0 configuration is missing AWS Federated AMR rule configuration values', () => {
-  let loader = require('./modules/rule-loader.js');
-  let rule = loader.load(
-    'AWS-Federated-AMR.js',
-    `
-    delete configuration.auth0_aws_assests_access_key_id;
-    `,
-    false
-  );
+   _configuration = {...configuration};
+  delete _configuration.auth0_aws_assests_access_key_id;
 
-  expect(() => { rule(user, context, loader.handler) }).toThrowError(
+  expect(() => { rule(_user, _context, _configuration, Global) }).toThrowError(
     new Error("Missing Auth0 AWS Federated AMR rule configuration values")
   );
 });
 
 test('error: cannot fetch group role map from aws', () => {
-  let loader = require('./modules/rule-loader.js');
-  let rule = loader.load(
-    'AWS-Federated-AMR.js',
-    `
-    delete global.awsGroupRoleMap;
-    configuration.auth0_aws_assests_access_key_id = "fake_access_key";
-    `,
-    false
-  );
-
-  output = expect(rule(user, context, loader.handler)).resolves;
+  output = expect(rule(_user, _context, {...configuration, auth0_aws_assests_access_key_id: "fake_access_key"}, Global)).resolves;
 
   output.toHaveProperty('context.idToken.amr', ['']);
   output.toHaveProperty('context.idTokenError', 'Could not fetch AWS group role map from S3');

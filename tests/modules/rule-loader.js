@@ -4,37 +4,37 @@
 const fs = require('fs');
 const path = require('path');
 const requireFromString = require('require-from-string');
+const strip = require('strip-comments');
+
+const handler = (_ = null, user, context) => {
+  return {
+    context,
+    user,
+  }
+};
 
 module.exports = {
-  // no idea from the docs what the first variable is
-  handler: (_ = null, user, context) => {
-    return {
-      context,
-      user,
-    }
-  },
-
-  load: (filename, preExportEval = '', silent = true) => {
+  load: (filename, silent = true) => {
     const ruleFile = path.join(__dirname, '../../rules', `${filename}`);
 
-    // this is here because you can easily screw up your tests if you
-    // switch the order of preExportEval and silent
-    if (typeof silent !== 'boolean') {
-      throw 'Incorrect argument order in rule loader';
+    // remove all comments from the code
+    let functionText = strip(fs.readFileSync(ruleFile, 'utf8')).trim();
+
+    // remove all console statements from the code, hopefully this is right
+    if (silent) {
+      functionText = functionText.replace(/console\.\w*\((.|\n)+?(?=\);)\);/g, '');
     }
 
-    const silence = silent ? `console.log = console.error = () => {};` : '';
+    // strip the function call on the top
+    functionText = functionText.replace(/function\s+\(.*\)/, '');
 
     // shim auth0 globals into each rule, and set each function to be the global export
     const ruleText = `
-      const configuration = require('./modules/global/configuration.js');
-      const global = require('./modules/global/global.js');
+      module.exports = (user, context, configuration, global, auth0) => {
+        const callback = ${handler.toString()};
 
-      ${silence}
-      ${preExportEval}
-
-      module.exports = ${fs.readFileSync(ruleFile, 'utf8')};
-      `;
+        ${functionText};
+      }`;
 
     const ruleModule = requireFromString(ruleText, filename);
 
