@@ -15,7 +15,7 @@ beforeEach(() => {
   _context = _.cloneDeep(context);
   output = undefined;
 
-  // set the context and user groups necessary for the tests to function
+  // set the context clientID to a whitelisted ID
   _context.clientID = 'xRFzU2bj7Lrbo3875aXwyxIArdkq1AOT';  // force to Federated AWS CLI auth0-dev
 });
 
