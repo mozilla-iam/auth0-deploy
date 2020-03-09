@@ -74,11 +74,7 @@ Please note that for any large change (i.e. anything but a single rule change), 
     dev PR and this prod PR will be the same and the reviewer can leverage
     the dev PR's review. If that's not the case a new thorough review would be
     needed.
-12. During change window, merge PR.
-    * As of September 2019 this won't trigger CI to deploy to prod as it's not been
-      setup
-    * Instead, manually deploy to prod using [`uploader_rules.py`](https://github.com/mozilla-iam/auth0-ci/blob/master/uploader_rules.py)
-     from the [`auth0-ci`](https://github.com/mozilla-iam/auth0-ci) project.
+12. During change window, merge the PR. Now you have to manually run the Codebuild job `auth0-deploy-prod` which will deploy the rules to the Auth0 production instance. You can do this using the AWS cli running `aws codebuild start-build --project-name auth0-deploy-prod`, or using the AWS UI console navigating to Codebuild, choosing 'auth0-deploy-prod', pressing 'Start build' and pressing again 'Start build' in the next screen. Once the job finish successfully, all the rules should be uploaded to Auth0 prod.
 13. [Test in prod](https://mana.mozilla.org/wiki/display/SECURITY/Auth0+manual+testing) to make sure everything works and rollback if it doesn't.  
 
 ## Known Issues

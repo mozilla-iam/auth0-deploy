@@ -6,10 +6,7 @@ var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH', // mozillians.org account v
 
 var MOZILLA_STAFF_DOMAINS = [ 'mozilla.com', // Main corp domain
                               'mozillafoundation.org', // Main org domain
-                              'readitlater.com', // Pocket
-                              'getpocket.com', // Pocket
-                              'mozilla.net', // Corp NetOps - should not happen, but just in case
-                              'mozilla.org' // Corp org domain - should not happen, but just in case
+                              'getpocket.com' // Pocket
                             ];
 
   // Sanity checks

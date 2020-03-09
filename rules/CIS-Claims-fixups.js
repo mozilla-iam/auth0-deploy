@@ -14,9 +14,14 @@ function (user, context, callback) {
   }
 
 
-  // If the only scope requested is openid, do not overload with custom claims
-  if (context.request.query.scope === "openid") {
-    console.log('Client '+context.clientID+' only requested scope:openid, not adding custom claims');
+  // If the only scopes requested are neither profile nor any scope beginning with
+  // https:// then do not overload with custom claims
+  let scopes_requested = context.request.query.scope ? context.request.query.scope.split(' ') : [];
+  let fixup_needed = function(scope) {
+    return scope === 'profile' || scope.startsWith('https://');
+  };
+  if (! scopes_requested.some(fixup_needed)) {
+    console.log('Client '+context.clientID+' only requested '+scopes_requested+', not adding custom claims');
     return callback(null, user, context);
   }
 
