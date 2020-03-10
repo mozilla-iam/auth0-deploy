@@ -123,10 +123,13 @@ test('error: auth0 configuration is missing AWS Federated AMR rule configuration
 });
 
 test('error: cannot fetch group role map from aws', () => {
-  output = expect(rule(_user, _context, {...configuration, auth0_aws_assests_access_key_id: "fake_access_key"}, Global)).resolves;
+  // reload the rule to capture the console log
+  const _rule = loader.load('AWS-Federated-AMR.js', false);
 
-  output.toHaveProperty('context.idToken.amr', ['']);
-  output.toHaveProperty('context.idTokenError', 'Could not fetch AWS group role map from S3');
+  return _rule(_user, _context, configuration, Global).then(output => {
+    expect(output.context.idToken.amr).toEqual(['']);
+    expect(output.context._log.error[0]).toContain('Could not fetch AWS group role map from S3: InvalidAccessKeyId');
+  });
 });
 
 test('not a whilelisted relier', () => {

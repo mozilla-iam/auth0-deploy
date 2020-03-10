@@ -122,7 +122,6 @@ function (user, context, callback) {
         })
         .catch(error => {
           global.awsGroupRoleMap = {};
-          context.idTokenError = 'Could not fetch AWS group role map from S3';
           console.error(`Could not fetch AWS group role map from S3: ${error} : ${error.stack}`);
 
           return updateAmr(user, context, callback);
