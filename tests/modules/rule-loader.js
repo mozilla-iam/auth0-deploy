@@ -6,6 +6,20 @@ const path = require('path');
 const requireFromString = require('require-from-string');
 const strip = require('strip-comments');
 
+const consoleMock = `
+  context._log = {
+    error: [],
+    log: [],
+    warn: [],
+  };
+
+  const console = {
+    error: (msg) => { context._log.error.push(msg) },
+    log: (msg) => { context._log.log.push(msg) },
+    warn: (msg) => { context._log.warn.push(msg) },
+  };
+`
+
 const handler = (_ = null, user, context) => {
   return {
     context,
@@ -28,10 +42,13 @@ module.exports = {
     // strip the function call on the top
     functionText = functionText.replace(/function\s+\(.*\)/, '');
 
+
     // shim auth0 globals into each rule, and set each function to be the global export
     const ruleText = `
       module.exports = (user, context, configuration, global, auth0) => {
         const callback = ${handler.toString()};
+
+        ${silent ? '' : consoleMock}
 
         ${functionText};
       }`;
