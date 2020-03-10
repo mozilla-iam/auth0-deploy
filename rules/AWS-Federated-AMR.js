@@ -6,7 +6,15 @@ function (user, context, callback) {
     'xRFzU2bj7Lrbo3875aXwyxIArdkq1AOT', // Federated AWS CLI auth0-dev
     'N7lULzWtfVUDGymwDs0yDEq6ZcwmFazj', // Federated AWS CLI auth0-prod
   ];
+
   if (WHITELIST.includes(context.clientID)) {
+    if (!("auth0_aws_assests_s3_bucket" in configuration) ||
+        !("auth0_aws_assests_access_key_id" in configuration) ||
+        !("auth0_aws_assests_access_secret_key" in configuration)) {
+      console.log("Enriching id_token with amr for AWS Federated CLI");
+      throw new Error("Missing Auth0 AWS Federated AMR rule configuration values");
+    }
+
     const S3_BUCKET_NAME = configuration.auth0_aws_assests_s3_bucket;
     const S3_FILE_NAME = "access-group-iam-role-map.json";
     const ACCESS_KEY_ID = configuration.auth0_aws_assests_access_key_id;
@@ -21,7 +29,7 @@ function (user, context, callback) {
             overlap = new Set();
 
       const escapeRegExp = (string) => {
-        string = (string && reHasRegExpChar.test(string))? string.replace(reRegExpChar, '\\$&') : string;
+        string = (string && reHasRegExpChar.test(string)) ? string.replace(reRegExpChar, '\\$&') : string;
 
         // in AWS, we support ? and * as wildcard characters
         return string.replace(/\?/g, '.').replace(/\*/g, '.*');
@@ -42,13 +50,6 @@ function (user, context, callback) {
 
       return [...overlap];
     };
-
-    if (!("auth0_aws_assests_s3_bucket" in configuration) ||
-        !("auth0_aws_assests_access_key_id" in configuration) ||
-        !("auth0_aws_assests_access_secret_key" in configuration)) {
-      console.log("Enriching id_token with amr for AWS Federated CLI");
-      throw new Error("Missing Auth0 AWS Federated AMR rule configuration values");
-    }
 
     console.log("Enriching id_token with amr for AWS Federated CLI");
 
