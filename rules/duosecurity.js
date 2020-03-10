@@ -17,6 +17,7 @@ function (user, context, callback) {
   }
 
   // Any user logging in with LDAP (ad) requires MFA authentication.
+  // TODO: Fix undefined behavior if the configuration variables aren't set
   if (context.connectionStrategy === 'ad') {
     context.multifactor = {
       host: configuration.duo_apihost_mozilla,
