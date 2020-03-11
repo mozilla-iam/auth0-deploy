@@ -7,7 +7,7 @@ module.exports = {
     var prefered_connection = prefered_connection_arg || ""; // Optional arg
 
     // Token is valid from 30s ago, to 1h from now
-    var skey = new Buffer(configuration.jwt_msgs_rsa_skey, 'base64').toString('ascii');
+    var skey = Buffer.from(configuration.jwt_msgs_rsa_skey, 'base64').toString('ascii');
     var token = jwt.sign(
       {
         code: code,
