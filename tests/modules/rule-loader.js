@@ -31,17 +31,19 @@ module.exports = {
   load: (filename, silent = true) => {
     const ruleFile = path.join(__dirname, '../../rules', `${filename}`);
 
-    // remove all comments from the code
     let functionText = strip(fs.readFileSync(ruleFile, 'utf8')).trim();
 
-    // remove all console statements from the code, hopefully this is right
+    // by default, we remove all comments from the code, as this helps
+    // reduce console spam while running tests. however, some tests probe console
+    // output, and so we have a shim above (to capture the log inside context), and
+    // we don't remove all the console logging statements from the code
     if (silent) {
       functionText = functionText.replace(/console\.\w*\((.|\n)+?(?=\);)\);/g, '');
     }
 
-    // strip the function call on the top
+    // strip the function call on the top, usually function(user, context, callback)
+    // we do this because we call the function with considerably more arguments
     functionText = functionText.replace(/function\s+\(.*\)/, '');
-
 
     // shim auth0 globals into each rule, and set each function to be the global export
     const ruleText = `
