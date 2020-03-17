@@ -45,6 +45,10 @@ module.exports = {
     // we do this because we call the function with considerably more arguments
     functionText = functionText.replace(/function\s+\(.*\)/, '');
 
+    // auth0 supports require with module versions, e.g. require('aws-sdk@2.5.3'), and so
+    // we have to shim those to trim off the version number
+    functionText = functionText.replace(/require\('(.*)@.*'\);/, "require('$1');")
+
     // shim auth0 globals into each rule, and set each function to be the global export
     const ruleText = `
       module.exports = (user, context, configuration, global, auth0) => {

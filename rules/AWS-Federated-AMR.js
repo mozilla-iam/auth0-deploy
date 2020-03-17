@@ -103,7 +103,7 @@ function (user, context, callback) {
     // Try to take advantage of a cached copy of the awsGroupRoleMap from a previous webtask run
     // If there is no cached copy, fetch a new one.
     if (!global.awsGroupRoleMap) {
-      let AWS = require('aws-sdk');
+      let AWS = require('aws-sdk@2.5.3');
       let s3 = new AWS.S3({
         apiVersion: '2006-03-01',
         accessKeyId: ACCESS_KEY_ID,
@@ -118,6 +118,7 @@ function (user, context, callback) {
         .promise()
         .then(data => {
           global.awsGroupRoleMap = JSON.parse(data.Body.toString());
+          console.log(`Successfully fetched AWS group role map: ${global.awsGroupRoleMap}`);
           return updateAmr(user, context, callback);
         })
         .catch(error => {

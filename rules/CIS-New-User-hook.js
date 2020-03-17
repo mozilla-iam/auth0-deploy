@@ -22,7 +22,7 @@ function (user, context, callback) {
     return callback(null, user, context);
   }
 
-  const AWS = require('aws-sdk');
+  const AWS = require('aws-sdk@2.5.3');
   const lambda = new AWS.Lambda({
     accessKeyId: configuration.CIS_access_key_id,
     apiVersion: '2015-03-31',
