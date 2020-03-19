@@ -11,9 +11,8 @@ function (user, context, callback) {
   const now = new Date();
   const created = new Date(user.created_at);
 
-  // User is LDAP? Bail because the user is created by the LDAP publisher
-  // TODO: Should this use context.connectionStrategy, like force-ldap-logins-over-ldap?
-  if (context.connection.startsWith('Mozilla-LDAP')) {
+  // Bail for LDAP users created by the LDAP publisher
+  if (context.connectionStrategy === 'ad') {
     return callback(null, user, context);
   }
 

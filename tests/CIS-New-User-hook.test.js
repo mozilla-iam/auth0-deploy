@@ -20,6 +20,7 @@ beforeEach(() => {
 
 test('error: invalid lambda settings', () => {
   _context.connection = 'github';
+  _context.connectionStrategy = 'not-ad';
   _user.created_at = new Date().toISOString();
 
   // we have to deep copy these again, because of the way that rules directly modify state
@@ -52,7 +53,7 @@ test('error: missing CIS new user hook configuration variables', () => {
 });
 
 test(`users in LDAP don't call the new user hook`, () => {
-  _context.connection = 'Mozilla-LDAP foo bar';
+  _context.connectionStrategy = 'ad';
   _contextCopy = _.cloneDeep(_context);
 
   output = rule(_user, _context, _configuration, Global);
