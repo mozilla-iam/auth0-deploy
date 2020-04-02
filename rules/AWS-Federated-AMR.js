@@ -11,7 +11,6 @@ function (user, context, callback) {
     if (!("auth0_aws_assests_s3_bucket" in configuration) ||
         !("auth0_aws_assests_access_key_id" in configuration) ||
         !("auth0_aws_assests_access_secret_key" in configuration)) {
-      console.log("Enriching id_token with amr for AWS Federated CLI");
       throw new Error("Missing Auth0 AWS Federated AMR rule configuration values");
     }
 
@@ -118,7 +117,7 @@ function (user, context, callback) {
         .promise()
         .then(data => {
           global.awsGroupRoleMap = JSON.parse(data.Body.toString());
-          console.log(`Successfully fetched AWS group role map: ${global.awsGroupRoleMap}`);
+          console.log(`Successfully fetched AWS group role map: ${JSON.stringify(global.awsGroupRoleMap)}`);
           return updateAmr(user, context, callback);
         })
         .catch(error => {
