@@ -132,12 +132,18 @@ function (user, context, callback) {
       //          };
 
       if (app.client_id && (app.client_id.indexOf(context.clientID) >= 0)) {
+        // If there are multiple applications in apps.yml with the same client_id
+        // then this expiration of access check will only run against the first
+        // one encountered. This matters if there are multiple applications, using
+        // the same client_id, and asserting different expire_access_when_unused_after
+        // values.
+
         // Set app AAL (AA level) if present
         required_aal = app.AAL || required_aal;
 
         // EXPIRATION OF ACCESS
         // Note that the expiration check MUST always run first
-        // Check if the user access to the RP has expired due to ExpirationOfAccess
+        // Check if the user's access to the RP has expired due to ExpirationOfAccess
         if ((app.expire_access_when_unused_after !== undefined) && (app.expire_access_when_unused_after > 0)) {
           user.app_metadata = user.app_metadata || {};
           // If the user has no authoritativeGroups for this clientID, let the user in
