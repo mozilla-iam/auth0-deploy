@@ -4,7 +4,7 @@ function (user, context, callback) {
   ];
 
   if (ALLOWED_CLIENTIDS.includes(context.clientID)) {
-    user.company_name = 'Mozilla';
+    user.company_name = 'MOZ Corp';
 
     context.samlConfiguration.mappings = {
       'Company Name': 'company_name',
