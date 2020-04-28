@@ -34,5 +34,5 @@ test('set SAML mappings', () => {
     'name':         'name',
   });
 
-  expect(output.user.company_name).toEqual('Mozilla'); 
+  expect(output.user.company_name).toEqual('MOZ Corp'); 
 });
