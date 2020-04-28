@@ -8,6 +8,7 @@ def selenium(selenium):
     return selenium
 
 
+# https://pypi.org/project/pytest-variables/
 @pytest.fixture
 def stored_users(variables):
     return variables['users']
@@ -34,5 +35,6 @@ def google_user(stored_users):
 
 
 @pytest.fixture
-def firefox_accounts_user(stored_users):
+def firefox_accounts_users(stored_users):
     return stored_users['fxa']
+
