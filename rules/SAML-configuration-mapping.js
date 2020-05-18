@@ -10,8 +10,8 @@ function (user, context, callback) {
     return callback(null, user, context);
   }
 
-  // `context.samlConfiguration` should always be set, but this in a protective measure
-  // just in case
+  // `context.samlConfiguration` should always be set
+  // but this is a protective measure just in case
   context.samlConfiguration = context.samlConfiguration || {};
 
   switch(client) {
