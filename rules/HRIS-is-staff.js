@@ -36,9 +36,9 @@ function (user, context, callback) {
     if (!user.groups.includes('hris_is_staff')) {
       user.groups.push('hris_is_staff');
     }
-  }
 
-  console.log(`Re-integrated hris_is_staff group for ${user.user_id}`);
+    console.log(`Re-integrated hris_is_staff group for ${user.user_id}`);
+  }
 
   return callback(null, user, context);
 }
