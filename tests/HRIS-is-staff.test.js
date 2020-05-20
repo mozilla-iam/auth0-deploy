@@ -33,7 +33,7 @@ test('clientID in list', () => {
   expect(output.context).toEqual(__context); 
 });
 
-test('clientID in list, user does not have hris_is_staff set', () => {
+test('user does not have hris_is_staff set', () => {
   _context.clientID = 'UCOY390lYDxgj5rU8EeXRtN6EP005k7V';
 
   output = rule(_user, _context, configuration, Global);
@@ -42,7 +42,7 @@ test('clientID in list, user does not have hris_is_staff set', () => {
   expect(output.user.app_metadata.groups).toEqual([...user.app_metadata.groups, 'hris_is_staff']); 
 });
 
-test('clientID in list, user does not get hris_is_staff set twice', () => {
+test('user does not get hris_is_staff set twice', () => {
   _context.clientID = 'UCOY390lYDxgj5rU8EeXRtN6EP005k7V';
   _user.groups = [..._user.groups, 'hris_is_staff'];
   _user.app_metadata.groups = [..._user.app_metadata.groups, 'hris_is_staff'];
@@ -51,4 +51,14 @@ test('clientID in list, user does not get hris_is_staff set twice', () => {
 
   expect(output.user.groups).toEqual([...user.groups, 'hris_is_staff']);
   expect(output.user.app_metadata.groups).toEqual([...user.app_metadata.groups, 'hris_is_staff']);
+});
+
+test('user has hris_is_staff set only in user.groups', () => {
+  _context.clientID = 'UCOY390lYDxgj5rU8EeXRtN6EP005k7V';
+  _user.groups = [..._user.groups, 'hris_is_staff'];
+
+  output = rule(_user, _context, configuration, Global);
+
+  expect(output.user.groups).toEqual([...user.groups, 'hris_is_staff']); 
+  expect(output.user.app_metadata.groups).toEqual([...user.app_metadata.groups, 'hris_is_staff']); 
 });

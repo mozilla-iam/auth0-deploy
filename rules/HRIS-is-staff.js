@@ -21,19 +21,24 @@ function (user, context, callback) {
   }
 
   const isStaff = user._HRData !== undefined && user._HRData.cost_center !== undefined;
+
+  // these shouldn't happen, but... just in case
   user.app_metadata = user.app_metadata || {};
   user.app_metadata.groups = user.app_metadata.groups || [];
   user.groups = user.groups || [];
 
   // add `hris_is_staff` to groups if not there and user is staff
-  if (isStaff &&
-      !user.app_metadata.groups.includes('hris_is_staff') &&
-      !user.groups.includes('hris_is_staff')) {
-    user.app_metadata.groups.push('hris_is_staff');
-    user.groups.push('hris_is_staff');
+  if (isStaff) {
+    if (!user.app_metadata.groups.includes('hris_is_staff')) {
+      user.app_metadata.groups.push('hris_is_staff');
+    }
 
-    console.log(`Re-integrated hris_is_staff group for ${user.user_id}`);
+    if (!user.groups.includes('hris_is_staff')) {
+      user.groups.push('hris_is_staff');
+    }
   }
+
+  console.log(`Re-integrated hris_is_staff group for ${user.user_id}`);
 
   return callback(null, user, context);
 }
