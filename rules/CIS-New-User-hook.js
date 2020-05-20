@@ -36,6 +36,9 @@ function (user, context, callback) {
 
   // We invoke async (Event) as to not block login flow
   // See also https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html#invoke-property
+  // This CIS_hook_arn points to the Lambda function backed by this code
+  // https://github.com/mozilla-iam/cis/tree/master/serverless-functions/auth0_publisher
+  // https://github.com/mozilla-iam/cis/blob/master/python-modules/cis_publisher/cis_publisher/auth0.py
   const params = {
     FunctionName: configuration.CIS_hook_arn,
     InvocationType: 'Event',  // Change to RequestResponse to block / debugging
