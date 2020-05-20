@@ -27,8 +27,8 @@ function (user, context, callback) {
 
   // add `hris_is_staff` to groups if not there and user is staff
   if (isStaff &&
-      !user.groups.includes('hris_is_staff') &&
-      !user.app_metadata.groups.includes('hris_is_staff')) {
+      !user.app_metadata.groups.includes('hris_is_staff') &&
+      !user.groups.includes('hris_is_staff')) {
     user.app_metadata.groups.push('hris_is_staff');
     user.groups.push('hris_is_staff');
 
