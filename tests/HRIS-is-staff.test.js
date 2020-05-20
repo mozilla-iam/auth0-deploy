@@ -49,7 +49,6 @@ test('clientID in list, user does not get hris_is_staff set twice', () => {
 
   output = rule(_user, _context, configuration, Global);
 
-  expect(output.context).toEqual(_context);
   expect(output.user.groups).toEqual([...user.groups, 'hris_is_staff']);
   expect(output.user.app_metadata.groups).toEqual([...user.app_metadata.groups, 'hris_is_staff']);
 });
