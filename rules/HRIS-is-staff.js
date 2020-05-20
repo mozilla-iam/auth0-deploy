@@ -15,7 +15,6 @@ function (user, context, callback) {
     'UCOY390lYDxgj5rU8EeXRtN6EP005k7V',  // sso dashboard prod (auth0 prod)
   ];
 
-  console.log('inside hris is staff');
   // We only care about LDAP and the above clients
   if (context.connectionStrategy !== 'ad' || !ALLOWED_CLIENTIDS.includes(context.clientID)) {
     return callback(null, user, context);
