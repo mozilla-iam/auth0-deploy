@@ -3,7 +3,7 @@ function (user, context, callback) {
     'wgh8S9GaE7sJ4i0QrAzeMxFXgWZYtB0l': 'sage-intacct',  // Sage Intacct
     'R4djNlyXSl3i8N2KXWkfylghDa9kFQ84': 'thinksmart',    // mozilla.tap.thinksmart.com
     'CLIENTID WILL GO HERE': 'stripe-subplat',  // name of RP will go here
-  }
+  };
   const client = CLIENTS[context.clientID];
 
   // if it's not a client that uses SAML, exit immediately
