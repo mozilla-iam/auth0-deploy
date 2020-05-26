@@ -60,7 +60,7 @@ function (user, context, callback) {
           context.samlConfiguration.mappings['Stripe-Role-' + roleInfo['account']] = 'app_metadata.' + roleInfo['account'];
         }
       });
-    }
+      break;
   }
 
   return callback(null, user, context);
