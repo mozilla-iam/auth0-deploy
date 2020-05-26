@@ -37,25 +37,19 @@ function (user, context, callback) {
     case 'stripe-subplat':
       // https://bugzilla.mozilla.org/show_bug.cgi?id=1637117
       var groupToStripeRoleMap = {
-        //  LDAP group name
-        'stripe_subplat_admin': [
-          //   stripe_role_name           stripe_account_id
-          {'role': 'admin', 'account': 'acct_1EJOaaJNcmPzuWtR'}],
-        'stripe_subplat_developer': [
-          {'role': 'developer', 'account': 'acct_1EJOaaJNcmPzuWtR'}],
-        'stripe_subplat_supportsp': [
-          {'role': 'support_specialist', 'account': 'acct_1EJOaaJNcmPzuWtR'}],
-        'stripe_subplat_analyst': [
-          {'role': 'analyst', 'account': 'acct_1EJOaaJNcmPzuWtR'}],
-        'stripe_subplat_viewonly': [
-          {'role': 'view_only', 'account': 'acct_1EJOaaJNcmPzuWtR'}]
+        //  LDAP group name          stripe_role_name           stripe_account_id
+        'stripe_subplat_admin': [{'role': 'admin', 'account': 'acct_1EJOaaJNcmPzuWtR'}],
+        'stripe_subplat_developer': [{'role': 'developer', 'account': 'acct_1EJOaaJNcmPzuWtR'}],
+        'stripe_subplat_supportsp': [{'role': 'support_specialist', 'account': 'acct_1EJOaaJNcmPzuWtR'}],
+        'stripe_subplat_analyst': [{'role': 'analyst', 'account': 'acct_1EJOaaJNcmPzuWtR'}],
+        'stripe_subplat_viewonly': [{'role': 'view_only', 'account': 'acct_1EJOaaJNcmPzuWtR'}]
       };
       context.samlConfiguration.mappings = context.samlConfiguration.mappings || {};
       Object.keys(groupToStripeRoleMap).forEach((groupName) => {
         if (user.hasOwnProperty('groups') && user.groups.includes(groupName)) {
           groupToStripeRoleMap[groupName].forEach((roleInfo) => {
-            user.app_metadata[roleInfo['account']] = roleInfo['role'];
-            context.samlConfiguration.mappings['Stripe-Role-' + roleInfo['account']] = 'app_metadata.' + roleInfo['account'];
+            user.app_metadata[roleInfo.account] = roleInfo.role;
+            context.samlConfiguration.mappings[`Stripe-Role-${roleInfo.account}`] = `app_metadata.${roleInfo.account}`;
           });
         }
       });
