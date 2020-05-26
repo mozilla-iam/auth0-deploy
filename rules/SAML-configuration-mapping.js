@@ -50,7 +50,6 @@ function (user, context, callback) {
         'stripe_subplat_viewonly': [
           {'role': 'view_only', 'account': 'acct_1EJOaaJNcmPzuWtR'}]
       };
-      context.samlConfiguration = context.samlConfiguration || {};
       context.samlConfiguration.mappings = context.samlConfiguration.mappings || {};
       Object.keys(groupToStripeRoleMap).forEach((groupName) => {
         if (user.hasOwnProperty('groups') && user.groups.includes(groupName)) {
