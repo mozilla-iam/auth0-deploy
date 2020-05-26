@@ -45,19 +45,19 @@ function (user, context, callback) {
           {'role': 'developer', 'account': 'acct_1EJOaaJNcmPzuWtR'}],
         'stripe_subplat_supportsp': [
           {'role': 'support_specialist', 'account': 'acct_1EJOaaJNcmPzuWtR'}],
-        'stripe_subplat_analyst ': [
+        'stripe_subplat_analyst': [
           {'role': 'analyst', 'account': 'acct_1EJOaaJNcmPzuWtR'}],
-        'stripe_subplat_viewonly ': [
+        'stripe_subplat_viewonly': [
           {'role': 'view_only', 'account': 'acct_1EJOaaJNcmPzuWtR'}]
       };
       context.samlConfiguration = context.samlConfiguration || {};
       context.samlConfiguration.mappings = context.samlConfiguration.mappings || {};
       Object.keys(groupToStripeRoleMap).forEach((groupName) => {
         if (user.hasOwnProperty('groups') && user.groups.includes(groupName)) {
-          Object.keys(groupToStripeRoleMap[groupName]).forEach((roleInfo) => {
+          groupToStripeRoleMap[groupName].forEach((roleInfo) => {
             user.app_metadata[roleInfo['account']] = roleInfo['role'];
+            context.samlConfiguration.mappings['Stripe-Role-' + roleInfo['account']] = 'app_metadata.' + roleInfo['account'];
           });
-          context.samlConfiguration.mappings['Stripe-Role-' + roleInfo['account']] = 'app_metadata.' + roleInfo['account'];
         }
       });
       break;
