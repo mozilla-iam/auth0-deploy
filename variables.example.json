@@ -18,9 +18,16 @@
       "password": ""
     },
     "fxa": {
-      "email": "",
-      "password": "",
-      "secret_seed": ""
+      "stage": {
+        "email": "",
+        "password": "",
+        "secret_seed": ""
+      },
+      "prod": {
+        "email": "",
+        "password": "",
+        "secret_seed": ""
+      }
     }
   }
 }

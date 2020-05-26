@@ -64,7 +64,7 @@ class Auth0(Base):
     # Firefox Accounts locators
     _login_with_firefox_accounts_locator = (By.CSS_SELECTOR, 'button[data-handler="authorise-firefoxaccounts"]')
     _sign_in_link_locator = (By.CSS_SELECTOR, '.sign-in')
-    _fxa_email_locator = (By.CSS_SELECTOR, '.email')
+    _fxa_email_locator = (By.CSS_SELECTOR, 'input[type="email"]')
     _fxa_password_locator = (By.ID, 'password')
     _fxa_sign_in_button_locator = (By.ID, 'submit-btn')
     _fxa_passcode_field_locator = (By.CSS_SELECTOR, '.totp-code')
@@ -192,12 +192,13 @@ class Auth0(Base):
     def click_login_with_firefox_accounts(self):
         self.wait_for_element_visible(*self._login_with_firefox_accounts_locator)
         self.selenium.find_element(*self._login_with_firefox_accounts_locator).click()
-        self.selenium.find_element(*self._sign_in_link_locator).click()
 
     def enter_fxa_email(self, email):
+        self.wait_for_element_visible(*self._fxa_email_locator)
         self.selenium.find_element(*self._fxa_email_locator).send_keys(email)
 
     def enter_fxa_password(self, password):
+        self.wait_for_element_visible(*self._password_fxa_locator)
         self.selenium.find_element(*self._fxa_password_locator).send_keys(password)
 
     def click_firefox_accounts_sign_in(self):
@@ -206,19 +207,20 @@ class Auth0(Base):
     def enter_fxa_passcode(self, secret):
         passcode = pyotp.TOTP(secret).now()
         self.selenium.find_element(*self._fxa_passcode_field_locator).send_keys(passcode)
-        self.selenium.find_element(*self._fxa_verify_passcode_button_locator).click()
-
-    def login_with_fxa_staging(self, email, password, secret):
-        self.wait_for_element_visible(*self._login_with_firefox_accounts_locator)
-        self.selenium.find_element(*self._login_with_firefox_accounts_locator).click()
-        self.wait_for_element_visible(*self._email_fxa_locator)
-        self.selenium.find_element(*self._email_fxa_locator).send_keys(email)
-        self.selenium.find_element(*self._fxa_continue_button_locator).click()
-        self.wait_for_element_visible(*self._password_fxa_locator)
-        self.selenium.find_element(*self._password_fxa_locator).send_keys(password)
-        self.selenium.find_element(*self._fxa_continue_button_locator).click()
-
-        passcode = pyotp.TOTP(secret).now()
-        self.selenium.find_element(*self._fxa_passcode_field_locator).send_keys(passcode)
         self.wait_for_element_visible(*self._fxa_passcode_field_locator)
         self.selenium.find_element(*self._fxa_verify_passcode_button_locator).click()
+
+    # def login_with_fxa_staging(self, email, password, secret):
+    #     self.wait_for_element_visible(*self._login_with_firefox_accounts_locator)
+    #     self.selenium.find_element(*self._login_with_firefox_accounts_locator).click()
+    #     self.wait_for_element_visible(*self._email_fxa_locator)
+    #     self.selenium.find_element(*self._email_fxa_locator).send_keys(email)
+    #     self.selenium.find_element(*self._fxa_continue_button_locator).click()
+    #     self.wait_for_element_visible(*self._password_fxa_locator)
+    #     self.selenium.find_element(*self._password_fxa_locator).send_keys(password)
+    #     self.selenium.find_element(*self._fxa_continue_button_locator).click()
+    #
+    #     passcode = pyotp.TOTP(secret).now()
+    #     self.selenium.find_element(*self._fxa_passcode_field_locator).send_keys(passcode)
+    #     self.wait_for_element_visible(*self._fxa_passcode_field_locator)
+    #     self.selenium.find_element(*self._fxa_verify_passcode_button_locator).click()
