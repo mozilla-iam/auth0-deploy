@@ -36,7 +36,7 @@ function (user, context, callback) {
       break;
     case 'stripe-subplat':
       // https://bugzilla.mozilla.org/show_bug.cgi?id=1637117
-      var groupToStripeRoleMap = {
+      const groupToStripeRoleMap = {
         //  LDAP group name          stripe_role_name           stripe_account_id
         'stripe_subplat_admin': [{'role': 'admin', 'account': 'acct_1EJOaaJNcmPzuWtR'}],
         'stripe_subplat_developer': [{'role': 'developer', 'account': 'acct_1EJOaaJNcmPzuWtR'}],
