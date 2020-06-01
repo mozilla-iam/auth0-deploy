@@ -72,11 +72,9 @@ class HomepageTestRp(Base):
 
     def login_with_firefox_accounts(self, email, password, secret):
         auth0 = Auth0(self.base_url, self.selenium)
-        if self.base_url == "https://aai-low-social-ldap-pwless.testrp.security.allizom.org":
-            auth0.login_with_fxa_staging(email, password, secret)
-        else:
-            auth0.click_login_with_firefox_accounts()
-            auth0.enter_fxa_email(email)
-            auth0.enter_fxa_password(password)
-            auth0.click_firefox_accounts_sign_in()
-            auth0.enter_fxa_passcode(secret)
+        auth0.click_login_with_firefox_accounts()
+        auth0.enter_fxa_email(email)
+        auth0.click_firefox_accounts_sign_in()
+        auth0.enter_fxa_password(password)
+        auth0.click_firefox_accounts_sign_in()
+        auth0.enter_fxa_passcode(secret)

@@ -37,10 +37,17 @@ class TestAccount:
         test_rp.click_logout()
         assert test_rp.is_sign_in_button_displayed
 
-    def test_login_with_firefox_accounts(self, base_url, selenium, firefox_accounts_user):
+    @pytest.mark.nondestructive
+    def test_login_with_firefox_accounts(self, base_url, selenium, firefox_accounts_users):
         test_rp = HomepageTestRp(base_url, selenium)
-        test_rp.login_with_firefox_accounts(firefox_accounts_user['email'], firefox_accounts_user['password'],
-                                            firefox_accounts_user['secret_seed'])
+        if base_url == 'https://aai-low-social-ldap-pwless.testrp.security.allizom.org':
+            firefox_accounts_user = firefox_accounts_users['stage']
+        else:
+            firefox_accounts_user = firefox_accounts_users['prod']
+        test_rp.login_with_firefox_accounts(
+            firefox_accounts_user['email'],
+            firefox_accounts_user['password'],
+            firefox_accounts_user['secret_seed'])
         assert test_rp.is_logout_button_displayed
         test_rp.click_logout()
         assert test_rp.is_sign_in_button_displayed
