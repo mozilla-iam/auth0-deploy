@@ -123,7 +123,7 @@ class Auth0(Base):
         self.selenium.find_element(*self._enter_button_locator).click()
 
     def enter_ldap_passcode(self, secret):
-        self.selenium.switch_to_frame('duo_iframe')
+        self.selenium.switch_to.frame('duo_iframe')
         self.wait_for_element_visible(*self._login_form_locator)
         self.wait_for_element_visible(*self._enter_passcode_button)
         self.selenium.find_element(*self._enter_passcode_button).click()
@@ -148,7 +148,7 @@ class Auth0(Base):
                         'duo iframe has been closed before we could look at '
                         'it indicating successful login')
                     break
-        self.selenium.switch_to_default_content()
+        self.selenium.switch_to.default_content()
 
     def click_login_with_github(self):
         self.wait_for_element_visible(*self._login_with_github_button_locator)
