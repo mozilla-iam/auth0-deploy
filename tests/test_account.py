@@ -32,7 +32,7 @@ class TestAccount:
     @pytest.mark.nondestructive
     def test_login_with_github(self, base_url, selenium, github_user):
         test_rp = HomepageTestRp(base_url, selenium)
-        test_rp.login_with_github(github_user['username'], github_user['password'], github_user['secret_seed'])
+        test_rp.login_with_github(github_user['email'], github_user['password'], github_user['secret_seed'])
         assert test_rp.is_logout_button_displayed
         test_rp.click_logout()
         assert test_rp.is_sign_in_button_displayed
@@ -100,6 +100,6 @@ class TestAccount:
     @pytest.mark.nondestructive
     def test_github_autologin(self, base_url, selenium, github_user):
         sso_dashboard = SsoDashboard(base_url, selenium)
-        sso_dashboard.login_with_github(github_user['username'], github_user['password'], github_user['secret_seed'])
+        sso_dashboard.login_with_github(github_user['email'], github_user['password'], github_user['secret_seed'])
         discourse = sso_dashboard.click_discourse()
         assert discourse.is_avatar_displayed

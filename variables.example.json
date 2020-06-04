@@ -9,13 +9,14 @@
       "email": ""
     },
     "github": {
-      "username": "",
+      "email": "",
       "password": "",
       "secret_seed": ""
     },
     "google": {
       "email": "",
-      "password": ""
+      "password": "",
+      "secret_seed": ""
     },
     "fxa": {
       "stage": {

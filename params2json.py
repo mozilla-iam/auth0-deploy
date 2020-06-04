@@ -80,7 +80,7 @@ def dump_secrets():
                 "email": get_secret('/iam/automated-test/passwordless/email')
             },
             "github": {
-                "username": get_secret('/iam/automated-test/github/email'),
+                "email": get_secret('/iam/automated-test/github/email'),
                 "password": get_secret('/iam/automated-test/github/password'),
                 "secret_seed": get_secret('/iam/automated-test/github/secret_seed')
             },
