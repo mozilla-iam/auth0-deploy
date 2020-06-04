@@ -6,6 +6,13 @@ Automated tests for auth0 login in https://testrp.security.allizom.org/
 These tests are run in the `mozilla-iam` (320464205386) AWS account in the
 `us-west-2` region via the [`auth0-tests-staging`][1] AWS CodeBuild project.
 
+## To create a local `variables.json`
+
+If you'd like to run these tests locally (not in CodeBuild)
+you can either create a `variables.json` file based on [`variables.example.json`](variables.example.json)
+or run [`params2json.py`](params2json.py) to fetch the variables from AWS SSM
+Parameter store and store them in a `variables.json` file locally
+
 ## To run a single test
 
 `tox -e py36 tests/test_account.py::TestAccount::test_login_passwordless`
