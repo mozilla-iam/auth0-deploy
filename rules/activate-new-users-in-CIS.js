@@ -48,6 +48,10 @@ function (user, context, callback) {
   const fetch = require('node-fetch@2.6.0');
 
   // we also need to decode the private key from base64 into a PEM format that `jsonwebtoken` understands
+  // generated with:
+  // import base64
+  // import boto3
+  // base64.b64encode(boto3.client('ssm').get_parameter(Name='/iam/cis/development/keys/access_provider', WithDecryption=True)['Parameter']['Value'].encode('ascii')).decode('ascii')
   const privateKey = Buffer.from(configuration.changeapi_auth0_private_key, 'base64');
 
   const getBearerToken = async () => {
@@ -74,21 +78,19 @@ function (user, context, callback) {
       })
     };
 
-    return fetch(configuration.personapi_oauth_url, options)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        // store the bearer token in the global object, so it's not constantly retrieved
-        global.personapi_bearer_token = data.access_token;
-        global.personapi_bearer_token_creation_time = Date.now();
- 
-        console.log(`Successfully retrieved bearer token from Auth0`);
-        return global.personapi_bearer_token;
-      })
-      .catch(() => {
-        throw Error('Unable to retrieve bearer token from Auth0');
-      });
+    try {
+      const response = await fetch(configuration.personapi_oauth_url, options);
+      const data = await response.json();
+
+      // store the bearer token in the global object, so it's not constantly retrieved
+      global.personapi_bearer_token = data.access_token;
+      global.personapi_bearer_token_creation_time = Date.now();
+
+      console.log(`Successfully retrieved bearer token from Auth0`);
+      return global.personapi_bearer_token;
+    } catch (error) {
+      throw Error(`Unable to retrieve bearer token from Auth0: ${error.message}`);
+    }
   };
 
   const createPersonProfile = async () => {
@@ -129,11 +131,20 @@ function (user, context, callback) {
     // now we need to go and update the identities values; this is based on the logic here:
     // https://github.com/mozilla-iam/cis/blob/master/python-modules/cis_publisher/cis_publisher/auth0.py
     // which may or may not be correct, I dunno
-    for (let key in user.identities) {
-      const identity = user.identities[key];
+    for (let i = 0; i < user.identities.length; i++) {
+      const identity = user.identities[i];
       // ignore a provider if it's not whitelisted
       if (!WHITELISTED_CONNECTIONS.includes(identity.connection)) {
         continue;
+      }
+
+      // store the login_method for the first identity
+      console.log(`oh hey i is ${i}`);
+      if (i === 0) {
+        console.log(`setting login method for ${i}`);
+        profile.login_method.metadata.last_modified = now;
+        profile.login_method.signature.publisher.name = PUBLISHER_NAME;
+        profile.login_method.value = identity.connection;
       }
 
       if (identity.provider === 'github') {
@@ -209,8 +220,9 @@ function (user, context, callback) {
 
     console.log(`Fetching person profile of ${user.user_id}`);
 
-    return fetch(url, options)
-      .then(response => response.json());
+    const response = await fetch(url, options);
+
+    return response.json();
   };
 
   const postProfile = async profile => {
@@ -228,11 +240,10 @@ function (user, context, callback) {
     };
     const url = `${configuration.changeapi_url}/v2/user?user_id=${encodeURI(user.user_id)}`;
 
-    // POST the profile
-    return fetch(url, options)
-      .then(response => {
-        return response.json();
-      });
+    // POST the profile to the ChangeAPI
+    const response = await fetch(url, options);
+
+    return response.json();
   };
 
   const signAll = profile => {
@@ -253,7 +264,8 @@ function (user, context, callback) {
 
     // we can only sign attributes that access_provider (e.g. auth0) is allowed to sign
     // we also ignore things that don't have a pre-existing signature field
-    if (!attr.signature || attr.signature.publisher.name !== PUBLISHER_NAME) {
+    // we also don't need to sign null attributes
+    if (!attr.signature || attr.signature.publisher.name !== PUBLISHER_NAME || attr.value === null || attr.values === null) {
       return attr;
     }
 
@@ -278,8 +290,8 @@ function (user, context, callback) {
     return attr;
   };
 
-  // if we get this far, we need to 1) call the PersonAPI to check for existance, and 2) if the don't exist,
-  // call the ChangeAPI to create them
+  // if we get this far, we need to 1) call the PersonAPI to check for existance, and 2) if the user
+  // doesn't exist, call the ChangeAPI to create them
   getPersonProfile()
     .then(profile => {
       if (Object.keys(profile).length !== 0) {
