@@ -62,13 +62,15 @@ class HomepageTestRp(Base):
         auth0.click_github_sign_in()
         auth0.enter_github_passcode(secret)
 
-    def login_with_google(self, email, password):
+    def login_with_google(self, email, password, secret):
         auth0 = Auth0(self.base_url, self.selenium)
         auth0.click_login_with_google()
         auth0.enter_google_email(email)
         auth0.click_email_next()
         auth0.enter_google_password(password)
         auth0.click_password_next()
+        auth0.enter_google_passcode(secret)
+        auth0.click_google_passcode_next()
 
     def login_with_firefox_accounts(self, email, password, secret):
         auth0 = Auth0(self.base_url, self.selenium)
