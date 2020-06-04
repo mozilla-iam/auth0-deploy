@@ -60,6 +60,8 @@ class Auth0(Base):
     _email_next_button_locator = (By.ID, 'identifierNext')
     _google_password_field_locator = (By.CSS_SELECTOR, '#password input')
     _password_next_button_locator = (By.ID, 'passwordNext')
+    _google_passcode_field_locator = (By.ID, 'totpPin')
+    _google_passcode_next_button_locator = (By.ID, 'totpNext')
 
     # Firefox Accounts locators
     _login_with_firefox_accounts_locator = (By.CSS_SELECTOR, 'button[data-handler="authorise-firefoxaccounts"]')
@@ -188,6 +190,14 @@ class Auth0(Base):
 
     def click_password_next(self):
         self.selenium.find_element(*self._password_next_button_locator).click()
+
+    def enter_google_passcode(self, secret):
+        self.wait_for_element_visible(*self._google_passcode_field_locator)
+        passcode = pyotp.TOTP(secret).now()
+        self.selenium.find_element(*self._google_passcode_field_locator).send_keys(passcode)
+
+    def click_google_passcode_next(self):
+        self.selenium.find_element(*self._google_passcode_next_button_locator).click()
 
     def click_login_with_firefox_accounts(self):
         self.wait_for_element_visible(*self._login_with_firefox_accounts_locator)

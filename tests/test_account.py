@@ -55,7 +55,7 @@ class TestAccount:
     @pytest.mark.nondestructive
     def test_login_with_google(self, base_url, selenium, google_user):
         test_rp = HomepageTestRp(base_url, selenium)
-        test_rp.login_with_google(google_user['email'], google_user['password'])
+        test_rp.login_with_google(google_user['email'], google_user['password'], google_user['secret_seed'])
         assert test_rp.is_logout_button_displayed
         test_rp.click_logout()
         assert test_rp.is_sign_in_button_displayed
