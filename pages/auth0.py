@@ -47,7 +47,7 @@ class Auth0(Base):
 
     # Github locators
     _login_with_github_button_locator = (By.CSS_SELECTOR, 'button[data-handler="authorise-github"]')
-    _github_username_field_locator = (By.ID, 'login_field')
+    _github_email_field_locator = (By.ID, 'login_field')
     _github_password_field_locator = (By.ID, 'password')
     _github_sign_in_button_locator = (By.CSS_SELECTOR, '.btn.btn-primary.btn-block')
     _github_passcode_field_locator = (By.CSS_SELECTOR, 'input[id="otp"]')
@@ -156,8 +156,8 @@ class Auth0(Base):
         self.wait_for_element_visible(*self._login_with_github_button_locator)
         self.selenium.find_element(*self._login_with_github_button_locator).click()
 
-    def enter_github_username(self, username):
-        self.selenium.find_element(*self._github_username_field_locator).send_keys(username)
+    def enter_github_email(self, email):
+        self.selenium.find_element(*self._github_email_field_locator).send_keys(email)
 
     def enter_github_password(self, password):
         self.selenium.find_element(*self._github_password_field_locator).send_keys(password)

@@ -14,10 +14,10 @@ class SsoDashboard(Base):
         if open_url:
             self.selenium.get("https://sso.mozilla.com")
 
-    def login_with_github(self, username, password, secret):
+    def login_with_github(self, email, password, secret):
         auth0 = Auth0(self.base_url, self.selenium)
         auth0.click_login_with_github()
-        auth0.enter_github_username(username)
+        auth0.enter_github_email(email)
         auth0.enter_github_password(password)
         auth0.click_github_sign_in()
         auth0.enter_github_passcode(secret)

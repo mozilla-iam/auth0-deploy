@@ -54,10 +54,10 @@ class HomepageTestRp(Base):
         login_link = restmail.get_mail(email_address)
         self.selenium.get(login_link)
 
-    def login_with_github(self, username, password, secret):
+    def login_with_github(self, email, password, secret):
         auth0 = Auth0(self.base_url, self.selenium)
         auth0.click_login_with_github()
-        auth0.enter_github_username(username)
+        auth0.enter_github_email(email)
         auth0.enter_github_password(password)
         auth0.click_github_sign_in()
         auth0.enter_github_passcode(secret)
