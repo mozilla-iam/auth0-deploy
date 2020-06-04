@@ -1,6 +1,5 @@
 function (user, context, callback) {
   const CHANGEAPI_TIMEOUT = 14000; // milliseconds
-  const MIN_LOGINS_TO_ASSUME_EXISTENCE_IN_CIS = 6;
   const PERSONAPI_BEARER_TOKEN_REFRESH_AGE = 64800; // 18 hours
   const PERSONAPI_TIMEOUT = 5000;  // milliseconds
   const PUBLISHER_NAME = 'access_provider';
@@ -35,12 +34,6 @@ function (user, context, callback) {
 
   // if you're explicitly flagged as existing in CIS, then we don't need to continue onward
   if (user.user_metadata && user.user_metadata.existsInCIS) {
-    return callback(null, user, context);
-  }
-
-  // if you've logged in several times before, we're going to assume you exist, to speed
-  // this function along. Once `existsInCIS` is reliable, we can probably remove this check
-  if (context.stats && context.stats.loginsCount && context.stats.loginsCount >= MIN_LOGINS_TO_ASSUME_EXISTENCE_IN_CIS) {
     return callback(null, user, context);
   }
 
@@ -139,9 +132,7 @@ function (user, context, callback) {
       }
 
       // store the login_method for the first identity
-      console.log(`oh hey i is ${i}`);
       if (i === 0) {
-        console.log(`setting login method for ${i}`);
         profile.login_method.metadata.last_modified = now;
         profile.login_method.signature.publisher.name = PUBLISHER_NAME;
         profile.login_method.value = identity.connection;
@@ -290,11 +281,27 @@ function (user, context, callback) {
     return attr;
   };
 
+  const setExistsInCIS = (exists = true) => {
+    // update user metadata to store them existing
+    user.user_metadata = user.user_metadata || {};
+    user.user_metadata.existsInCIS = exists;
+
+    auth0.users.updateUserMetadata(user.user_id, user.user_metadata)
+      .then(() => {
+        console.log(`Updated user metadata on ${user.user_id} to set existsInCIS`);
+        return exists;
+      })
+      .catch(() => {
+        throw Error(`Unable to set existsInCIS on ${user.user_id}`);
+      });
+  };
+
   // if we get this far, we need to 1) call the PersonAPI to check for existance, and 2) if the user
   // doesn't exist, call the ChangeAPI to create them
   getPersonProfile()
     .then(profile => {
       if (Object.keys(profile).length !== 0) {
+        setExistsInCIS();
         throw Error(`Profile for ${user.user_id} already exists in PersonAPI`);
       } else {
         return createPersonProfile();
@@ -304,6 +311,10 @@ function (user, context, callback) {
     .then(response => {
       if (response.constructor === Object && response.status_code === 200) {
         console.log(`Successfully created profile for ${user.user_id} in ChangeAPI`);
+
+        // set their profile as existing in CIS
+        setExistsInCIS();
+
         return callback(null, user, context);
       } else {
         throw Error(`Unable to create profile for ${user.user_id} in ChangeAPI`);
