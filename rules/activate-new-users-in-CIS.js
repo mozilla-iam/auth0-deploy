@@ -103,10 +103,11 @@ function (user, context, callback) {
     profile.active.signature.publisher.name = PUBLISHER_NAME;
     profile.active.value = true;
 
+    // order goes given_name -> name -> family_name -> nickname -> ' '
     profile.first_name.metadata.display = 'private';
     profile.first_name.metadata.last_modified = now;
     profile.first_name.signature.publisher.name = PUBLISHER_NAME;
-    profile.first_name.value = user.given_name ? user.given_name : ' ';
+    profile.first_name.value = user.given_name || user.name || user.family_name || user.nickname || ' ';
 
     profile.last_name.metadata.display = 'private';
     profile.last_name.metadata.last_modified = now;
@@ -147,7 +148,7 @@ function (user, context, callback) {
         if (user.nickname) {
           profile.usernames.metadata.display = 'private';
           profile.usernames.signature.publisher.name = PUBLISHER_NAME;
-          profile.usernames.value = {"HACK#GITHUB": user.nickname};
+          profile.usernames.values = {"HACK#GITHUB": user.nickname};
         }
 
         if (identity.profileData) {
@@ -258,6 +259,11 @@ function (user, context, callback) {
     // we also don't need to sign null attributes
     if (!attr.signature || attr.signature.publisher.name !== PUBLISHER_NAME || attr.value === null || attr.values === null) {
       return attr;
+    }
+
+    // this is an ugly hack, as the CIS profile currently requires all integers to be cast into strings
+    if (attr.value && typeof attr.value === "number") {
+      attr.value = attr.value.toString();
     }
 
     // we need to delete the existing signature and generate it anew
