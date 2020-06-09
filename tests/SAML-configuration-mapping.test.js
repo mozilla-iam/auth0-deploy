@@ -47,3 +47,30 @@ test('Thinksmart', () => {
     'lastName': 'family_name',
   });
 });
+
+test('stripe-subplat admin has admin rights', () => {
+  _context.clientID = 'cEfnJekrSStxxxBascTjNEDAZVUPAIU2';
+  _user.groups = [..._user.groups, 'stripe_subplat_admin'];
+  output = rule(_user, _context, configuration, Global);
+  expect(output.context.samlConfiguration.mappings).toEqual({
+    'Stripe-Role-acct_1EJOaaJNcmPzuWtR': 'app_metadata.acct_1EJOaaJNcmPzuWtR',
+  });
+  expect(output.user.app_metadata.acct_1EJOaaJNcmPzuWtR).toEqual('admin');
+});
+
+test('stripe-subplat analyst has analyst rights', () => {
+  _context.clientID = 'cEfnJekrSStxxxBascTjNEDAZVUPAIU2';
+  _user.groups = [..._user.groups, 'stripe_subplat_analyst'];
+  output = rule(_user, _context, configuration, Global);
+  expect(output.context.samlConfiguration.mappings).toEqual({
+    'Stripe-Role-acct_1EJOaaJNcmPzuWtR': 'app_metadata.acct_1EJOaaJNcmPzuWtR',
+  });
+  expect(output.user.app_metadata.acct_1EJOaaJNcmPzuWtR).toEqual('analyst');
+});
+
+test('stripe-subplat grants no rights to anyone else', () => {
+  _context.clientID = 'cEfnJekrSStxxxBascTjNEDAZVUPAIU2';
+  output = rule(_user, _context, configuration, Global);
+  expect(output.context.samlConfiguration.mappings).toEqual({});
+  expect(output.user.app_metadata).not.toHaveProperty('acct_1EJOaaJNcmPzuWtR');
+});
