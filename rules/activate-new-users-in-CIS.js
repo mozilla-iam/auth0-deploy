@@ -3,7 +3,7 @@ function (user, context, callback) {
   const PERSONAPI_BEARER_TOKEN_REFRESH_AGE = 64800; // 18 hours
   const PERSONAPI_TIMEOUT = 5000;  // milliseconds
   const PUBLISHER_NAME = 'access_provider';
-  const WHITELISTED_CONNECTIONS = ['email', 'firefoxaccounts', 'github', 'google-oauth2'];
+  const WHITELISTED_CONNECTIONS = ['email', 'firefoxaccounts', 'github', 'google-oauth2', 'oauth2'];
 
   // if we don't have the configuration variables we need, bail
   // note that this requires the "PersonAPI - Auth0" application configured with the following scopes:
