@@ -1,7 +1,4 @@
 function (user, context, callback) {
-  // AAI (AUTHENTICATOR ASSURANCE INDICATOR)
-  // Sets the AAI for the user. This is later used by the AccessRules.js rule which also sets the AAL.
-
   user.aai = [];
   // We go through each possible attribute as auth0 will translate these differently in the main profile 
   // depending on the connection type
