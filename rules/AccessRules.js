@@ -177,6 +177,7 @@ function (user, context, callback) {
         }
 
         // Check if the user is authorized to access
+        // A user is authorized if they are a member of any authorized_groups or if they are one of the authorized_users
         if ((app.authorized_users.length > 0 ) && (app.authorized_users.indexOf(user.email) >= 0)) {
           authorized = true;
         // Same dance as above, but for groups
