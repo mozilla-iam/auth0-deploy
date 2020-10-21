@@ -1,9 +1,12 @@
 function (user, context, callback) {
   const CHANGEAPI_TIMEOUT = 14000; // milliseconds
+  // let MANAGEMENT_API = auth0;
+  const METADATA = context.primaryUserMetadata || user.user_metadata;  // linked acount, or if not linked, then user
   const PERSONAPI_BEARER_TOKEN_REFRESH_AGE = 64800; // 18 hours
   const PERSONAPI_TIMEOUT = 5000;  // milliseconds
   const PUBLISHER_NAME = 'access_provider';
-  const WHITELISTED_CONNECTIONS = ['email', 'firefoxaccounts', 'github', 'google-oauth2', 'oauth2'];
+  const USER_ID = context.primaryUser || user.user_id;  // linked account, or if not linked, then the user account
+  const WHITELISTED_CONNECTIONS = ['email', 'firefoxaccounts', 'github', 'google-oauth2', 'oauth2', 'auth0'];
 
   // if we don't have the configuration variables we need, bail
   // note that this requires the "PersonAPI - Auth0" application configured with the following scopes:
@@ -33,7 +36,7 @@ function (user, context, callback) {
   }
 
   // if you're explicitly flagged as existing in CIS, then we don't need to continue onward
-  if (user.user_metadata && user.user_metadata.existsInCIS) {
+  if (METADATA && METADATA.existsInCIS) {
     return callback(null, user, context);
   }
 
@@ -87,7 +90,7 @@ function (user, context, callback) {
   };
 
   const createPersonProfile = async () => {
-    console.log(`Generating CIS profile for ${user.user_id}`);
+    console.log(`Generating CIS profile for ${USER_ID}`);
 
     let now = new Date();
     now = now.toISOString();
@@ -120,7 +123,7 @@ function (user, context, callback) {
 
     profile.user_id.metadata.last_modified = now;
     profile.user_id.signature.publisher.name = PUBLISHER_NAME;
-    profile.user_id.value = user.user_id;
+    profile.user_id.value = USER_ID;
 
     // now we need to go and update the identities values; this is based on the logic here:
     // https://github.com/mozilla-iam/cis/blob/master/python-modules/cis_publisher/cis_publisher/auth0.py
@@ -208,9 +211,9 @@ function (user, context, callback) {
       },
       timeout: PERSONAPI_TIMEOUT,
     };
-    const url = `${configuration.personapi_url}/v2/user/user_id/${encodeURI(user.user_id)}?active=any`;
+    const url = `${configuration.personapi_url}/v2/user/user_id/${encodeURI(USER_ID)}?active=any`;
 
-    console.log(`Fetching person profile of ${user.user_id}`);
+    console.log(`Fetching person profile of ${USER_ID}`);
 
     const response = await fetch(url, options);
 
@@ -218,7 +221,7 @@ function (user, context, callback) {
   };
 
   const postProfile = async profile => {
-    console.log(`Posting profile for ${user.user_id} to ChangeAPI`);
+    console.log(`Posting profile for ${USER_ID} to ChangeAPI`);
 
     const bearer = await getBearerToken();
     const options = {
@@ -230,7 +233,7 @@ function (user, context, callback) {
       body: JSON.stringify(profile),
       timeout: CHANGEAPI_TIMEOUT,
     };
-    const url = `${configuration.changeapi_url}/v2/user?user_id=${encodeURI(user.user_id)}`;
+    const url = `${configuration.changeapi_url}/v2/user?user_id=${encodeURI(USER_ID)}`;
 
     // POST the profile to the ChangeAPI
     const response = await fetch(url, options);
@@ -289,16 +292,16 @@ function (user, context, callback) {
 
   const setExistsInCIS = (exists = true) => {
     // update user metadata to store them existing
-    user.user_metadata = user.user_metadata || {};
-    user.user_metadata.existsInCIS = exists;
+    metadata = METADATA || {}
+    metadata.existsInCIS = exists;
 
-    auth0.users.updateUserMetadata(user.user_id, user.user_metadata)
+    auth0.users.updateUserMetadata(USER_ID, metadata)
       .then(() => {
-        console.log(`Updated user metadata on ${user.user_id} to set existsInCIS`);
+        console.log(`Updated user metadata on ${USER_ID} to set existsInCIS`);
         return exists;
       })
       .catch(() => {
-        throw Error(`Unable to set existsInCIS on ${user.user_id}`);
+        throw Error(`Unable to set existsInCIS on ${USER_ID}`);
       });
   };
 
@@ -308,7 +311,7 @@ function (user, context, callback) {
     .then(profile => {
       if (Object.keys(profile).length !== 0) {
         setExistsInCIS();
-        throw Error(`Profile for ${user.user_id} already exists in PersonAPI`);
+        throw Error(`Profile for ${user.user_id} already exists in PersonAPI as ${USER_ID}`);
       } else {
         return createPersonProfile();
       }
@@ -316,14 +319,14 @@ function (user, context, callback) {
     .then(profile => postProfile(profile))
     .then(response => {
       if (response.constructor === Object && response.status_code === 200) {
-        console.log(`Successfully created profile for ${user.user_id} in ChangeAPI`);
+        console.log(`Successfully created profile for ${user.user_id} in ChangeAPI as ${USER_ID}`);
 
         // set their profile as existing in CIS
         setExistsInCIS();
 
         return callback(null, user, context);
       } else {
-        throw Error(`Unable to create profile for ${user.user_id} in ChangeAPI`);
+        throw Error(`Unable to create profile for ${USER_ID} in ChangeAPI`);
       }
     })
     .catch(error => {

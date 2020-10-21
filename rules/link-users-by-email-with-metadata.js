@@ -188,6 +188,8 @@ function (user, context, callback) {
           }
           // Finally, swap user_id so that the current login process has the correct data
           context.primaryUser = primaryUser.user_id;
+          context.primaryUserMetadata = primaryUser.user_metadata || {};
+
           return callback(null, user, context);
       });
     })
