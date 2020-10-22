@@ -1,7 +1,6 @@
 function (user, context, callback) {
   const CHANGEAPI_TIMEOUT = 14000; // milliseconds
-  // let MANAGEMENT_API = auth0;
-  const METADATA = context.primaryUserMetadata || user.user_metadata;  // linked acount, or if not linked, then user
+  const METADATA = context.primaryUserMetadata || user.user_metadata || {};  // linked account, or if not linked, then user
   const PERSONAPI_BEARER_TOKEN_REFRESH_AGE = 64800; // 18 hours
   const PERSONAPI_TIMEOUT = 5000;  // milliseconds
   const PUBLISHER_NAME = 'access_provider';
@@ -36,7 +35,7 @@ function (user, context, callback) {
   }
 
   // if you're explicitly flagged as existing in CIS, then we don't need to continue onward
-  if (METADATA && METADATA.existsInCIS) {
+  if (METADATA.existsInCIS) {
     return callback(null, user, context);
   }
 
@@ -292,10 +291,9 @@ function (user, context, callback) {
 
   const setExistsInCIS = (exists = true) => {
     // update user metadata to store them existing
-    metadata = METADATA || {}
-    metadata.existsInCIS = exists;
+    METADATA.existsInCIS = exists;
 
-    auth0.users.updateUserMetadata(USER_ID, metadata)
+    auth0.users.updateUserMetadata(USER_ID, METADATA)
       .then(() => {
         console.log(`Updated user metadata on ${USER_ID} to set existsInCIS`);
         return exists;
