@@ -103,6 +103,7 @@ function (user, context, callback) {
       } else if (user.identities && user.identities.length > 1) {
         console.log("Account linking case 1 reached for "+user.user_id);
         primaryUser = user;
+        context.primaryUserMetadata = primaryUser.user_metadata || {};
 
       // CASE 2:
       // If user has a single account in auth0 database other than the one they just logged in with (data.length === 1),
