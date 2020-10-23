@@ -1,8 +1,8 @@
 function (user, context, callback) {
-  const CHANGEAPI_TIMEOUT = 14000; // milliseconds
+  const AUTH0_TIMEOUT = PERSONAPI_TIMEOUT = 5000;  // milliseconds
+  const CHANGEAPI_TIMEOUT = 14000;  // milliseconds
   const METADATA = context.primaryUserMetadata || user.user_metadata || {};  // linked account, or if not linked, then user
-  const PERSONAPI_BEARER_TOKEN_REFRESH_AGE = 64800; // 18 hours
-  const PERSONAPI_TIMEOUT = 5000;  // milliseconds
+  const PERSONAPI_BEARER_TOKEN_REFRESH_AGE = 64800;  // 18 hours
   const PUBLISHER_NAME = 'access_provider';
   const USER_ID = context.primaryUser || user.user_id;  // linked account, or if not linked, then the user account
   const WHITELISTED_CONNECTIONS = ['email', 'firefoxaccounts', 'github', 'google-oauth2', 'oauth2', 'auth0'];
@@ -64,7 +64,7 @@ function (user, context, callback) {
       headers: {
         'Content-Type': 'application/json',
       },
-      timeout: PERSONAPI_TIMEOUT,
+      timeout: AUTH0_TIMEOUT,
       body: JSON.stringify({
         audience: configuration.personapi_audience,
         client_id: configuration.personapi_client_id,
