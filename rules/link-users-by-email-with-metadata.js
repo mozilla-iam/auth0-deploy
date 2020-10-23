@@ -173,7 +173,7 @@ function (user, context, callback) {
     user.app_metadata = user.app_metadata || {};
     user.user_metadata = user.user_metadata || {};
     auth0.users.updateAppMetadata(primaryUser.user_id, user.app_metadata)
-    .then(auth0.users.updateUserMetadata(primaryUser.user_id, user.user_metadata))
+    .then(auth0.users.updateUserMetadata(primaryUser.user_id, Object.assign({}, user.user_metadata, primaryUser.user_metadata))
     // Link the accounts
     .then(function() {
       request.post({
