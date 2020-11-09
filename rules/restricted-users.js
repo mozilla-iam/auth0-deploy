@@ -14,28 +14,32 @@ function (user, context, callback) {
     'FeqjZfpOqMIkcGKkd2fDjpnm5oSsOOZ2',  // aai-low-social-ldap-pwless.testrp.security.allizom.org for dev testing only (dev clientid)
 
     // The following are production clientIDs
-    'smKTjsVVxUJDEkjIftOsP0bop2NWjysa',  // Google / Gsuite
+    'smKTjsVVxUJDEkjIftOsP0bop2NWjysa',  // Google / GSuite
     'Hypn042D0cqtqET33nRrnqOwAcIXOqx6',  // Workday
-    'Qzs1IbNmnXB1js1KlhhdnwYZT9rwwF4U',  // Mana
+    'Qzs1IbNmnXB1js1KlhhdnwYZT9rwwF4U',  // mana.mozilla.org
     'WXVdgVoCca11OtpGlK8Ir3pR9CBAlSA5',  // Slack
     'TnqNECyCfoQYd1X7c4xwMF4PMsEfyWPj',  // Zoom
-    '5gtZrLu2eyAapp1BgQsF11rhdPNt2lGP',  // Hub
-    'adMlV8Ud0Z77GLfsaa4fb4oQj8ggf0ws',  // Expensify
-    'o2e391VjmnPk0115UedNTmRL8x2nySOa',  // PMO/Dinopark
-    'HdfEiM1SZibaQnOYTxLoMdxSh4a6ZKD3',  // Mozillians.org
-    'cav8o4za5QGMXilUEjglH9cgJpQl33Ck',  // Moderator
+    '5gtZrLu2eyAapp1BgQsF11rhdPNt2lGP',  // mozilla.service-now.com / The Hub
+    'adMlV8Ud0Z77GLfsaa4fb4oQj8ggf0ws',  // expensify.com
+    'o2e391VjmnPk0115UedNTmRL8x2nySOa',  // people.mozilla.org / Dinopark
+    'HdfEiM1SZibaQnOYTxLoMdxSh4a6ZKD3',  // mozillians.org
+    'cav8o4za5QGMXilUEjglH9cgJpQl33Ck',  // moderator.mozilla.org
     '7euXeq96glWUS85bwDRCCs10xKGY93t0',  // INXPO air.mozilla.org
     'UCOY390lYDxgj5rU8EeXRtN6EP005k7V',  // sso.mozilla.com
+    'LGK34V7wTjZ8tkMSCQhxI0ynfiMcAsvg',  // chat.mozilla.org / Matrix IM
+    '7wyIItkJX4t7vYEaDmGrwP9k2fBh5qWP',  // prod.testrp.allizom.org
+    'NhzqLGjjqXIp3kGoonkTLSO7awPBhWsK',  // Udemy
   ];
 
   if (restrictedUsers.includes(user.email)) {
     // Remove all group but what's allowed (IntranetWiki) just in case
     console.log(`User is restricted, wiping group data for ${user.user_id}`);
     user.app_metadata = user.app_metadata || {};
-    user.app_metadata.groups = ['IntranetWiki'];
-    user.groups = ['IntranetWiki'];
-    user.ldap_groups = ['IntranetWiki'];
-    context.idToken[`${NAMESPACE}groups`] = ['IntranetWiki'];
+    const groups_to_add = ['IntranetWiki'];
+    user.app_metadata.groups = groups_to_add;
+    user.groups = groups_to_add;
+    user.ldap_groups = groups_to_add;
+    context.idToken[`${NAMESPACE}groups`] = groups_to_add;
 
     // call auth0 to update the app metadata
     auth0.users.updateAppMetadata(user.user_id, user.app_metadata);
