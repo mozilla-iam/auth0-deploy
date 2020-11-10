@@ -106,7 +106,7 @@ function (user, context, callback) {
 
       // CASE 2:
       // If user has a single account in auth0 database other than the one they just logged in with (data.length === 1),
-      // AND they are logging in with an account which is linked to one other account (user.identities.length === 1),
+      // AND they are logging in with an account which is not linked to any other account (user.identities.length === 1),
       // AND that one other account has one or more additional accounts linked to it (targetUser.identities.length >= 1)
       // we do not apply ratcheting logic as this means
       // 1) `user` is a new user not in the database
