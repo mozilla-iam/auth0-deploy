@@ -6,13 +6,19 @@ function (user, context, callback) {
     'xRFzU2bj7Lrbo3875aXwyxIArdkq1AOT', // Federated AWS CLI auth0-dev
     'N7lULzWtfVUDGymwDs0yDEq6ZcwmFazj', // Federated AWS CLI auth0-prod
   ];
-  if (WHITELIST.indexOf(context.clientID) >= 0) {
+
+  if (WHITELIST.includes(context.clientID)) {
+    if (!("auth0_aws_assests_s3_bucket" in configuration) ||
+        !("auth0_aws_assests_access_key_id" in configuration) ||
+        !("auth0_aws_assests_access_secret_key" in configuration)) {
+      throw new Error("Missing Auth0 AWS Federated AMR rule configuration values");
+    }
+
     const S3_BUCKET_NAME = configuration.auth0_aws_assests_s3_bucket;
     const S3_FILE_NAME = "access-group-iam-role-map.json";
     const ACCESS_KEY_ID = configuration.auth0_aws_assests_access_key_id;
     const SECRET_KEY = configuration.auth0_aws_assests_access_secret_key;
 
-    // modules/group-intersection.js
     // Given a set of groups that a user is in (groups), and a filter upon those groups,
     // return the intersection of the two
     const groupIntersection = (groups, filter) => {
@@ -22,7 +28,7 @@ function (user, context, callback) {
             overlap = new Set();
 
       const escapeRegExp = (string) => {
-        string = (string && reHasRegExpChar.test(string))? string.replace(reRegExpChar, '\\$&') : string;
+        string = (string && reHasRegExpChar.test(string)) ? string.replace(reRegExpChar, '\\$&') : string;
 
         // in AWS, we support ? and * as wildcard characters
         return string.replace(/\?/g, '.').replace(/\*/g, '.*');
@@ -44,13 +50,8 @@ function (user, context, callback) {
       return [...overlap];
     };
 
-    if (!("auth0_aws_assests_s3_bucket" in configuration) ||
-        !("auth0_aws_assests_access_key_id" in configuration) ||
-        !("auth0_aws_assests_access_secret_key" in configuration)) {
-      console.log("Enriching id_token with amr for AWS Federated CLI");
-      throw new Error("Missing Auth0 AWS Federated AMR rule configuration values");
-    }
     console.log("Enriching id_token with amr for AWS Federated CLI");
+
     // Amazon will read in the id token's `amr` list and allow you to match on policies with a string condition.
     // See
     // https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_condition_operators.html#Conditions_String
@@ -75,13 +76,13 @@ function (user, context, callback) {
     //      "arn:aws:iam::656532927350:role/federated-aws-cli-test-may2019"
     //    ]
     // }
-    const updateAmr = function(user, context, callback) {
+    const updateAmr = (user, context, callback) => {
       let aws_groups = Object.keys(global.awsGroupRoleMap);
       user.groups = user.groups || [];
       context.idToken.amr = groupIntersection(user.groups, aws_groups);
       console.log(`User groups: ${user.groups.join(", ")}`);
       console.log(`AWS groups: ${aws_groups.join(", ")}`);
-      console.log("Intersection of user groups and AWS groups: " + context.idToken.amr);
+      console.log(`Intersection of user groups and AWS groups: ${context.idToken.amr}`);
 
       // If Auth0 is going to send the user to Duo, Auth0 will modify the `amr` claim. Auth0 will specifically
       // overwrite the first element in the `amr` list (slot 0) with the string `mfa`. Anything put in slot 0
@@ -94,33 +95,37 @@ function (user, context, callback) {
       // elements in the `amr` claim list. This rule does not account for these possible future issues.
       context.idToken.amr.splice(0, 0, "");
 
-      console.log("Returning idToken with idToken.amr size == "+context.idToken.amr.length+" (should be ~< 26 and idToken < 2048) for user_id "+user.user_id);
+      console.log(`Returning idToken with idToken.amr size == ${context.idToken.amr.length} (should be ~< 26 and idToken < 2048) for user_id ${user.user_id}`);
       return callback(null, user, context);
     };
+
     // Try to take advantage of a cached copy of the awsGroupRoleMap from a previous webtask run
     // If there is no cached copy, fetch a new one.
     if (!global.awsGroupRoleMap) {
-      let AWS = require('aws-sdk');
+      let AWS = require('aws-sdk@2.5.3');
       let s3 = new AWS.S3({
         apiVersion: '2006-03-01',
         accessKeyId: ACCESS_KEY_ID,
         secretAccessKey: SECRET_KEY,
         region: 'us-west-2',
-        logger: console
+        logger: console,
       });
-      s3.getObject({Bucket: S3_BUCKET_NAME, Key: S3_FILE_NAME},
-        function(error, data) {
-          if (error) {
-            console.error(
-                'Could not fetch AWS group role map from S3: ' + error + ' : ' + error.stack);
-            global.awsGroupRoleMap = {};
-          } else {
-            console.log('Fetched ' + S3_BUCKET_NAME + '/' + S3_FILE_NAME + ' from S3');
-            global.awsGroupRoleMap = JSON.parse(data.Body.toString());
-          }
+
+      // this returns a promise so that jest can wait for it to resolve
+      // in theory, auth0 doesn't finish executing a rule until the callback is made
+      return s3.getObject({Bucket: S3_BUCKET_NAME, Key: S3_FILE_NAME})
+        .promise()
+        .then(data => {
+          global.awsGroupRoleMap = JSON.parse(data.Body.toString());
+          console.log(`Successfully fetched AWS group role map: ${JSON.stringify(global.awsGroupRoleMap)}`);
           return updateAmr(user, context, callback);
-        }
-      );
+        })
+        .catch(error => {
+          global.awsGroupRoleMap = {};
+          console.error(`Could not fetch AWS group role map from S3: ${error} : ${error.stack}`);
+
+          return updateAmr(user, context, callback);
+        });
     } else {
       return updateAmr(user, context, callback);
     }

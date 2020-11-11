@@ -2,7 +2,7 @@
 Rules used for the Auth0 instances of Mozilla.
 You can find more information about Auth0 at https://www.auth0.com
 
-The rules are snippets of javascript code running as webtasks (https://www.webtasks.io), which modify the authentication flow of users in Auth0.
+The rules are snippets of javascript code running as webtasks (https://www.webtask.io), which modify the authentication flow of users in Auth0.
 
 ## Branches
 
@@ -76,6 +76,18 @@ Please note that for any large change (i.e. anything but a single rule change), 
     needed.
 12. During change window, merge the PR. Now you have to manually run the Codebuild job `auth0-deploy-prod` which will deploy the rules to the Auth0 production instance. You can do this using the AWS cli running `aws codebuild start-build --project-name auth0-deploy-prod`, or using the AWS UI console navigating to Codebuild, choosing 'auth0-deploy-prod', pressing 'Start build' and pressing again 'Start build' in the next screen. Once the job finish successfully, all the rules should be uploaded to Auth0 prod.
 13. [Test in prod](https://mana.mozilla.org/wiki/display/SECURITY/Auth0+manual+testing) to make sure everything works and rollback if it doesn't.  
+
+## Testing
+
+To run the automated tests on the rules first setup your testing environment. This is a one time step
+
+* `cd tests`
+* `npm install`
+
+Next run the tests
+
+* `cd tests`
+* `npm run tests` 
 
 ## Known Issues
 
