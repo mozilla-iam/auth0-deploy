@@ -48,7 +48,7 @@ function (user, context, callback) {
       // Do not perform any account linking
       return callback(null, user, context);
     }
-    var firstSearchResult = data[0] || undefined;
+    const firstSearchResult = data[0] || undefined;
 
     if (data.length === 2) {
       // Auth0 is aware of 2 identities with the same email address
@@ -69,26 +69,25 @@ function (user, context, callback) {
         if (firstSearchResult.user_id === user.user_id) {
           // Link the current user identity into the second search result identity
           return linkAccount(data[1]);
-        } else {
-          // Link the current user identity into the first search result identity
-          return linkAccount(firstSearchResult);
+        }
+        // Link the current user identity into the first search result identity
+        return linkAccount(firstSearchResult);
         }
       }
     } else {
       // data.length is > 2 which, post November 2020 when all identities were
       // force linked manually, shouldn't be possible
-      var error_message = "Error linking account + " + user.user_id +
-          " as there are over 2 identities with the email address " + user.email +
-          " " + data.map(x => x.user_id).join();
+      var error_message = `Error linking account ${user.user_id} as there are ` +
+          `over 2 identities with the email address ${user.email} ` +
+          data.map(x => x.user_id).join();
       console.log(error_message);
       return callback(new Error(error_message));
     }
   });
 
-  function linkAccount(primaryUser) {
+  const linkAccount = primaryUser => {
     // Link the current logged in identity as a secondary into primaryUser as a primary
-    console.log("Linking secondary identity " + user.user_id +
-        " into primary identity " + primaryUser.user_id);
+    console.log(`Linking secondary identity ${user.user_id} into primary identity ${primaryUser.user_id}`);
 
     // Update app, user metadata as Auth0 won't back this up in user.identities[x].profileData
     user.app_metadata = user.app_metadata || {};
