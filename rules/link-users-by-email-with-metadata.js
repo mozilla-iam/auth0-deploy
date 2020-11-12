@@ -39,41 +39,19 @@ function (user, context, callback) {
 
     var data = JSON.parse(body);
     // Ignore non-verified users
-    data = data.filter(function(u) {
-      return u.email_verified;
-    });
+    data = data.filter(u => u.email_verified);
 
     if (data.length === 1) {
       // The user logged in with an identity which is the only one Auth0 knows about
       // Do not perform any account linking
       return callback(null, user, context);
     }
-    const firstSearchResult = data[0] || undefined;
 
     if (data.length === 2) {
-      // Auth0 is aware of 2 identities with the same email address
-      // The first search result of the /users-by-email API endpoint is the linked
-      // account for that email address if there is one. It's followed by all unlinked accounts.
-
-      if (firstSearchResult.identities && firstSearchResult.identities.length >= 1) {
-        if (user.identities && user.identities.length > 1 && user.user_id ===
-            firstSearchResult.user_id) {
-          // The user has logged in with the already linked account, do nothing
-          return callback(null, user, context);
-        } else if (user.identities && user.identities.length === 1) {
-          // The user has logged in with a not yet linked account, link it to firstSearchResult
-          return linkAccount(firstSearchResult);
-        }
-      } else {
-        // firstSearchResult is an identity with no linked secondaries
-        if (firstSearchResult.user_id === user.user_id) {
-          // Link the current user identity into the second search result identity
-          return linkAccount(data[1]);
-        }
-        // Link the current user identity into the first search result identity
-        return linkAccount(firstSearchResult);
-        }
-      }
+      // Auth0 is aware of 2 identities with the same email address which means
+      // that the user just logged in with a new identity that hasn't been linked
+      // into the other existing identity
+      return linkAccount(data.filter(u => u.user_id !== user.user_id)[0]);
     } else {
       // data.length is > 2 which, post November 2020 when all identities were
       // force linked manually, shouldn't be possible
@@ -81,6 +59,7 @@ function (user, context, callback) {
           `over 2 identities with the email address ${user.email} ` +
           data.map(x => x.user_id).join();
       console.log(error_message);
+      publishSNSMessage(`${error_message}\n\ndata : ${JSON.stringify(data)}\nuser : ${JSON.stringify(user)}`);
       return callback(new Error(error_message));
     }
   });
@@ -110,12 +89,42 @@ function (user, context, callback) {
         // Finally, swap user_id so that the current login process has the correct data
         context.primaryUser = primaryUser.user_id;
         context.primaryUserMetadata = primaryUser.user_metadata || {};
-        return callback(null, user, context)
+        return callback(null, user, context);
       });
     })
     .catch(function (err) {
       console.log("An unknown error occurred while linking accounts: " + err);
       return callback(err);
     });
-  }
+  };
+  const publishSNSMessage = message => {
+    if (!("aws_logging_sns_topic_arn" in configuration) ||
+        !("aws_logging_access_key_id" in configuration) ||
+        !("aws_logging_secret_key" in configuration)) {
+      console.log("Missing Auth0 AWS SNS logging configuration values");
+      return false;
+    }
+
+    const SNS_TOPIC_ARN = configuration.aws_logging_sns_topic_arn;
+    const ACCESS_KEY_ID = configuration.aws_logging_access_key_id;
+    const SECRET_KEY = configuration.aws_logging_secret_key;
+
+    let AWS = require('aws-sdk@2.5.3');
+    let sns = new AWS.SNS({
+      apiVersion: '2010-03-31',
+      accessKeyId: ACCESS_KEY_ID,
+      secretAccessKey: SECRET_KEY,
+      region: 'us-west-2',
+      logger: console,
+    });
+    const params = {
+      Message: message,
+      TopicArn: SNS_TOPIC_ARN,
+    };
+    sns.publish(params, function(err, data) {
+      if (err) console.log(err, err.stack); // an error occurred
+      else     console.log(data);           // successful response
+    });
+
+  };
 }
