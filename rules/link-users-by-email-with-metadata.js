@@ -101,7 +101,8 @@ function (user, context, callback) {
     if (!("aws_logging_sns_topic_arn" in configuration) ||
         !("aws_logging_access_key_id" in configuration) ||
         !("aws_logging_secret_key" in configuration)) {
-      throw new Error("Missing Auth0 AWS SNS logging configuration values");
+      console.log("Missing Auth0 AWS SNS logging configuration values");
+      return false;
     }
 
     const SNS_TOPIC_ARN = configuration.aws_logging_sns_topic_arn;
@@ -116,9 +117,9 @@ function (user, context, callback) {
       region: 'us-west-2',
       logger: console,
     });
-    var params = {
+    const params = {
       Message: message,
-      TopicArn: SNS_TOPIC_ARN
+      TopicArn: SNS_TOPIC_ARN,
     };
     sns.publish(params, function(err, data) {
       if (err) console.log(err, err.stack); // an error occurred
