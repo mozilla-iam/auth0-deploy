@@ -39,9 +39,7 @@ function (user, context, callback) {
 
     var data = JSON.parse(body);
     // Ignore non-verified users
-    data = data.filter(function(u) {
-      return u.email_verified;
-    });
+    data = data.filter(u => u.email_verified);
 
     if (data.length === 1) {
       // The user logged in with an identity which is the only one Auth0 knows about
@@ -61,6 +59,7 @@ function (user, context, callback) {
           `over 2 identities with the email address ${user.email} ` +
           data.map(x => x.user_id).join();
       console.log(error_message);
+      publishSNSMessage(`${error_message}\n\ndata : ${JSON.stringify(data)}\nuser : ${JSON.stringify(user)}`);
       return callback(new Error(error_message));
     }
   });
@@ -97,5 +96,34 @@ function (user, context, callback) {
       console.log("An unknown error occurred while linking accounts: " + err);
       return callback(err);
     });
+  };
+  const publishSNSMessage = message => {
+    if (!("aws_logging_sns_topic_arn" in configuration) ||
+        !("aws_logging_access_key_id" in configuration) ||
+        !("aws_logging_secret_key" in configuration)) {
+      throw new Error("Missing Auth0 AWS SNS logging configuration values");
+    }
+
+    const SNS_TOPIC_ARN = configuration.aws_logging_sns_topic_arn;
+    const ACCESS_KEY_ID = configuration.aws_logging_access_key_id;
+    const SECRET_KEY = configuration.aws_logging_secret_key;
+
+    let AWS = require('aws-sdk@2.5.3');
+    let sns = new AWS.SNS({
+      apiVersion: '2010-03-31',
+      accessKeyId: ACCESS_KEY_ID,
+      secretAccessKey: SECRET_KEY,
+      region: 'us-west-2',
+      logger: console,
+    });
+    var params = {
+      Message: message,
+      TopicArn: SNS_TOPIC_ARN
+    };
+    sns.publish(params, function(err, data) {
+      if (err) console.log(err, err.stack); // an error occurred
+      else     console.log(data);           // successful response
+    });
+
   };
 }
