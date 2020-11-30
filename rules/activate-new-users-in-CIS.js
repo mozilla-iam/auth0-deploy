@@ -166,7 +166,7 @@ function (user, context, callback) {
 
           profile.identities.github_primary_email.metadata.display = 'private';
           profile.identities.github_primary_email.metadata.last_modified = now;
-          profile.identities.github_primary_email.metadata.verified = identity.profileData.email_verified === true ? true : false;
+          profile.identities.github_primary_email.metadata.verified = identity.profileData.email_verified === true;
           profile.identities.github_primary_email.signature.publisher.name = PUBLISHER_NAME;
           profile.identities.github_primary_email.value = identity.profileData.email;
         }
