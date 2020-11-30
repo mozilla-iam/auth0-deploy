@@ -195,6 +195,27 @@ function (user, context, callback) {
         profile.identities.firefox_accounts_primary_email.signature.publisher.name = PUBLISHER_NAME;
         profile.identities.firefox_accounts_primary_email.value = user.email;
       }
+
+      else if (identity.provider === 'ad' && (identity.connection === 'Mozilla-LDAP' || identity.connection === 'Mozilla-LDAP-Dev')) {
+        // Auth0 gets LDAP attributes from the Auth0 LDAP Connector.
+        // We've patched the LDAP connector to pass addition LDAP fields
+        // https://github.com/mozilla-iam/ad-ldap-connector-rpm/tree/master/patches
+
+        // The Auth0 publisher can't currently publish this attribute as it's not
+        // permitted to : https://auth.mozilla.com/.well-known/mozilla-iam-publisher-rules
+        // If these publisher rules were to change this could be published by the Auth0
+        // publisher. Until then, this value won't be correct until the LDAP publisher
+        // updates it.
+        // profile.identities.mozilla_ldap_primary_email = user.email;
+
+        // The following fields were previously published by the LDAP publisher
+        // when it was tasked with creating new CIS profiles for LDAP users
+        // They appear to not be available to this rule as they aren't in the
+        // user object and aren't passed by the LDAP connector
+        // profile.identities.mozilla_ldap_id = 'mail=jdoe@mozilla.com,o=com,dc=mozilla';
+        // profile.identities.mozilla_posix_id = 'jdoe';
+        // profile.identities.mozilliansorg_id = null;
+      }
     }
 
     // now, we need to sign every field and subfield
