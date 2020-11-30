@@ -10,7 +10,7 @@ The rules are snippets of javascript code running as webtasks (https://www.webta
 The master branch is used for development of rules and are auto-deployed on https://manage-dev.mozilla.auth0.com/
 
 `production`:
-/!\ The production branch uses merges from the master branch and are used for production. These are auto-deployed on https://manage.mozilla.auth0.com/
+/!\ The production branch is used for deployments to the production Auth0 tenant. Deployment from the production branch to the production tenant is triggered by a manual execution of a CodeBuild job
 
 ## Deployment & CI
 
