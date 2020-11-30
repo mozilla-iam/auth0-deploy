@@ -6,7 +6,7 @@ function (user, context, callback) {
   const PERSONAPI_TIMEOUT = 5000;  // milliseconds
   const PUBLISHER_NAME = 'access_provider';
   const USER_ID = context.primaryUser || user.user_id;  // linked account, or if not linked, then the user account
-  const WHITELISTED_CONNECTIONS = ['email', 'firefoxaccounts', 'github', 'google-oauth2', 'oauth2', 'Mozilla-LDAP', 'Mozilla-LDAP-Dev'];
+  const WHITELISTED_CONNECTIONS = ['email', 'firefoxaccounts', 'github', 'google-oauth2', 'Mozilla-LDAP', 'Mozilla-LDAP-Dev'];
 
   // if we don't have the configuration variables we need, bail
   // note that this requires the "PersonAPI - Auth0" application configured with the following scopes:
@@ -31,7 +31,7 @@ function (user, context, callback) {
   }
 
   // We can only provision users that have certain connection strategies
-  if (!WHITELISTED_CONNECTIONS.includes(context.connectionStrategy)) {
+  if (!WHITELISTED_CONNECTIONS.includes(context.connection)) {
     return callback(null, user, context);
   }
 
