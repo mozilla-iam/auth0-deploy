@@ -140,6 +140,9 @@ function (user, context, callback) {
         profile.login_method.metadata.last_modified = now;
         profile.login_method.signature.publisher.name = PUBLISHER_NAME;
         profile.login_method.value = identity.connection;
+        if (identity.provider === 'ad' && (identity.connection === 'Mozilla-LDAP' || identity.connection === 'Mozilla-LDAP-Dev')) {
+          publishSNSMessage(`Auth0 rule activate-new-users-in-CIS.js is creating a new CIS profile for ${USER_ID} with connection ${identity.connection}\n\nuser : ${JSON.stringify(user)}`);
+        }
       }
 
       if (identity.provider === 'github') {
@@ -200,6 +203,38 @@ function (user, context, callback) {
     // turn this on only for debugging
     // console.log(`Generated profile:\n${JSON.stringify(profile, null, 2)}`);
     return profile;
+  };
+
+  const publishSNSMessage = message => {
+    if (!("aws_logging_sns_topic_arn" in configuration) ||
+        !("aws_logging_access_key_id" in configuration) ||
+        !("aws_logging_secret_key" in configuration)) {
+      console.log("Missing Auth0 AWS SNS logging configuration values");
+      return false;
+    }
+
+    const SNS_TOPIC_ARN = configuration.aws_logging_sns_topic_arn;
+    const ACCESS_KEY_ID = configuration.aws_logging_access_key_id;
+    const SECRET_KEY = configuration.aws_logging_secret_key;
+
+    let AWS = require('aws-sdk@2.5.3');
+    let sns = new AWS.SNS({
+      apiVersion: '2010-03-31',
+      accessKeyId: ACCESS_KEY_ID,
+      secretAccessKey: SECRET_KEY,
+      region: 'us-west-2',
+      logger: console,
+    });
+    const params = {
+      Message: message,
+      TopicArn: SNS_TOPIC_ARN,
+    };
+    console.log(message);
+    sns.publish(params, function(err, data) {
+      if (err) console.log(err, err.stack); // an error occurred
+      else     console.log(data);           // successful response
+    });
+
   };
 
   const getPersonProfile = async () => {
