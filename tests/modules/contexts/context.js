@@ -13,9 +13,7 @@ module.exports = {
     ]
   },
   "clientID": "fakefakefakefakefakefakefakefake",
-  "clientMetadata": {
-    "oidc_conformant": "true"
-  },
+  "clientMetadata": {},
   "clientName": "social-ldap-pwless.testrp.security.allizom.org (new)",
   "connection": "Mozilla-LDAP-Dev",
   "connectionID": "con_fakefakefakefake",

@@ -6,7 +6,7 @@ function (user, context, callback) {
   const PERSONAPI_TIMEOUT = 5000;  // milliseconds
   const PUBLISHER_NAME = 'access_provider';
   const USER_ID = context.primaryUser || user.user_id;  // linked account, or if not linked, then the user account
-  const WHITELISTED_CONNECTIONS = ['email', 'firefoxaccounts', 'github', 'google-oauth2', 'oauth2'];
+  const WHITELISTED_CONNECTIONS = ['email', 'firefoxaccounts', 'github', 'google-oauth2', 'Mozilla-LDAP', 'Mozilla-LDAP-Dev'];
 
   // if we don't have the configuration variables we need, bail
   // note that this requires the "PersonAPI - Auth0" application configured with the following scopes:
@@ -31,7 +31,7 @@ function (user, context, callback) {
   }
 
   // We can only provision users that have certain connection strategies
-  if (!WHITELISTED_CONNECTIONS.includes(context.connectionStrategy)) {
+  if (!WHITELISTED_CONNECTIONS.includes(context.connection)) {
     return callback(null, user, context);
   }
 
@@ -140,6 +140,9 @@ function (user, context, callback) {
         profile.login_method.metadata.last_modified = now;
         profile.login_method.signature.publisher.name = PUBLISHER_NAME;
         profile.login_method.value = identity.connection;
+        if (identity.provider === 'ad' && (identity.connection === 'Mozilla-LDAP' || identity.connection === 'Mozilla-LDAP-Dev')) {
+          publishSNSMessage(`Auth0 rule activate-new-users-in-CIS.js is creating a new CIS profile for ${USER_ID} with connection ${identity.connection}\n\nuser : ${JSON.stringify(user)}`);
+        }
       }
 
       if (identity.provider === 'github') {
@@ -163,7 +166,7 @@ function (user, context, callback) {
 
           profile.identities.github_primary_email.metadata.display = 'private';
           profile.identities.github_primary_email.metadata.last_modified = now;
-          profile.identities.github_primary_email.metadata.verified = identity.profileData.email_verified === true ? true : false;
+          profile.identities.github_primary_email.metadata.verified = identity.profileData.email_verified === true;
           profile.identities.github_primary_email.signature.publisher.name = PUBLISHER_NAME;
           profile.identities.github_primary_email.value = identity.profileData.email;
         }
@@ -192,6 +195,27 @@ function (user, context, callback) {
         profile.identities.firefox_accounts_primary_email.signature.publisher.name = PUBLISHER_NAME;
         profile.identities.firefox_accounts_primary_email.value = user.email;
       }
+
+      else if (identity.provider === 'ad' && (identity.connection === 'Mozilla-LDAP' || identity.connection === 'Mozilla-LDAP-Dev')) {
+        // Auth0 gets LDAP attributes from the Auth0 LDAP Connector.
+        // We've patched the LDAP connector to pass addition LDAP fields
+        // https://github.com/mozilla-iam/ad-ldap-connector-rpm/tree/master/patches
+
+        // The Auth0 publisher can't currently publish this attribute as it's not
+        // permitted to : https://auth.mozilla.com/.well-known/mozilla-iam-publisher-rules
+        // If these publisher rules were to change this could be published by the Auth0
+        // publisher. Until then, this value won't be correct until the LDAP publisher
+        // updates it.
+        // profile.identities.mozilla_ldap_primary_email = user.email;
+
+        // The following fields were previously published by the LDAP publisher
+        // when it was tasked with creating new CIS profiles for LDAP users
+        // They appear to not be available to this rule as they aren't in the
+        // user object and aren't passed by the LDAP connector
+        // profile.identities.mozilla_ldap_id = 'mail=jdoe@mozilla.com,o=com,dc=mozilla';
+        // profile.identities.mozilla_posix_id = 'jdoe';
+        // profile.identities.mozilliansorg_id = null;
+      }
     }
 
     // now, we need to sign every field and subfield
@@ -200,6 +224,38 @@ function (user, context, callback) {
     // turn this on only for debugging
     // console.log(`Generated profile:\n${JSON.stringify(profile, null, 2)}`);
     return profile;
+  };
+
+  const publishSNSMessage = message => {
+    if (!("aws_logging_sns_topic_arn" in configuration) ||
+        !("aws_logging_access_key_id" in configuration) ||
+        !("aws_logging_secret_key" in configuration)) {
+      console.log("Missing Auth0 AWS SNS logging configuration values");
+      return false;
+    }
+
+    const SNS_TOPIC_ARN = configuration.aws_logging_sns_topic_arn;
+    const ACCESS_KEY_ID = configuration.aws_logging_access_key_id;
+    const SECRET_KEY = configuration.aws_logging_secret_key;
+
+    let AWS = require('aws-sdk@2.5.3');
+    let sns = new AWS.SNS({
+      apiVersion: '2010-03-31',
+      accessKeyId: ACCESS_KEY_ID,
+      secretAccessKey: SECRET_KEY,
+      region: 'us-west-2',
+      logger: console,
+    });
+    const params = {
+      Message: message,
+      TopicArn: SNS_TOPIC_ARN,
+    };
+    console.log(message);
+    sns.publish(params, function(err, data) {
+      if (err) console.log(err, err.stack); // an error occurred
+      else     console.log(data);           // successful response
+    });
+
   };
 
   const getPersonProfile = async () => {

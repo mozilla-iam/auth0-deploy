@@ -2,18 +2,6 @@ function (user, context, callback) {
   var namespace = 'https://sso.mozilla.com/claim/';
   var whitelist = ['']; // claim whitelist
 
-  // If you're not OIDC Conformant, stop right there as this INCREASES the profile size
-  // significantly! The metadata is set by us, manually.
-
-  if (!context.clientMetadata || !context.clientMetadata.oidc_conformant || context.clientMetadata.oidc_conformant !== 'true') {
-    console.log('Client '+context.clientID+' is not OIDC conformant yet, please fix!');
-    // Bare minimum conversion to help migrating clients to OIDC conformant
-    //context.idToken = context.idToken || {};
-    //context.idToken[namespace+'groups'] = user.groups;
-    return callback(null, user, context);
-  }
-
-
   // If the only scopes requested are neither profile nor any scope beginning with
   // https:// then do not overload with custom claims
   let scopes_requested = context.request.query.scope ? context.request.query.scope.split(' ') : [];
