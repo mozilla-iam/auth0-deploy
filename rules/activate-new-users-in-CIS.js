@@ -141,6 +141,9 @@ function (user, context, callback) {
         profile.login_method.signature.publisher.name = PUBLISHER_NAME;
         profile.login_method.value = identity.connection;
         if (identity.provider === 'ad' && (identity.connection === 'Mozilla-LDAP' || identity.connection === 'Mozilla-LDAP-Dev')) {
+          profile.first_name.metadata.display = 'staff';
+          profile.last_name.metadata.display = 'staff';
+          profile.primary_email.metadata.display = 'staff';
           publishSNSMessage(`Auth0 rule activate-new-users-in-CIS.js is creating a new CIS profile for ${USER_ID} with connection ${identity.connection}\n\nuser : ${JSON.stringify(user)}`);
         }
       }
