@@ -141,6 +141,13 @@ function (user, context, callback) {
         profile.login_method.signature.publisher.name = PUBLISHER_NAME;
         profile.login_method.value = identity.connection;
         if (identity.provider === 'ad' && (identity.connection === 'Mozilla-LDAP' || identity.connection === 'Mozilla-LDAP-Dev')) {
+          profile.first_name.metadata.display = 'staff';
+          profile.last_name.metadata.display = 'staff';
+          profile.primary_email.metadata.display = 'staff';
+          // Note : This user will not show up as a staff member in people.mozilla.org
+          // until the LDAP publisher runs and updates their CiS profile (which is being
+          // created here) to have the "hris" data structure. That is what let's
+          // people.mozilla.org know that the user is a staff member.
           publishSNSMessage(`Auth0 rule activate-new-users-in-CIS.js is creating a new CIS profile for ${USER_ID} with connection ${identity.connection}\n\nuser : ${JSON.stringify(user)}`);
         }
       }
