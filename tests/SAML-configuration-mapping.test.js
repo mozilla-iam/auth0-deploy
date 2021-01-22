@@ -74,3 +74,16 @@ test('stripe-subplat grants no rights to anyone else', () => {
   expect(output.context.samlConfiguration.mappings).toEqual({});
   expect(output.user.app_metadata).not.toHaveProperty('acct_1EJOaaJNcmPzuWtR');
 });
+
+test('Acoustic stage', () => {
+  _context.clientID = 'inoLoMyAEOzLX1cZOvubQpcW18pk4O1S';
+  output = rule(_user, _context, configuration, Global);
+
+  expect(output.context.samlConfiguration.mappings).toEqual({
+    'Nameid': 'email',
+    'email': 'email',
+    'firstName': 'given_name',
+    'lastName': 'family_name'
+  });
+});
+
