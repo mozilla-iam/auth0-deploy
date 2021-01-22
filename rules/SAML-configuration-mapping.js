@@ -3,6 +3,7 @@ function (user, context, callback) {
     'wgh8S9GaE7sJ4i0QrAzeMxFXgWZYtB0l': 'sage-intacct',    // Sage Intacct
     'R4djNlyXSl3i8N2KXWkfylghDa9kFQ84': 'thinksmart',      // mozilla.tap.thinksmart.com
     'cEfnJekrSStxxxBascTjNEDAZVUPAIU2': 'stripe-subplat',  // Stripe - subplat
+    'inoLoMyAEOzLX1cZOvubQpcW18pk4O1S': 'acoustic-stage',  // Acoustic stage
   };
   const client = CLIENTS[context.clientID];
 
@@ -53,6 +54,15 @@ function (user, context, callback) {
           });
         }
       });
+      break;
+    case 'acoustic-stage':
+      context.samlConfiguration.mappings = {
+        'Nameid': 'email',
+        'email': 'email',
+        'firstName': 'given_name',
+        'lastName': 'family_name'
+      };
+
       break;
   }
 
