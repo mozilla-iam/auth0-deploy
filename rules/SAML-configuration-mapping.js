@@ -4,6 +4,7 @@ function (user, context, callback) {
     'R4djNlyXSl3i8N2KXWkfylghDa9kFQ84': 'thinksmart',      // mozilla.tap.thinksmart.com
     'cEfnJekrSStxxxBascTjNEDAZVUPAIU2': 'stripe-subplat',  // Stripe - subplat
     'inoLoMyAEOzLX1cZOvubQpcW18pk4O1S': 'acoustic-stage',  // Acoustic stage
+    'sBImsybtPPLyWlstD0SC35IwnAafE4nB': 'acoustic-prod',   // Acoustic prod
   };
   const client = CLIENTS[context.clientID];
 
@@ -56,6 +57,15 @@ function (user, context, callback) {
       });
       break;
     case 'acoustic-stage':
+      context.samlConfiguration.mappings = {
+        'Nameid': 'email',
+        'email': 'email',
+        'firstName': 'given_name',
+        'lastName': 'family_name'
+      };
+
+      break;
+    case 'acoustic-prod':
       context.samlConfiguration.mappings = {
         'Nameid': 'email',
         'email': 'email',
