@@ -87,3 +87,15 @@ test('Acoustic stage', () => {
   });
 });
 
+test('Acoustic prod', () => {
+  _context.clientID = 'sBImsybtPPLyWlstD0SC35IwnAafE4nB';
+  output = rule(_user, _context, configuration, Global);
+
+  expect(output.context.samlConfiguration.mappings).toEqual({
+    'Nameid': 'email',
+    'email': 'email',
+    'firstName': 'given_name',
+    'lastName': 'family_name'
+  });
+});
+
