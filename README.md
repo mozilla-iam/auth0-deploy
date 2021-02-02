@@ -79,7 +79,10 @@ Please note that for any large change (i.e. anything but a single rule change), 
 
 ## Testing
 
-To run the automated tests on the rules first setup your testing environment. This is a one time step
+Test are run by GitHub actions on every Pull Request.
+To run the tests locally, first setup your testing environment.
+
+This is a one time step
 
 * `cd tests`
 * `npm install`
