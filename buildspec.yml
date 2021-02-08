@@ -6,6 +6,7 @@ phases:
       python: 3.7
     commands:
       - echo Preparing to run the automated tests...
+      - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - # See https://github.com/yarnpkg/yarn/issues/6865
       - apt-get update -y
       - pip install boto3
       - python params2json.py
