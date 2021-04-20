@@ -5,6 +5,7 @@ function (user, context, callback) {
     'cEfnJekrSStxxxBascTjNEDAZVUPAIU2': 'stripe-subplat',  // Stripe - subplat
     'inoLoMyAEOzLX1cZOvubQpcW18pk4O1S': 'acoustic-stage',  // Acoustic stage
     'sBImsybtPPLyWlstD0SC35IwnAafE4nB': 'acoustic-prod',   // Acoustic prod
+    'H5ddlJSCfGP8ab65EnWaB2sd541CJAlM': 'planful',   // Planful prod
   };
   const client = CLIENTS[context.clientID];
 
@@ -28,6 +29,10 @@ function (user, context, callback) {
       };
 
       break;
+    case 'planful':
+      user["IdP Entity ID"] = "fed.identropy.hostanalytics.saml2"
+      break;
+
     case 'thinksmart':
       context.samlConfiguration.mappings = {
         'Email': 'email',
