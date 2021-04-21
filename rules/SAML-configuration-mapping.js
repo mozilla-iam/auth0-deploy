@@ -6,6 +6,7 @@ function (user, context, callback) {
     'inoLoMyAEOzLX1cZOvubQpcW18pk4O1S': 'acoustic-stage',  // Acoustic stage
     'sBImsybtPPLyWlstD0SC35IwnAafE4nB': 'acoustic-prod',   // Acoustic prod
     'H5ddlJSCfGP8ab65EnWaB2sd541CJAlM': 'planful',   // Planful prod
+    'pUmRmcBrAJEdsgRTVXIW84jZoc3wtuYO': 'planful-dev',   // Planful dev
   };
   const client = CLIENTS[context.clientID];
 
@@ -29,8 +30,13 @@ function (user, context, callback) {
       };
 
       break;
-    case 'planful':
+
+    case 'planful-dev':
       user["IdP Entity ID"] = "urn:auth-dev.mozilla.auth0.com"
+      break;
+
+    case 'planful':
+      user["IdP Entity ID"] = "urn:auth.mozilla.auth0.com"
       break;
 
     case 'thinksmart':
