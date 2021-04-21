@@ -32,11 +32,11 @@ function (user, context, callback) {
       break;
 
     case 'planful-dev':
-      user["IdP Entity ID"] = "urn:auth-dev.mozilla.auth0.com"
+      user["IdP Entity ID"] = "urn:auth-dev.mozilla.auth0.com";
       break;
 
     case 'planful':
-      user["IdP Entity ID"] = "urn:auth.mozilla.auth0.com"
+      user["IdP Entity ID"] = "urn:auth.mozilla.auth0.com";
       break;
 
     case 'thinksmart':
