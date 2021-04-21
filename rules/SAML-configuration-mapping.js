@@ -30,7 +30,7 @@ function (user, context, callback) {
 
       break;
     case 'planful':
-      user["IdP Entity ID"] = "fed.identropy.hostanalytics.saml2"
+      user["IdP Entity ID"] = "urn:auth-dev.mozilla.auth0.com"
       break;
 
     case 'thinksmart':
