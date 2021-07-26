@@ -5,11 +5,6 @@ module.exports = {
   "auth0_aws_assests_s3_bucket": "mozilla-infosec-auth0-dev-rule-assets",
 
   // fake values here
-  "CIS_access_key_id": "FAKEFAKEFAKEFAKEFAKE",
-  "CIS_access_secret_key": "fakefakefakefakefakefakefakefakefakefake",
-  "CIS_hook_arn": "arn:aws:lambda:us-west-2:123456789012:function:auth0-publisher-development-handler",
-
-  // fake values here
   "duo_ikey_mozilla": "FAKEFAKEFAKEFAKEFAKE",
   "duo_skey_mozilla": "fakefakefakefakefakefakefakefakefakefake",
   "duo_apihost_mozilla": "api-fakehost.duosecurity.com",

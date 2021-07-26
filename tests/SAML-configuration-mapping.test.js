@@ -99,8 +99,10 @@ test('Acoustic prod', () => {
   });
 });
 
-test('BitSight', () => {
+test('BitSight portfolio managers', () => {
   _context.clientID = 'eEAeYh6BMPfRyiSDax0tejjxkWi22zkP';
+
+  _user.groups = ['mozilliansorg_bitsight-users'];
   output = rule(_user, _context, configuration, Global);
 
   expect(output.context.samlConfiguration.mappings).toEqual({
@@ -112,3 +114,16 @@ test('BitSight', () => {
   expect(output.user.app_metadata.bitsight_user_role).toEqual('Customer Portfolio Manager');
 });
 
+test('BitSight admins', () => {
+  _context.clientID = 'eEAeYh6BMPfRyiSDax0tejjxkWi22zkP';
+  _user.groups = ['mozilliansorg_bitsight-admins', 'mozilliansorg_bitsight-users'];
+  output = rule(_user, _context, configuration, Global);
+  expect(output.user.app_metadata.bitsight_user_role).toEqual('Customer Admin');
+});
+
+test('BitSight users', () => {
+  _context.clientID = 'eEAeYh6BMPfRyiSDax0tejjxkWi22zkP';
+  _user.groups = [];
+  output = rule(_user, _context, configuration, Global);
+  expect(output.user.app_metadata.bitsight_user_role).toEqual('Customer User');
+});
