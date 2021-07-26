@@ -52,7 +52,7 @@ Please note that for any large change (i.e. anything but a single rule change), 
 
 1. Confirm that the head of `master` contains the same code as is live in `auth0-dev`
    by doing a diff.
-   1. Ensure you've checked out `auth0-ci`, [created an activated a virtualenv](https://github.com/mozilla-iam/auth0-ci#virtual-environment)
+   1. Ensure you've checked out `auth0-ci`, [created and activated a virtualenv](https://github.com/mozilla-iam/auth0-ci#virtual-environment)
       and [have a `credentials.json` file with valid credentials](https://github.com/mozilla-iam/auth0-ci#credentials)
    2. Ensure your local copy of `auth0-deploy` is up to date and on `master`
    3. Run `uploader_rules.py` on the `auth0-deploy` rule directory
@@ -61,10 +61,10 @@ Please note that for any large change (i.e. anything but a single rule change), 
       live in `auth-dev`
 2. Create a branch to work in in your local repo
 3. Write a rule in your local branch of the repo
-4. Run `uploader_rules.py -r rules` to deploy the uncommitted rule to auth0-dev
-5. Do manual testing in auth0-dev to determine if the rule does what you want
+4. Run `uploader_rules.py -r rules` to deploy the uncommitted rule to `auth0-dev`
+5. Do manual testing in `auth0-dev` to determine if the rule does what you want
 6. Iterate steps 1-3 until you have a rule that works
-7. Remove the new rule from auth0-dev. This could be done by checking out 
+7. Remove the new rule from `auth0-dev`. This could be done by checking out 
    master (which doesn't have the rule) and again running `uploader_rules.py -r rules`
 
 #### 2 Commit your changes and deploy to auth-dev with CI
@@ -73,7 +73,7 @@ Please note that for any large change (i.e. anything but a single rule change), 
    a review of the PR.
 2. Someone reviews the PR, either suggesting changes or approving
 3. Merge the PR to `master`
-4. CI deploys the PR to auth0-dev
+4. CI deploys the PR to `auth0-dev`
    * This CI runs in AWS CodeBuild in the `mozilla-iam` (320464205386) AWS
      account in the `us-west-2` region in the AWS CodeBuild project
      `auth0-deploy-stage`.
@@ -82,7 +82,7 @@ Please note that for any large change (i.e. anything but a single rule change), 
      [`uploader_rules.py`](https://github.com/mozilla-iam/auth0-ci/blob/master/uploader_rules.py)
      tool which is installed from the [`auth0-ci`](https://github.com/mozilla-iam/auth0-ci)
      project.
-5. Manually test again in auth0-dev to validate that the rule works. This is 
+5. Manually test again in `auth0-dev` to validate that the rule works. This is 
     the stage to do more thorough testing as this is the last step before
     production deployment
 
