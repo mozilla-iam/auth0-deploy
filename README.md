@@ -96,9 +96,8 @@ Please note that for any large change (i.e. anything but a single rule change), 
    3. Confirm that no differences are detected between your local code and what's
       live in production Auth0
 2. Switch back to the `master` branch
-3. If testing validated that your new or changed rule is good, create a second 
-    PR from `master` to
-    `production`, requesting review and referencing in the text of the PR the
+3. If testing validated that your new or changed rule is good, [create a second PR from `master` to `production`](https://github.com/mozilla-iam/auth0-deploy/compare/production...master),
+    requesting review and referencing, in the text of the PR, the
     first PR which contains the initial review. Ideally the changes in the first
     dev PR and this prod PR will be the same and the reviewer can leverage
     the dev PR's review. If that's not the case a new thorough review would be
