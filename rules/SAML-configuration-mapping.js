@@ -98,9 +98,21 @@ function (user, context, callback) {
         'urn:oid:2.5.4.3': 'given_name',
         'urn:oid:2.5.4.4': 'family_name'
       };
-      // Grant every user the Customer Portfolio Manager role
+      // Assign BitSight roles based on group membership.
       // https://help.bitsighttech.com/hc/en-us/articles/360008185714-User-Roles
-      user.app_metadata['bitsight_user_role'] = 'Customer Portfolio Manager';
+      // https://help.bitsighttech.com/hc/en-us/articles/231658167-SAML-Documentation
+      // Possible values :
+      //   Customer User
+      //   Customer Admin
+      //   Customer Group Admin
+      //   Customer Portfolio Manager
+      if (user.groups.includes('mozilliansorg_bitsight-admins')) {
+        user.app_metadata['bitsight_user_role'] = 'Customer Admin';
+      } else if (user.groups.includes('mozilliansorg_bitsight-users')) {
+        user.app_metadata['bitsight_user_role'] = 'Customer Portfolio Manager';
+      } else {
+        user.app_metadata['bitsight_user_role'] = 'Customer User';
+      }
       context.samlConfiguration.mappings['urn:oid:1.3.6.1.4.1.50993.1.1.2'] = 'app_metadata.bitsight_user_role';
 
       break;
