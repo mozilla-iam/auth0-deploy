@@ -273,3 +273,20 @@ function (user, context, callback) {
     return get_verified_access_rules(access_decision, fake_access_file_conf);
   });
 }
+
+// Per the GHE integration we need to limit access to certain orgs.
+function (user, context, callback) {
+  const applicationGroupMapping = {
+    'EnEylt4OZW6i7yCWzZmCxyCxDRp6lOY0': 'mozilliansorg_ghe_saml-test-integrations_users',
+  };
+
+  if(applicationGroupMapping[context.clientID] !== undefined){
+    if(!user.app_metadata.groups.includes(applicationGroupMapping[context.clientID])){
+      // Placeholder redirect here.
+      // We will eventually be redirecting to 1 or more mana pages, possibly one per GHE org
+      context.redirect = {
+        url: "https://sso.mozilla.com"
+      }
+  }
+  return callback(null, user, context);
+}
