@@ -113,6 +113,10 @@ Please note that for any large change (i.e. anything but a single rule change), 
 5. [Test in prod](https://mana.mozilla.org/wiki/display/SECURITY/Auth0+manual+testing) 
    to make sure everything works and rollback if it doesn't.  
 
+##### What if the CodeBuild fails?
+
+`HTTP 409 Conflict` means that the unique ordering ID stored in a new rule's .json file is not unique across all .json files. Alter the ordering ID in the new rule's .json and try again.
+
 ## Testing
 
 Test are run by GitHub actions on every Pull Request.
