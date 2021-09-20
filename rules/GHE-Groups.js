@@ -71,7 +71,7 @@ const getPersonProfile = async () => {
   // We only care about SSO applications that exist in the applicationGroupMapping
   // If the SSO ID is undefined in applicationGroupMapping, skip processing and return callback()
 
-  if(applicationGroupMapping[context.clientID] !== undefined){
+  if(applicationGroupMapping[context.clientID] !== undefined) {
         getPersonProfile().then(profile => {
           let githubUsername = null;
           // Get githubUsername from person api, otherwise we'll redirect
@@ -79,12 +79,12 @@ const getPersonProfile = async () => {
             githubUsername = profile.usernames.values['HACK#GITHUB'];
             // If somehow dinopark allows a user to store an empty value
             // Let's set to null to be redirected later
-            if(githubUsername.length === 0){
+            if(githubUsername.length === 0) { 
               console.log("empty HACK#GITHUB")
               githubUsername = null;
             }
             //console.log("githubUsername: " +  githubUsername);
-          } catch (e){
+          } catch (e) {
             // Unable to do the githubUsername lookup
           }
           
