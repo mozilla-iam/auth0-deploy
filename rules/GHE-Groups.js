@@ -7,7 +7,7 @@ function (user, context, callback) {
 
   const fetch = require('node-fetch@2.6.0');
   const AUTH0_TIMEOUT = 5000;  // milliseconds
-  const PERSONAPI_BEARER_TOKEN_REFRESH_AGE = 64800;  // 18 hours
+  const PERSONAPI_BEARER_TOKEN_REFRESH_AGE = 64770;  // 18 hours - 30 seconds for refresh timeout allowance
   const PERSONAPI_TIMEOUT = 5000;  // milliseconds
   const USER_ID = context.primaryUser || user.user_id;
   const getBearerToken = async () => {
@@ -80,6 +80,7 @@ const getPersonProfile = async () => {
             // If somehow dinopark allows a user to store an empty value
             // Let's set to null to be redirected later
             if(githubUsername.length === 0){
+              console.log("empty HACK#GITHUB")
               githubUsername = null;
             }
             //console.log("githubUsername: " +  githubUsername);
@@ -91,7 +92,7 @@ const getPersonProfile = async () => {
           // confirm the user has a githubUsername stored in mozillians, otherwise redirect
           if(!user.app_metadata.groups.includes(applicationGroupMapping[context.clientID]) || githubUsername === null){
             context.redirect = {
-               url: "https://wiki.mozilla.org/GitHub/SAML_issues"
+               url: configuration.github_enterprise_wiki_url
              };
           }
           return callback(null, user, context);
