@@ -80,7 +80,7 @@ const getPersonProfile = async () => {
             // If somehow dinopark allows a user to store an empty value
             // Let's set to null to be redirected later
             if(githubUsername.length === 0) { 
-              console.log("empty HACK#GITHUB")
+              console.log("empty HACK#GITHUB");
               githubUsername = null;
             }
             //console.log("githubUsername: " +  githubUsername);
@@ -102,3 +102,4 @@ const getPersonProfile = async () => {
   } else {
     return callback(null, user, context);
   }
+}

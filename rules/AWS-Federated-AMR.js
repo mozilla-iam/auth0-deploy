@@ -3,6 +3,7 @@
 function (user, context, callback) {
   const WHITELIST = [
     '7PQFR1tyqr6TIqdHcgbRcYcbmbgYflVE', // ldap-pwless.testrp.security.allizom.org
+    '7wyIItkJX4t7vYEaDmGrwP9k2fBh5qWP', // prod.testrp.security.allizom.org
     'xRFzU2bj7Lrbo3875aXwyxIArdkq1AOT', // Federated AWS CLI auth0-dev
     'N7lULzWtfVUDGymwDs0yDEq6ZcwmFazj', // Federated AWS CLI auth0-prod
   ];
