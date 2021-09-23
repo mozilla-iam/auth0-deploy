@@ -26,8 +26,8 @@ function (user, context, callback) {
       timeout: AUTH0_TIMEOUT,
       body: JSON.stringify({
         audience: configuration.personapi_audience,
-        client_id: configuration.personapi_client_id,
-        client_secret: configuration.personapi_secret_id,
+        client_id: configuration.personapi_read_profile_api_client_id,
+        client_secret: configuration.personapi_read_profile_api_secret,
         grant_type: 'client_credentials',
       })
     };
