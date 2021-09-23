@@ -26,8 +26,8 @@ function (user, context, callback) {
       timeout: AUTH0_TIMEOUT,
       body: JSON.stringify({
         audience: configuration.personapi_audience,
-        client_id: configuration.personapi_client_id,
-        client_secret: configuration.personapi_secret_id,
+        client_id: configuration.personapi_read_profile_api_client_id,
+        client_secret: configuration.personapi_read_profile_api_secret,
         grant_type: 'client_credentials',
       })
     };
@@ -77,6 +77,10 @@ const getPersonProfile = async () => {
           // Get githubUsername from person api, otherwise we'll redirect
           try {
             githubUsername = profile.usernames.values['HACK#GITHUB'];
+            // Explicitely setting githubUsername to null if undefined
+            if(githubUsername === undefined) {
+              githubUsername = null;
+            }
             // If somehow dinopark allows a user to store an empty value
             // Let's set to null to be redirected later
             if(githubUsername.length === 0) { 
@@ -90,7 +94,7 @@ const getPersonProfile = async () => {
           
           // Confirm the user has the group defined from mozillians matching the application id
           // confirm the user has a githubUsername stored in mozillians, otherwise redirect
-          if(!user.app_metadata.groups.includes(applicationGroupMapping[context.clientID]) || githubUsername === null){
+          if(!user.app_metadata.groups.includes(applicationGroupMapping[context.clientID]) || githubUsername === null) {
             context.redirect = {
                url: configuration.github_enterprise_wiki_url
              };
