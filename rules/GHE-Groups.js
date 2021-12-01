@@ -3,6 +3,18 @@ function (user, context, callback) {
 
   const applicationGroupMapping = {
     'EnEylt4OZW6i7yCWzZmCxyCxDRp6lOY0': 'mozilliansorg_ghe_saml-test-integrations_users',
+    '2MVzcGFtl2rbdEx97rpC98urD6ZMqUcf': 'mozilliansorg_ghe_mozilla-it_users',
+    'Cc2xFG6xS5O8UKoSzoJ4eNggo6jHnzDU': 'mozilliansorg_ghe_mozilla-games_users',
+    '8lXCX2EGQNLixvBqONK3ceCVY2ppYiU6': 'mozilliansorg_ghe_mozilla-jetpack_users',
+    'kkVlkyyJjjhONdxjiB4963i4cka6VBSh': 'mozilliansorg_ghe_mozilla-twqa_users',
+    'nzV38DSEECYNl9toBfbVvVqXG04d2DaR': 'mozilliansorg_ghe_fxos_users',
+    'RXTiiTCJ8wCCHklJuU9NxB1gK3GpFL4J': 'mozilliansorg_ghe_fxos-eng_users',
+    '2mw77kvVsYBwlvZFay45S0e7dJ9Cd6z5': 'mozilliansorg_ghe_mozilla-b2g_users',
+    'XBQy3ijpDhqnE9PQLd9fvO85o8NNroFH': 'mozilliansorg_ghe_mozilla-tw_users',
+    'pFmfC1JoiDB9DZcrqX5GpiUM0IpDwIi5': 'mozilliansorg_ghe_mozillawiki_users',
+    'F7KEqlRIgdC5yUAAq0zm4voJZFk9IlS4': 'mozilliansorg_ghe_mozilla-outreachy-datascience_users',
+    'lhAIAsdx3jSOiKe1LoHmB0zEsUrCbfhI': 'mozilliansorg_ghe_moco-ghe-admin_users',
+    'f1MpcTzYA8J06nUUdO5LuhhA7b4JZVJi': 'mozilliansorg_ghe_mozilla_users',
   };
 
   const fetch = require('node-fetch@2.6.0');
@@ -33,14 +45,17 @@ function (user, context, callback) {
     };
 
     try {
-      //console.log(configuration.personapi_oauth_url);
+      //console.log("the personapi_oauth_url is: " + configuration.personapi_oauth_url);
+      //console.log("the personapi audience is: " + configuration.personapi_audience);
+      //console.log("the personapi client_id is: " + configuration.personapi_read_profile_api_client_id);
       const response = await fetch(configuration.personapi_oauth_url, options);
       const data = await response.json();
+      //console.log("the access token from the personapi oauth url is: " + data.access_token);
       // store the bearer token in the global object, so it's not constantly retrieved
       global.personapi_bearer_token = data.access_token;
       global.personapi_bearer_token_creation_time = Date.now();
 
-      console.log(`Successfully retrieved bearer token from Auth0`);
+      //console.log(`Successfully retrieved bearer token from Auth0`);
       return global.personapi_bearer_token;
     } catch (error) {
       throw Error(`Unable to retrieve bearer token from Auth0: ${error.message}`);
@@ -79,6 +94,7 @@ const getPersonProfile = async () => {
             githubUsername = profile.usernames.values['HACK#GITHUB'];
             // Explicitely setting githubUsername to null if undefined
             if(githubUsername === undefined) {
+              console.log("githubUsername is undefined");
               githubUsername = null;
             }
             // If somehow dinopark allows a user to store an empty value
@@ -87,9 +103,9 @@ const getPersonProfile = async () => {
               console.log("empty HACK#GITHUB");
               githubUsername = null;
             }
-            //console.log("githubUsername: " +  githubUsername);
+            console.log("githubUsername: " + githubUsername);
           } catch (e) {
-            // Unable to do the githubUsername lookup
+            console.log("Unable to do the githubUsername lookup: " + e.message);
           }
           
           // Confirm the user has the group defined from mozillians matching the application id
