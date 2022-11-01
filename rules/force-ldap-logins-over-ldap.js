@@ -8,7 +8,8 @@ function (user, context, callback) {
   const MOZILLA_STAFF_DOMAINS = [
      'mozilla.com',            // Main corp domain
      'mozillafoundation.org',  // Main org domain
-     'getpocket.com',
+     'getpocket.com',          // Pocket domain
+     'thunderbird.net',        // MZLA domain
   ];
 
   // Sanity checks
