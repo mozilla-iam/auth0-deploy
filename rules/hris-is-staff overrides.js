@@ -4,7 +4,7 @@ function (user, context, callback) {
   const ALLOWED_CLIENTIDS = [
     'o2e391VjmnPk0115UedNTmRL8x2nySOa',  // people.mozilla.org
   ];
-  
+
   // 2022-10-27 atoll - IAM-975 deployed, no longer required.
   const STAFF_OVERRIDE = [
     // 'ad|Mozilla-LDAP|atoll_admin',			// atoll_admin@mozilla.com
