@@ -15,7 +15,7 @@
 // scopes: openid profile
 // Note that as per above, using the authorization parameter `acr_values=AAL2` will enforce authenticating accounts with 2FA only
 
-function(accessToken, ctx, cb) {
+function firefoxAccountsConnection(accessToken, ctx, cb) {
   // Auth0 already verified the id_token and it's signature at this stage
   // See docs at https://developer.mozilla.org/en-US/docs/Mozilla/Tech/Firefox_Accounts/Introduction
   // See also https://github.com/mozilla/fxa-oauth-server/issues/519#issuecomment-367196241 for information on fields
@@ -32,14 +32,14 @@ function(accessToken, ctx, cb) {
       }
     },
     function(e, r, b) {
-      if (e) return callback(e);
+      if (e) return cb(e);
       if (r.statusCode !== 200) {
         return cb(new Error('Failed to fetch user profile. StatusCode:' + r.statusCode));
       }
 
       var p = JSON.parse(b);
 
-      if (id_token.sub != p.sub) {
+      if (id_token.sub !== p.sub) {
         return cb(new Error('sub does not match, this should not happen'));
       }
       // We check if the current session was authenticated with 2FA (id_token knows this)
