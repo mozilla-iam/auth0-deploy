@@ -18,6 +18,8 @@ beforeEach(() => {
 
 
 test('Test Placeholder', () => {
+  // Inject the empty AAI array attribute.  This is normally setup in the aai.js rule
+  _user.aai = [];
   output = rule(_user, _context, configuration, Global);
 
   expect(true).toEqual(true);
