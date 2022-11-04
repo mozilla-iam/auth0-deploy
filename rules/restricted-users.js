@@ -1,4 +1,4 @@
-function (user, context, callback) {
+function restrictUsers(user, context, callback) {
   // Id token claim namespace
   const NAMESPACE = 'https://sso.mozilla.com/claim/';
 

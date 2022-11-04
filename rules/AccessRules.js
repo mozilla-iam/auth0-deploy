@@ -1,4 +1,4 @@
-function (user, context, callback) {
+function AccessRules(user, context, callback) {
   // Imports
   const request = require('request');
   const YAML = require('js-yaml');

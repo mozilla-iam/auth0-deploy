@@ -1,4 +1,4 @@
-function (user, context, callback) {
+function HRISIsStaff(user, context, callback) {
   // NOTE: _HRData comes from WorkDay, through LDAP Connector
   //
   // This fix is only for Mozillians.org and the SSO dashboard
