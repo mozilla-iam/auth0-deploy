@@ -12,7 +12,7 @@
  *
  */
 
-function (user, context, callback) {
+function linkUsersByEmailWithMetadata(user, context, callback) {
   const request = require('request');
 
   // Check if email is verified, we shouldn't automatically

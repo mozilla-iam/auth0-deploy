@@ -1,6 +1,6 @@
 /*jshint esversion: 6 */
 
-function (user, context, callback) {
+function AWSFederatedAMR(user, context, callback) {
   const WHITELIST = [
     '7PQFR1tyqr6TIqdHcgbRcYcbmbgYflVE', // ldap-pwless.testrp.security.allizom.org
     '7wyIItkJX4t7vYEaDmGrwP9k2fBh5qWP', // prod.testrp.security.allizom.org

@@ -1,4 +1,4 @@
-function (user, context, callback) {
+function temporaryLDAPReReintergration(user, context, callback) {
   // Workaround all the group handling in Auth0. This should integrate all groups from all locations into user.app_metadata.groups, which is the only thing actually evalutated during any ACL or other rule.
   // Ensure we have the correct group data
   user.app_metadata = user.app_metadata || {};

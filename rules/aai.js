@@ -1,4 +1,4 @@
-function (user, context, callback) {
+function aai(user, context, callback) {
   // AAI (AUTHENTICATOR ASSURANCE INDICATOR)
   // Sets the AAI for the user. This is later used by the AccessRules.js rule which also sets the AAL.
 

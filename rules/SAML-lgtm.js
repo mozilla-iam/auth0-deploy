@@ -1,4 +1,4 @@
-function (user, context, callback) {
+function SAMLLgtm(user, context, callback) {
   // this rule sets a specific public key to encrypt the SAML assertion generated from Auth0 and overrides the Issuer, because the client hardcodes a validation check for URL format
   if (context.clientID === 'Ury9HCvBS4B1SzAH8f3YASbbcGf5QlQf') {
 	  context.samlConfiguration = (context.samlConfiguration || {});
