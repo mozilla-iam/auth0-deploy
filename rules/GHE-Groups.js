@@ -1,4 +1,4 @@
-function (user, context, callback) {
+function GHEGroups(user, context, callback) {
   // dictionary of applications and their related mozillians groups to worry about
 
   const applicationGroupMapping = {

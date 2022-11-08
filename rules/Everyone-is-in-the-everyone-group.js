@@ -1,4 +1,4 @@
-function (user, context, callback) {
+function everyoneIsInTheEveryoneGroup(user, context, callback) {
   // This is a work-around because the SSO Dashboard apps.yml authorization rules
   // decided to have a group that's called `everyone` hardcoded, even thus no such group exists
   // This rule hard codes it for all users, as it is meant to represent, well, every user.

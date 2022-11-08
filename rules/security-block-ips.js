@@ -1,4 +1,4 @@
-function (user, context, callback) {
+function securityBlockIps(user, context, callback) {
   const BLACKLIST_IPS = [];
   const BLACKLIST_RANGES = [];
 

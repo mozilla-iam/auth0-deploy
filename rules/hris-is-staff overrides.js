@@ -1,4 +1,4 @@
-function (user, context, callback) {
+function HRISIsStaffOverrides(user, context, callback) {
   // This overrides a design flaw uncovered by IAM-947.
   // Once the relevant dino-park code is deployed, this can be removed.
   const ALLOWED_CLIENTIDS = [

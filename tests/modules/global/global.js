@@ -1,9 +1,9 @@
 const configuration = require('./configuration.js');
+const jwt = require('jsonwebtoken');
 
 module.exports = {
   // this is taken from Global-Function-Declarations.js
   postError: (code, rcontext, prefered_connection_arg) => {
-    var jwt = require('jsonwebtoken');
     var prefered_connection = prefered_connection_arg || ""; // Optional arg
 
     // Token is valid from 30s ago, to 1h from now

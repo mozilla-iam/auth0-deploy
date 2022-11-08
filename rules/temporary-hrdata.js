@@ -1,4 +1,4 @@
-function (user, context, callback) {
+function temporaryHRData(user, context, callback) {
   // This is a rule to specifically allow access to _HRData for specific ClientIDs
   // _HRData comes from WorkDay, through LDAP Connector
   // Ideally the RPs who need this data should request it directly from WorkDay, so this is a work-around.

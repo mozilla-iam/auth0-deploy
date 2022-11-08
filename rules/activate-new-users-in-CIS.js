@@ -1,4 +1,4 @@
-function (user, context, callback) {
+function activateNewUsersInCIS(user, context, callback) {
   const AUTH0_TIMEOUT = 5000;  // milliseconds
   const CHANGEAPI_TIMEOUT = 14000;  // milliseconds
   const METADATA = context.primaryUserMetadata || user.user_metadata || {};  // linked account, or if not linked, then user
