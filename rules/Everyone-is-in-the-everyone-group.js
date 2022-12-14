@@ -4,19 +4,35 @@ function everyoneIsInTheEveryoneGroup(user, context, callback) {
   // This rule hard codes it for all users, as it is meant to represent, well, every user.
   // Without this rule, users would otherwise be denied access when an RP has an authorization of "`everyone`" in the SSO Dashboard apps.yml
 
-  user.app_metadata = user.app_metadata || {};
-  user.app_metadata.groups = user.app_metadata.groups || [];
-  user.groups = user.groups || [];
+  var is_write_needed = false;
 
+  // ensure that the user object is valid enough
+  if (user.app_metadata == undefined) {
+    is_write_needed = true;
+    user.app_metadata = {};
+  }
+  if (user.app_metadata.groups == undefined) {
+    is_write_needed = true;
+    user.app_metadata.groups = [];
+  }
+  if (user.groups == undefined) {
+    is_write_needed = true;
+    user.groups = [];
+  }
+
+  // append the group 'everyone' if not already present
   if (user.app_metadata.groups.indexOf('everyone') < 0) {
+    is_write_needed = true;
     Array.prototype.push.apply(user.app_metadata.groups, ['everyone']);
   }
-  auth0.users.updateAppMetadata(user.user_id, user.app_metadata)
-    .then(function(){
-      callback(null, user, context);
-    })
-    .catch(function(err){
-      console.log(err);
-      callback(err);
-    });
+
+  if (is_write_needed) {
+    auth0.users.updateAppMetadata(user.user_id, user.app_metadata)
+      .catch(function(err){
+        console.log(err);
+        callback(err);
+      });
+  }
+
+  callback(null, user, context);
 }
