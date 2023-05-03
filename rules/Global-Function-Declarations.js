@@ -22,7 +22,7 @@ function globalFunctionDeclaration(user, context, callback) {
           exp: Math.floor(Date.now() / 1000) + 3600,
           iat: Math.floor(Date.now() / 1000) - 30,
           preferred_connection_name: prefered_connection,
-          redirect_uri: rcontext.request.query.redirect_uri,
+          redirect_uri: rcontext.request.query ? context.request.query.redirect_uri : undefined,
         },
         skey,
         { algorithm: 'RS256' }
