@@ -6,6 +6,7 @@ function GHEGroups(user, context, callback) {
     '9MR2UMAftbs6758Rmbs8yZ9Dj5AjeT0P': 'mozilliansorg_ghe_ghe-auth-dev_users',
 
   // Prod applications
+    'RzaIwPS6wfABGLrhnCmWdzlCLoKXUY84': 'mozilliansorg_ghe_mozilla-actions_users',
     'EnEylt4OZW6i7yCWzZmCxyCxDRp6lOY0': 'mozilliansorg_ghe_saml-test-integrations_users',
     '2MVzcGFtl2rbdEx97rpC98urD6ZMqUcf': 'mozilliansorg_ghe_mozilla-it_users',
     'Cc2xFG6xS5O8UKoSzoJ4eNggo6jHnzDU': 'mozilliansorg_ghe_mozilla-games_users',
@@ -46,6 +47,12 @@ function GHEGroups(user, context, callback) {
     'VStrUcaxLXH9xQEEFX9Vkf0D5pRo5c6C': 'mozilliansorg_ghe_projectfluent_users',
     'WKOfTFaGTV10YKzfkMOyAl3bgi3BPFMc': 'mozilliansorg_ghe_taskcluster_users',
     '8Zhm4W07m9OSBlwN2h9FtQorFs6WgbQ8': 'mozilliansorg_ghe_mozilla-mobile_users',
+    'vJG7CGVQutdCWpMGO9pkC5Vn4vgJzJ3I': 'mozilliansorg_ghe_mozilla-ocho_users',
+    'dlDfXM5oqapRXUvrkCarPwgTN2INIA9G': 'mozilliansorg_ghe_mozilla-metrics_users',
+    'lJbj6OE9VFK05i2XjZEiAEljamPyOCkz': 'mozilliansorg_ghe_mozilla-platform-ops_users',
+    'AgiLB9xCoW4beavY9z7UuvO36DLmdwJ1': 'mozilliansorg_ghe_mozilla-rally_users',
+    'QfJVAjXlaGzpCo5S48J9D38QvIfhlYzF': 'mozilliansorg_ghe_mozilladatascience_users',
+    'UwUgLsXH6YtrWLATQpTuil2iNilYGGhF': 'mozilliansorg_ghe_mozilla-services_users',
   };
 
   const fetch = require('node-fetch@2.6.0');

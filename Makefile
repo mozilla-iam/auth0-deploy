@@ -1,4 +1,4 @@
-URI		:= auth-dev.mozilla.auth0.com
+URI		:= dev.mozilla-dev.auth0.com
 CLIENTID	:= 
 CLIENTSECRET	:=
 
