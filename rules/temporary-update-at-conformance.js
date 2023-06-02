@@ -4,6 +4,7 @@ function temporaryUpdateAtConformance(user, context, callback) {
     'aDL5o9SZRaYTH5zzkGntT4l76qydMbZe', // sso dashboard allizom
     'UCOY390lYDxgj5rU8EeXRtN6EP005k7V', // sso dashboard prod
     'mc1l0G4sJI2eQfdWxqgVNcRAD9EAgHib', // sso dashboard allizom
+    '2KNOUCxN8AFnGGjDCGtqiDIzq8MKXi2h', // sso dashboard allizom
   ];
 
   if (apps.indexOf(context.clientID) >= 0) {
