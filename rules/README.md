@@ -59,7 +59,6 @@ This is the list of keys we're using for secrets (and abuse for certain configur
   indicate to the user that we're in maintenance mode. Used for emergencies only!
 - `temporary-LDAP-re-reintegration.js` Temporary rule that reintegrates LDAP groups to the profile. This should be
   removed and replaced by person-api v2 calls eventually
-- `temporary-hrdata.js` Temporary rule that adds HRIS data in a special `_HRData` structure until person-apiv2 is
   available.
 - `temporary-hris-connector.js` Temporary rule that fix the missing `hris_is_staff` group for Mozillians.org, until
   person-apiv2 is available.
