@@ -19,24 +19,4 @@ function temporaryLDAPReReintergration(user, context, callback) {
       }
     }
   }
-
-  // This is a work-around because the SSO Dashboard apps.yml authorization rules
-  // decided to have a group that's called `everyone` hardcoded, even though no such group exists
-  // This rule hard codes it for all users, as it is meant to represent, well, every user.
-  // Without this rule, users would otherwise be denied access when an RP has an authorization of "`everyone`" in the SSO Dashboard apps.yml
-  Array.prototype.push.apply(groups, ['everyone']);
-  Array.prototype.push.apply(groups, user.app_metadata.groups);
-  Array.prototype.push.apply(groups, user.groups);
-  groups = Array.from(new Set(groups));
-  user.groups = groups;
-  user.app_metadata.groups = groups;
-  auth0.users.updateAppMetadata(user.user_id, user.app_metadata)
-     .then(function(){
-       console.log("reintegration complete for " + user.user_id);
-       return callback(null, user, context);
-     })
-     .catch(function(err){
-       console.log(err);
-       return callback(err);
-  });
 }

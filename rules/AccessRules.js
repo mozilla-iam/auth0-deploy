@@ -115,6 +115,12 @@ function AccessRules(user, context, callback) {
     // Use whatever is available from the group struct. Sometimes there's a race condition where user.app_metadata.*
     // isnt reintegrated to user.* for example
     var groups = user.app_metadata.groups || user.ldap_groups || user.groups || [];
+
+    // Inject the everyone group and filter duplicates
+    groups.push("everyone")
+    groups = groups.filter((value, index, array) => array.indexOf(value) === index);
+
+
     // This is used for authorized user/groups
     var authorized = false;
     // Defaut app requested aal to MEDIUM for all apps which do not have this set in access file
