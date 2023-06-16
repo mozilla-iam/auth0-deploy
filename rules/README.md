@@ -43,15 +43,10 @@ This is the list of keys we're using for secrets (and abuse for certain configur
 - `force-ldap-logins-over-ldap.js` Ensure LDAP users only login with LDAP (i.e. "Staff uses Staff login"). This
   forbids using passwordless, GitHub, etc. login methods with a `@mozilla.com` email for example.
 - `CIS-Claims-fixups.js` Adds custom OIDC claims in our namespace, like groups or AAI
-- `CIS-New-User-hook.js` Invoke the Auth0 CIS Publisher hook with a user_id, in order to notify it of potentially new
   or modified users.
-- `Everyone-is-in-the-everyone-group.js` Adds all users in a group called `everyone` to function correctly with the
   apps.yml file, which assume you have this group, historically
 - `Global-Function-Declarations.js` A place to have a cache of functions. This cache dies when the webtasks die, so
   every 60s
-- `SAML-AWS-consolidatedbilling-readonly.js` Custom claim mapping for SAML
-- `SAML-AWS-mozillaiam-account-readonly.js` Ditto
-- `SAML-temporary-AWS-consolidatedbilling-admin.js` Ditto
 - `SAML-test-mozilla-com-google.js` Ditto
 - `SAML-thinksmart.js` Ditto
 - `gcp-gsuite-SAML-claims.js` Ditto
@@ -60,7 +55,6 @@ This is the list of keys we're using for secrets (and abuse for certain configur
 - `temporary-LDAP-re-reintegration.js` Temporary rule that reintegrates LDAP groups to the profile. This should be
   removed and replaced by person-api v2 calls eventually
   available.
-- `temporary-hris-connector.js` Temporary rule that fix the missing `hris_is_staff` group for Mozillians.org, until
   person-apiv2 is available.
 - `link-users-by-email-with-metadata.js` Links user profiles by primary email (GH x@x.x and FxA x@x.x become the same
   profile). The user profile to be main (ie main user_id) is decided by ratcheting logic.
