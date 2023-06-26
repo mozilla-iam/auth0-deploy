@@ -20,7 +20,7 @@
     "jest": "^24.9.0"
   },
   "dependencies": {
-    "aws-sdk": "^2.5.3",
+    "aws-sdk": "^2.1354.0",
     "ipaddr.js": "^1.9.1",
     "js-yaml": "^4.1.0",
     "jsonwebtoken": "^8.5.1",
