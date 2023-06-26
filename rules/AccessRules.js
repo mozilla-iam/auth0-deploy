@@ -112,14 +112,32 @@ function AccessRules(user, context, callback) {
 
   // Process the access cache decision
   function access_decision(access_rules, access_file_conf) {
-    // Use whatever is available from the group struct. Sometimes there's a race condition where user.app_metadata.*
-    // isnt reintegrated to user.* for example
-    var groups = user.app_metadata.groups || user.ldap_groups || user.groups || [];
+    // Ensure we have the correct group data
+    user.app_metadata = user.app_metadata || {};
+    user.app_metadata.groups = user.app_metadata.groups || [];
+    user.identities = user.identities || [];
+    user.ldap_groups = user.ldap_groups || [];
+    user.groups = user.groups || [];
 
-    // Inject the everyone group and filter duplicates
+    // With account linking its possible that LDAP is not the main account on contributor LDAP accounts
+    // Here we iterate over all possible user identities and build an array of all groups from them
+    var _profile;
+    var profile_groups = [];
+    for (var i = 0, len = user.identities.length;i<len;i++) {
+      _profile = user.identities[i];
+      if ('profileData' in _profile) {
+        if ('groups' in _profile.profileData) {
+          Array.prototype.push.apply(profile_groups, _profile.profileData.groups);
+        }
+      }
+    }
+
+    // Collect all variations of groups and merge them together for access evaluation
+    var groups = Array.prototype.concat(user.app_metadata.groups, user.ldap_groups, user.groups, profile_groups)
+
+    // Inject the everyone group and filter for duplicates
     groups.push("everyone")
     groups = groups.filter((value, index, array) => array.indexOf(value) === index);
-
 
     // This is used for authorized user/groups
     var authorized = false;
