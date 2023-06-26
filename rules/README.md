@@ -52,9 +52,5 @@ This is the list of keys we're using for secrets (and abuse for certain configur
 - `gcp-gsuite-SAML-claims.js` Ditto
 - `default-deny-for-maintenance.js` A default "OFF" rule, that can be manually turned on to refuse all logins and
   indicate to the user that we're in maintenance mode. Used for emergencies only!
-- `temporary-LDAP-re-reintegration.js` Temporary rule that reintegrates LDAP groups to the profile. This should be
-  removed and replaced by person-api v2 calls eventually
-  available.
-  person-apiv2 is available.
 - `link-users-by-email-with-metadata.js` Links user profiles by primary email (GH x@x.x and FxA x@x.x become the same
   profile). The user profile to be main (ie main user_id) is decided by ratcheting logic.
