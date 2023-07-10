@@ -17,15 +17,16 @@
   },
   "homepage": "https://github.com/mozilla-iam/auth0-deploy#readme",
   "devDependencies": {
-    "jest": "^24.9.0"
+    "jest": "^29.6.1"
   },
   "dependencies": {
-    "aws-sdk": "^2.5.3",
-    "ipaddr.js": "^1.9.1",
+    "aws-sdk": "^2.1413.0",
+    "ipaddr.js": "^2.1.0",
     "js-yaml": "^4.1.0",
-    "jsonwebtoken": "^8.5.1",
-    "node-fetch": "^2.6.0",
-    "node-jose": "^2.1.1",
+    "jsonwebtoken": "^9.0.1",
+    "node-fetch": "^2.6.6",
+    "node-jose": "^2.2.0",
+    "request": "^2.88.2",
     "require-from-string": "^2.0.2",
     "strip-comments": "^2.0.1"
   }
