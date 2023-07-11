@@ -54,6 +54,7 @@ function GHEGroups(user, context, callback) {
     'QfJVAjXlaGzpCo5S48J9D38QvIfhlYzF': 'mozilliansorg_ghe_mozilladatascience_users',
     'UwUgLsXH6YtrWLATQpTuil2iNilYGGhF': 'mozilliansorg_ghe_mozilla-services_users',
     'RLPUxhCQsmmRHyOmDOGkLpu1mArNH3xn': 'mozilliansorg_ghe_firefoxux_users',
+    'KMcYzqySOFXHteY1zliDlq577ARCb6gi': 'mozilliansorg_ghe_mozillasocial_users',
   };
 
   const fetch = require('node-fetch@2.6.0');
