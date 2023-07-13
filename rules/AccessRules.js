@@ -133,11 +133,14 @@ function AccessRules(user, context, callback) {
     }
 
     // Collect all variations of groups and merge them together for access evaluation
-    var groups = Array.prototype.concat(user.app_metadata.groups, user.ldap_groups, user.groups, profile_groups)
+    var groups = Array.prototype.concat(user.app_metadata.groups, user.ldap_groups, user.groups, profile_groups);
 
     // Inject the everyone group and filter for duplicates
-    groups.push("everyone")
+    groups.push("everyone");
     groups = groups.filter((value, index, array) => array.indexOf(value) === index);
+
+    // Update user.groups with new merged values
+    user.groups = groups;
 
     // This is used for authorized user/groups
     var authorized = false;

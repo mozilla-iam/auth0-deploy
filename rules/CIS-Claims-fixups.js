@@ -72,144 +72,72 @@ function CISClaimsFixups(user, context, callback) {
     //"created_at"
   ];
 
-  // XXX This code is no longer required once we get an LDAP identity driver
-  // It reintegrates LDAP groups into the user's app_metadata/profile
-  if (user.app_metadata !== undefined && user.app_metadata.length > 0) {
+  // XXX NOTE WARNING XXX
+  // Do NOT enable this as this will inflate the id_token
+  // This feature may only be used for specific scope or endpoints, whenever auth0 let us do that
+  // Import entire CIS profile to a namespaced claim
+  //context.idToken[namespace+'cis'] = user.app_metadata;
 
-    // Force re-integrate LDAP groups until we have a LDAP CIS publisher
-    // See https://github.com/mozilla-iam/cis_functions/blob/master/functions/idvtoauth0/main.py#L87
-    // which this very code below supersedes as idvauth0 code only gets triggered if a profile is being actively published
-    var index = 0;
-    var userApiUrl = auth0.baseUrl + '/users/';
-    var ugroups = user.app_metadata.groups;
 
-    request({
-      url: userApiUrl+user.user_id,
-      headers: {
-        Authorization: 'Bearer ' + auth0.accessToken
-      },
-    },
-    function(err, response, body) {
-      if (!err) {
-        var udata = JSON.parse(body);
-        // If user has no LDAP groups, return immediately
-        udata.groups = udata.groups || [];
-        if (udata.groups.length === 0) {
-          return cb();
-        }
+  // Reduce profile size further
+  // Note: do not wipe user.app_metadata as auth0 now re-overlays it in memory
+  // user.app_metadata = undefined;
+  user.email_aliases = undefined;
+  user.dn = undefined;
+  user.organizationUnits = undefined;
 
-        // Add non-LDAP groups to new_groups
-        var new_groups = [];
-
-        for (index = 0; index < ugroups.length; ++index) {
-          var cur_grp = ugroups[index];
-          if (cur_grp === null) {
-            console.log("CIS: Group data contained null entries in array, that's not normal");
-            continue;
-          }
-          // Don't remove non-LDAP groups
-          if (cur_grp.substr(0,14) === 'mozilliansorg_') {
-            new_groups.push(cur_grp);
-          } else if (cur_grp.substr(0,5) === 'hris_') {
-            new_groups.push(cur_grp);
-          }
-        }
-
-        // Re-add groups that are in LDAP (ie udata.groups)
-        for (index = 0; index < udata.groups.length; ++index) {
-            new_groups.push(udata.groups[index]);
-        }
-        return cb(new_groups);
-      } else {
-        console.log('CIS: Error while parsing user groups for user '+user.user_id+': '+err);
-        return cb();
+  // Re-map old and new profile claims to namespaced claims
+  // Basically that's `groups`
+  old_authzero_claims.forEach(function(claim) {
+    try {
+      if (whitelist.indexOf(context.clientID) < 0) {
+        context.idToken[namespace+claim] = user[claim];
       }
-      console.log('CIS: HTTP Error while parsing user groups for user '+user.user_id+': '+err);
-      return cb();
-    });
-  } else {
-    return cb();
-  }
-
-  // Ensure this is always called or the webtask will timeout
-  function cb(new_groups) {
-    user.app_metadata = user.app_metadata || {};
-    if (new_groups !== undefined) {
-      user.groups = new_groups;
-      user.app_metadata.groups = new_groups;
-      // Save app_metadata changes
-      auth0.users.updateAppMetadata(user.user_id, user.app_metadata)
-        .catch(function(err){
-          console.log('CIS: Error updating app_metadata (groups) for user '+user.user_id+': '+err);
-      });
+    } catch (e) {
+      console.log("Undefined claim (non-fatal): "+e);
     }
-    // XXX NOTE WARNING XXX
-    // Do NOT enable this as this will inflate the id_token
-    // This feature may only be used for specific scope or endpoints, whenever auth0 let us do that
-    // Import entire CIS profile to a namespaced claim
-    //context.idToken[namespace+'cis'] = user.app_metadata;
+  });
 
-
-    // Reduce profile size further
-    // Note: do not wipe user.app_metadata as auth0 now re-overlays it in memory
-//    user.app_metadata = undefined;
-    user.email_aliases = undefined;
-    user.dn = undefined;
-    user.organizationUnits = undefined;
-
-    // Re-map old and new profile claims to namespaced claims
-    // Basically that's `groups`
-    old_authzero_claims.forEach(function(claim) {
-      try {
-        if (whitelist.indexOf(context.clientID) < 0) {
-          context.idToken[namespace+claim] = user[claim];
-        }
-      } catch (e) {
-        console.log("Undefined claim (non-fatal): "+e);
-      }
-    });
-
-    // AAI & AAL values
-    user.aai = user.aai || [];
-    context.idToken[namespace+'AAI'] = user.aai;
-    user.aal = user.aal || "UNKNOWN";
-    context.idToken[namespace+'AAL'] = user.aal;
+  // AAI & AAL values
+  user.aai = user.aai || [];
+  context.idToken[namespace+'AAI'] = user.aai;
+  user.aal = user.aal || "UNKNOWN";
+  context.idToken[namespace+'AAL'] = user.aal;
 
 /* WARNING  this entire block can be removed when mozillians.org / DinoPark uses it's own verification method for
- * accounts */
+* accounts */
 /* START removable block */
-    var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH', // mozillians.org account verification
-                   't9bMi4eTCPpMp5Y6E1Lu92iVcqU0r1P1', // https://web-mozillians-staging.production.paas.mozilla.community Verification client
-                   'jijaIzcZmFCDRtV74scMb9lI87MtYNTA', // mozillians.org Verification Client
-                ];
-    if (WHITELIST.indexOf(context.clientID) >= 0) {
-      // Original connection method's user_id (useful when the account is a linked account, this lets you know what the actual IdP
-      // was used to login
-      // Default to current user_id
-      var originalConnection_user_id = user.user_id;
-      var targetIdentity;
-      // If we have linked account, check if we have a better match
-      if (user.identities && user.identities.length > 1) {
-        for (var i = 0; i < user.identities.length; i++) {
-          targetIdentity = user.identities[i];
-          // Find the identity which corresponding to the user logging in
-          if ((targetIdentity.connection === context.connection) && (targetIdentity.provider === context.connectionStrategy)) {
-            // If what we find has no `profileData` structure it means the user_id is the same as the one currently
-            // logging in, so we don't need to do anything.
-            // If it is, then we need to reconstruct a user_id from the identity data
-            if (targetIdentity.profileData !== undefined) {
-              originalConnection_user_id = targetIdentity.provider + '|' + targetIdentity.user_id;
-            }
-            break;
+  var WHITELIST = ['HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH', // mozillians.org account verification
+                  't9bMi4eTCPpMp5Y6E1Lu92iVcqU0r1P1', // https://web-mozillians-staging.production.paas.mozilla.community Verification client
+                  'jijaIzcZmFCDRtV74scMb9lI87MtYNTA', // mozillians.org Verification Client
+              ];
+  if (WHITELIST.indexOf(context.clientID) >= 0) {
+    // Original connection method's user_id (useful when the account is a linked account, this lets you know what the actual IdP
+    // was used to login
+    // Default to current user_id
+    var originalConnection_user_id = user.user_id;
+    var targetIdentity;
+    // If we have linked account, check if we have a better match
+    if (user.identities && user.identities.length > 1) {
+      for (var i = 0; i < user.identities.length; i++) {
+        targetIdentity = user.identities[i];
+        // Find the identity which corresponding to the user logging in
+        if ((targetIdentity.connection === context.connection) && (targetIdentity.provider === context.connectionStrategy)) {
+          // If what we find has no `profileData` structure it means the user_id is the same as the one currently
+          // logging in, so we don't need to do anything.
+          // If it is, then we need to reconstruct a user_id from the identity data
+          if (targetIdentity.profileData !== undefined) {
+            originalConnection_user_id = targetIdentity.provider + '|' + targetIdentity.user_id;
           }
+          break;
         }
       }
-      context.idToken[namespace+'original_connection_user_id'] = originalConnection_user_id;
     }
+    context.idToken[namespace+'original_connection_user_id'] = originalConnection_user_id;
+  }
 /* END of removable block */
 
-    // Give info about CIS API
-    context.idToken[namespace+'README_FIRST'] = 'Please refer to https://github.com/mozilla-iam/person-api in order to query Mozilla IAM CIS user profile data';
-    return callback(null, user, context);
-  }
+  // Give info about CIS API
+  context.idToken[namespace+'README_FIRST'] = 'Please refer to https://github.com/mozilla-iam/person-api in order to query Mozilla IAM CIS user profile data';
+  return callback(null, user, context);
 }
