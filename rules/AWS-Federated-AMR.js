@@ -81,9 +81,13 @@ function AWSFederatedAMR(user, context, callback) {
       let aws_groups = Object.keys(global.awsGroupRoleMap);
       user.groups = user.groups || [];
       context.idToken.amr = groupIntersection(user.groups, aws_groups);
+      context.idToken.oaud = groupIntersection(user.groups, aws_groups);
+      context.idToken.id = groupIntersection(user.groups, aws_groups);
       console.log(`User groups: ${user.groups.join(", ")}`);
       console.log(`AWS groups: ${aws_groups.join(", ")}`);
-      console.log(`Intersection of user groups and AWS groups: ${context.idToken.amr}`);
+      console.log(`idToken.amr: Intersection of user groups and AWS groups: ${context.idToken.amr}`);
+      console.log(`idToken.oaud: Intersection of user groups and AWS groups: ${context.idToken.oaud}`);
+      console.log(`idToken.id: Intersection of user groups and AWS groups: ${context.idToken.id}`);
 
       // If Auth0 is going to send the user to Duo, Auth0 will modify the `amr` claim. Auth0 will specifically
       // overwrite the first element in the `amr` list (slot 0) with the string `mfa`. Anything put in slot 0
