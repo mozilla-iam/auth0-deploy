@@ -81,6 +81,8 @@ function AWSFederatedAMR(user, context, callback) {
       let aws_groups = Object.keys(global.awsGroupRoleMap);
       user.groups = user.groups || [];
       context.idToken.amr = groupIntersection(user.groups, aws_groups);
+      context.idToken.id = context.idToken.amr;
+      context.idToken.oaud = context.idToken.amr;
       console.log(`User groups: ${user.groups.join(", ")}`);
       console.log(`AWS groups: ${aws_groups.join(", ")}`);
       console.log(`Intersection of user groups and AWS groups: ${context.idToken.amr}`);
