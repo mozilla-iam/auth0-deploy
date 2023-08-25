@@ -1,6 +1,6 @@
 function AccessRules(user, context, callback) {
   // Imports
-  const request = require('request');
+  const fetch = require('node-fetch@2.6.1');
   const YAML = require('js-yaml');
   const jose = require('node-jose');
 
@@ -9,18 +9,19 @@ function AccessRules(user, context, callback) {
   function get_access_file_configuration(cb) {
     var access_file_conf = {};
     var options = { method: 'GET', url: configuration.iam_well_known };
-    request(options, function (error, response, body) {
-      if (error) throw new Error(error);
-      if (response.statusCode !== 200) {
+    fetch(configuration.iam_well_known, options).then(response => {
+      if (response.status !== 200) {
         console.log('Could not fetch access file URL: '+response.statusCode);
       } else {
-        access_file_conf = JSON.parse(body).access_file;
+        access_file_conf = response.json().access_file;
         // contains mainly:
         // access_file_conf.endpoint  (URL)
         // access_file_conf.jwks.keys[]{} (pub keys)
         // access_file_conf.aai_mappings
       }
       return cb(access_file_conf);
+    }).catch( err => {
+      throw new Error(err);
     });
   }
 
@@ -123,8 +124,8 @@ function AccessRules(user, context, callback) {
     // Here we iterate over all possible user identities and build an array of all groups from them
     var _profile;
     var profile_groups = [];
-    for (var i = 0, len = user.identities.length;i<len;i++) {
-      _profile = user.identities[i];
+    for (var x = 0, len = user.identities.length;x<len;x++) {
+      _profile = user.identities[x];
       if ('profileData' in _profile) {
         if ('groups' in _profile.profileData) {
           Array.prototype.push.apply(profile_groups, _profile.profileData.groups);
@@ -274,7 +275,7 @@ function AccessRules(user, context, callback) {
       console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - due to " +
         "Identity Assurance Level being too low for this RP. Required AAL: "+required_aal+
         " ("+aai_pass+")");
-      context.request.query.redirect_uri = app.url || "https://sso.mozilla.com";
+      context.request.query.redirect_uri = "https://sso.mozilla.com";
       return access_denied(null, user, global.postError('aai_failed', context));
     }
 

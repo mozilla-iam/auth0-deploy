@@ -107,11 +107,11 @@ function SAMLConfigurationMapping(user, context, callback) {
       //   Customer Group Admin
       //   Customer Portfolio Manager
       if (user.groups.includes('mozilliansorg_bitsight-admins')) {
-        user.app_metadata['bitsight_user_role'] = 'Customer Admin';
+        user.app_metadata.bitsight_user_role = 'Customer Admin';
       } else if (user.groups.includes('mozilliansorg_bitsight-users')) {
-        user.app_metadata['bitsight_user_role'] = 'Customer Portfolio Manager';
+        user.app_metadata.bitsight_user_role = 'Customer Portfolio Manager';
       } else {
-        user.app_metadata['bitsight_user_role'] = 'Customer User';
+        user.app_metadata.bitsight_user_role = 'Customer User';
       }
       context.samlConfiguration.mappings['urn:oid:1.3.6.1.4.1.50993.1.1.2'] = 'app_metadata.bitsight_user_role';
 
