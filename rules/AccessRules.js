@@ -21,7 +21,7 @@ function AccessRules(user, context, callback) {
       }
       return cb(access_file_conf);
     }).catch( err => {
-      throw new Error(err);
+      return callback(err);
     });
   }
 
@@ -57,7 +57,7 @@ function AccessRules(user, context, callback) {
       global.access_rules = YAML.load(decoded).apps;
       return cb(global.access_rules, access_file_conf);
     }).catch( err => {
-      throw new Error(err);
+      return callback(err);
     }
 
     );
