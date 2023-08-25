@@ -36,20 +36,19 @@ function AccessRules(user, context, callback) {
     //  return cb(global.access_rules, access_file_conf);
     //}
 
-    var options = { method: 'GET', url: access_file_conf.endpoint };
+    var options = { method: 'GET' };
     var decoded;
-    request(options, function (error, response, body) {
-      if (error) throw new Error(error);
+    fetch(access_file_conf.endpoint, options).then( response => {
       // Convert key into jose-formatted-key
       // XXX remove this part of the code when well-known and signature exists
       if (access_file_conf.jwks === null) {
         console.log('WARNING: Bypassing access file signature verification');
-        decoded = body;
+        decoded = response.text;
       } else {
         // XXX verify key format when the well-known endpoint exists
         var pubkey = jose.JWK.asKey(access_file_conf.jwks.keys.x5c[0], 'pem').then((jwk) => jwk);
         var verifier = jose.JWS.createVerify(pubkey);
-        var ret = verifier.verify(body).then((response) => response.payload).catch((err) => err);
+        var ret = verifier.verify(response.text).then((response) => response.payload).catch((err) => err);
         decoded = ret.then((data) => data).catch((err) => {
           throw new Error('Signature verification of access file failed (fatal): '+err);
         });
@@ -57,7 +56,11 @@ function AccessRules(user, context, callback) {
 
       global.access_rules = YAML.load(decoded).apps;
       return cb(global.access_rules, access_file_conf);
-    });
+    }).catch( err => {
+      throw new Error(err);
+    }
+
+    );
   }
 
   // Check if array A has any occurrence from array B

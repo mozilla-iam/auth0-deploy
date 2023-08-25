@@ -24,7 +24,11 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
   const userApiUrl = auth0.baseUrl + '/users';
   const userSearchApiUrl = auth0.baseUrl + '/users-by-email';
 
-  fetch(userSearchApiUrl + new URLSearchParams({email: user.email}),
+  const params = new URLSearchParams({
+    email: user.email
+	});
+
+  fetch(userSearchApiUrl + params.toString(),
   {
     headers: {
       Authorization: 'Bearer ' + auth0.accessToken
