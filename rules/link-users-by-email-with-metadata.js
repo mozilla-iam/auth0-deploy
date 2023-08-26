@@ -13,7 +13,7 @@
  */
 
 function linkUsersByEmailWithMetadata(user, context, callback) {
-  const request = require('request');
+  const fetch = require('node-fetch@2.6.1');
 
   // Check if email is verified, we shouldn't automatically
   // merge accounts if this is not the case.
@@ -22,22 +22,21 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
   }
 
   const userApiUrl = auth0.baseUrl + '/users';
-  const userSearchApiUrl = auth0.baseUrl + '/users-by-email';
+  const userSearchApiUrl = auth0.baseUrl + '/users-by-email?';
 
-  request({
-   url: userSearchApiUrl,
-   headers: {
-     Authorization: 'Bearer ' + auth0.accessToken
-   },
-   qs: {
-     email: user.email
-   }
-  },
-  function (err, response, body) {
-    if (err) return callback(err);
-    if (response.statusCode !== 200) return callback(new Error("API Call failed: " + body));
+  const params = new URLSearchParams({
+    email: user.email
+	});
 
-    var data = JSON.parse(body);
+  fetch(userSearchApiUrl + params.toString(),
+  {
+    headers: {
+      Authorization: 'Bearer ' + auth0.accessToken
+    }
+  }).then((response) => {
+    if (response.status !== 200) return callback(new Error("API Call failed: " + response.body));
+    return response.json();
+  }).then((data) => {
     // Ignore non-verified users
     data = data.filter(u => u.email_verified);
 
@@ -62,6 +61,8 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
       publishSNSMessage(`${error_message}\n\ndata : ${JSON.stringify(data)}\nuser : ${JSON.stringify(user)}`);
       return callback(new Error(error_message));
     }
+  }).catch(err => {
+    return callback(err);
   });
 
   const linkAccount = primaryUser => {
@@ -75,24 +76,25 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
     .then(auth0.users.updateUserMetadata(primaryUser.user_id, Object.assign({}, user.user_metadata, primaryUser.user_metadata)))
     // Link the accounts
     .then(function() {
-      request.post({
-        url: userApiUrl + '/' + primaryUser.user_id + '/identities',
+      fetch( userApiUrl + '/' + primaryUser.user_id + '/identities',
+      {
+        method: 'post',
         headers: {
-          Authorization: 'Bearer ' + auth0.accessToken
+          Authorization: 'Bearer ' + auth0.accessToken,
+          'Content-Type': 'application/json'
         },
-        json: { provider: user.identities[0].provider, user_id: String(user.identities[0].user_id) }
-      }, function (err, response, body) {
-        if (response && response.statusCode >= 400) {
-          console.log("Error linking account: " + response.statusMessage);
-          return callback(new Error('Error linking account: ' + response.statusMessage));
+        body: JSON.stringify({ provider: user.identities[0].provider, user_id: String(user.identities[0].user_id) }),
+      }).then( response => {
+        if (!response.ok && response.status >= 400) {
+          console.log("Error linking account: " + response.statusText);
+          return callback(new Error('Error linking account: ' + response.statusText));
         }
         // Finally, swap user_id so that the current login process has the correct data
         context.primaryUser = primaryUser.user_id;
         context.primaryUserMetadata = primaryUser.user_metadata || {};
         return callback(null, user, context);
       });
-    })
-    .catch(function (err) {
+    }).catch( err => {
       console.log("An unknown error occurred while linking accounts: " + err);
       return callback(err);
     });

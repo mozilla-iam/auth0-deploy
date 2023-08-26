@@ -41,7 +41,7 @@ function activateNewUsersInCIS(user, context, callback) {
   }
 
   // we'll need the node-fetch module, to add support for timeouts
-  const fetch = require('node-fetch@2.6.0');
+  const fetch = require('node-fetch@2.6.1');
 
   // we also need to decode the private key from base64 into a PEM format that `jsonwebtoken` understands
   // generated with:
