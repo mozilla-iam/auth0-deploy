@@ -17,7 +17,7 @@ function awsSaml(user, context, callback) {
   const IdentityStoreId = configuration.AWS_IDENTITYSTORE_ID;
   const userName = user.email;
   var AWSUserId = "";
-  return callback(null, user, context);
+
   // This is a list of groups that are mapped to AWS groups
   const AWS_GROUPS = [
     "mozilliansorg_pocket_mozilla_sre",
