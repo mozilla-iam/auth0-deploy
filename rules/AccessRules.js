@@ -7,19 +7,13 @@ function AccessRules(user, context, callback) {
   // Retrieve the access file information/configuration from well-known
   // See also https://github.com/mozilla-iam/cis/blob/profilev2/docs/.well-known/mozilla-iam.json
   function get_access_file_configuration(cb) {
-    var access_file_conf = {};
-    var options = { method: 'GET', url: configuration.iam_well_known };
-    fetch(configuration.iam_well_known, options).then(response => {
+    fetch(configuration.iam_well_known).then(response => {
       if (response.status !== 200) {
-        console.log('Could not fetch access file URL: '+response.statusCode);
-      } else {
-        access_file_conf = response.json().access_file;
-        // contains mainly:
-        // access_file_conf.endpoint  (URL)
-        // access_file_conf.jwks.keys[]{} (pub keys)
-        // access_file_conf.aai_mappings
+        return callback(new Error("Could not fetch IAM well known: " + response.body));
       }
-      return cb(access_file_conf);
+      return response.json();
+    }).then( response => {
+      return cb(response.access_file);
     }).catch( err => {
       return callback(err);
     });
@@ -36,14 +30,13 @@ function AccessRules(user, context, callback) {
     //  return cb(global.access_rules, access_file_conf);
     //}
 
-    var options = { method: 'GET' };
     var decoded;
-    fetch(access_file_conf.endpoint, options).then( response => {
+    fetch(access_file_conf.endpoint).then( response => {
       // Convert key into jose-formatted-key
       // XXX remove this part of the code when well-known and signature exists
       if (access_file_conf.jwks === null) {
         console.log('WARNING: Bypassing access file signature verification');
-        decoded = response.text;
+        decoded = response.text();
       } else {
         // XXX verify key format when the well-known endpoint exists
         var pubkey = jose.JWK.asKey(access_file_conf.jwks.keys.x5c[0], 'pem').then((jwk) => jwk);
@@ -53,7 +46,8 @@ function AccessRules(user, context, callback) {
           throw new Error('Signature verification of access file failed (fatal): '+err);
         });
       }
-
+      return decoded;
+    }).then( decoded => {
       global.access_rules = YAML.load(decoded).apps;
       return cb(global.access_rules, access_file_conf);
     }).catch( err => {

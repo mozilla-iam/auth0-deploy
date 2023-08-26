@@ -22,7 +22,7 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
   }
 
   const userApiUrl = auth0.baseUrl + '/users';
-  const userSearchApiUrl = auth0.baseUrl + '/users-by-email';
+  const userSearchApiUrl = auth0.baseUrl + '/users-by-email?';
 
   const params = new URLSearchParams({
     email: user.email
@@ -35,8 +35,8 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
     }
   }).then((response) => {
     if (response.status !== 200) return callback(new Error("API Call failed: " + response.body));
-
-    var data = response.json;
+    return response.json();
+  }).then((data) => {
     // Ignore non-verified users
     data = data.filter(u => u.email_verified);
 
@@ -80,7 +80,8 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
       {
         method: 'post',
         headers: {
-          Authorization: 'Bearer ' + auth0.accessToken
+          Authorization: 'Bearer ' + auth0.accessToken,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ provider: user.identities[0].provider, user_id: String(user.identities[0].user_id) }),
       }).then( response => {
