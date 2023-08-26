@@ -1,17 +1,23 @@
-function aws_scim(user, context, callback) {
-  //const fetch = require('node-fetch');
-  var istore = require('aws-sdk/clients/identitystore');
-  require('aws-sdk/lib/maintenance_mode_message').suppress = true;
+function awsSaml(user, context, callback) {
+  // Only exec this rule if logging into AWS Saml SSO
+  if (context.clientID !== "q8vmyUjlPZj7QnURDVXtjvzSlsXK9AHK")
+    return callback(null, user, context); // AWS
+
+  var AWS = require("aws-sdk@2.1416.0");
 
   // Instantate and set Region
-  var i = new istore({
-    region: 'us-west-2'
+  var i = new AWS.IdentityStore({
+    region: "us-west-2",
+    apiVersion: "2020-06-15",
+    accessKeyId: configuration.AWS_IDENTITYSTORE_ACCESS_ID,
+    secretAccessKey: configuration.AWS_IDENTITYSTORE_ACCESS_KEY,
+    logger: console,
   });
 
-  const IdentityStoreId = 'd-9267491fb7';
+  const IdentityStoreId = configuration.AWS_IDENTITYSTORE_ID;
   const userName = user.email;
   var AWSUserId = "";
-
+  return callback(null, user, context);
   // This is a list of groups that are mapped to AWS groups
   const AWS_GROUPS = [
     "mozilliansorg_pocket_mozilla_sre",
@@ -74,26 +80,27 @@ function aws_scim(user, context, callback) {
 
   // Filter the users Auth0 groups down to only those mapped to AWS groups
   function filterAWSGRoups(groups) {
-    var filteredGroups = groups.filter(x => AWS_GROUPS.includes(x));
+    var filteredGroups = groups.filter((x) => AWS_GROUPS.includes(x));
     return filteredGroups;
   }
 
   function userAuth0Groups(proposedGroups, existingGroups) {
-    var addToGroup = proposedGroups.filter(x => !existingGroups.includes(x));
-    var removeFromGroup = existingGroups.filter(x => !proposedGroups.includes(x));
-    return { "addToGroup": addToGroup, "removeFromGroup": removeFromGroup };
+    var addToGroup = proposedGroups.filter((x) => !existingGroups.includes(x));
+    var removeFromGroup = existingGroups.filter(
+      (x) => !proposedGroups.includes(x)
+    );
+    return { addToGroup: addToGroup, removeFromGroup: removeFromGroup };
   }
 
   function createGroupMemberships(addToGroup) {
-    console.log(addToGroup);
     var creationPromises = [];
     for (var groupId of addToGroup) {
       var params = {
         IdentityStoreId: IdentityStoreId,
         GroupId: groupId,
         MemberId: {
-          UserId: AWSUserId
-        }
+          UserId: AWSUserId,
+        },
       };
       creationPromises.push(i.createGroupMembership(params).promise());
     }
@@ -105,7 +112,7 @@ function aws_scim(user, context, callback) {
     for (var membershipId of removeMembershipId) {
       var params = {
         IdentityStoreId: IdentityStoreId,
-        MembershipId: membershipId
+        MembershipId: membershipId,
       };
       removalPromises.push(i.deleteGroupMembership(params).promise());
     }
@@ -114,31 +121,28 @@ function aws_scim(user, context, callback) {
 
   function fetchAWSUUID() {
     var params = {
-      AlternateIdentifier: {
-        UniqueAttribute: {
-          AttributePath: 'UserName',
-          AttributeValue: userName
-        }
-      },
-      IdentityStoreId: IdentityStoreId
+      Filters: [
+        {
+          AttributePath: "UserName",
+          AttributeValue: userName,
+        },
+      ],
+      IdentityStoreId: IdentityStoreId,
     };
-    var userId = i.getUserId(params).promise();
-    console.log("Fetching users AWS UUID");
+    var userId = i.listUsers(params).promise();
     return userId; // returns promise
   }
 
   function fetchUsersAWSGroups(userUUID) {
-    console.log(`Fetching users group membership with ${userUUID}`);
     var params = {
       IdentityStoreId: IdentityStoreId,
       MemberId: {
-        UserId: userUUID
+        UserId: userUUID,
       },
-      MaxResults: 50
+      MaxResults: 50,
     };
     // TODO: handle pagenation!!!
     var userMembership = i.listGroupMembershipsForMember(params).promise();
-    // console.log(Object.prototype.toString.call(userMembership));
     return userMembership;
   }
 
@@ -147,7 +151,7 @@ function aws_scim(user, context, callback) {
     for (var group of groupList) {
       var params = {
         GroupId: group.GroupId,
-        IdentityStoreId: IdentityStoreId 
+        IdentityStoreId: IdentityStoreId,
       };
       groupPromises.push(i.describeGroup(params).promise());
     }
@@ -158,15 +162,15 @@ function aws_scim(user, context, callback) {
     var promisedGroupIds = [];
     for (var groupName of groupList) {
       var params = {
-        IdentityStoreId: IdentityStoreId, 
+        IdentityStoreId: IdentityStoreId,
         AlternateIdentifier: {
           UniqueAttribute: {
-            AttributePath: 'DisplayName',
-            AttributeValue: groupName
-          }
-        }
+            AttributePath: "DisplayName",
+            AttributeValue: groupName,
+          },
+        },
       };
-      promisedGroupIds.push(i.getGroupId(params).promise()); 
+      promisedGroupIds.push(i.getGroupId(params).promise());
     }
     return Promise.all(promisedGroupIds);
   }
@@ -178,14 +182,14 @@ function aws_scim(user, context, callback) {
       UserName: user.email,
       Name: {
         FamilyName: user.family_name,
-        GivenName: user.given_name
+        GivenName: user.given_name,
       },
       Emails: [
         {
           Primary: true,
-          Value: user.email
-        }
-      ]
+          Value: user.email,
+        },
+      ],
     };
     return i.createUser(params).promise();
   }
@@ -194,55 +198,64 @@ function aws_scim(user, context, callback) {
   const asyncWrapper = async () => {
     // Get the users group list filtered down to only AWS related groups
     const proposedGroups = filterAWSGRoups(user.groups);
-    
+
     // Fetch users AWS UUID
-    const userIdObj = (await fetchAWSUUID().catch(error => {
-      if (error.code === 'ResourceNotFoundException') {
-      } else { throw error; }
-    }));
+    const userIdObj = await fetchAWSUUID().catch((error) => {
+      if (error.code === "ResourceNotFoundException") {
+      } else {
+        throw error;
+      }
+    });
 
     if (!userIdObj) {
-      console.log("Create User");
+      console.log(`Creating User (${userName}) in AWS IdentityStore`);
       AWSUserId = (await createUser()).UserId;
     } else {
-      AWSUserId = userIdObj.UserId;
+      AWSUserId = userIdObj.Users[0].UserId;
     }
-    console.log(AWSUserId);
 
     // Get users existing AWS group membership
     const usersAWSGroups = await fetchUsersAWSGroups(AWSUserId);
-    console.log(usersAWSGroups);
 
-    const usersAWSGroupNames = await fetchGroupNameMap(usersAWSGroups.GroupMemberships);
-    const existingGroups = usersAWSGroupNames.map(item => item.DisplayName);
+    const usersAWSGroupNames = await fetchGroupNameMap(
+      usersAWSGroups.GroupMemberships
+    );
+    const existingGroups = usersAWSGroupNames.map((item) => item.DisplayName);
 
     // Diff the proposed groups and the existing groups
     const groupActionList = userAuth0Groups(proposedGroups, existingGroups);
-    const addToGroup = groupActionList.addToGroup;  // DisplayName list
-    const removeFromGroup = groupActionList.removeFromGroup;  // DisplayName list
-    console.log("Add user to:", addToGroup);
-    console.log("Remove user from:", removeFromGroup);
-
-    const addToGroupIds = (await getGroupIds(addToGroup)).map(item => item.GroupId);
-    console.log("Add to GroupIds:", addToGroupIds);
+    const addToGroup = groupActionList.addToGroup; // DisplayName list
+    const removeFromGroup = groupActionList.removeFromGroup; // DisplayName list
+    if (addToGroup.length > 0 || removeFromGroup.length > 0) {
+      console.log(`Add user (${userName}) to: `, addToGroup);
+      console.log(`Remove user (${userName}) from: `, removeFromGroup);
+    }
+    const addToGroupIds = (await getGroupIds(addToGroup)).map(
+      (item) => item.GroupId
+    );
 
     // From the groupsmembership object, filter and map group ids to be removed from
-    const removeGroupIds = usersAWSGroupNames.filter((item) => removeFromGroup.includes(item.DisplayName)).map(item => item.GroupId);
-    console.log(removeGroupIds);
-    const removeMembershipId = usersAWSGroups.GroupMemberships.filter((item) => removeGroupIds.includes(item.GroupId)).map(item => item.MembershipId);
-    console.log("Remove membership: ", removeMembershipId);
+    const removeGroupIds = usersAWSGroupNames
+      .filter((item) => removeFromGroup.includes(item.DisplayName))
+      .map((item) => item.GroupId);
+    const removeMembershipId = usersAWSGroups.GroupMemberships.filter((item) =>
+      removeGroupIds.includes(item.GroupId)
+    ).map((item) => item.MembershipId);
 
     // Create group memberships
     const addPromise = createGroupMemberships(addToGroupIds);
-    
+
     // Delete group memberships
     const removePromise = removeGroupMemberships(removeMembershipId);
     return Promise.all([addPromise, removePromise]);
   };
 
-  asyncWrapper().then(response => {
-    console.log(response);
-  }).catch(error => {
-    console.error(error);
-  });
+  asyncWrapper()
+    .then(() => {
+      return callback(null, user, context);
+    })
+    .catch((error) => {
+      console.error(error);
+      return callback(error);
+    });
 }
