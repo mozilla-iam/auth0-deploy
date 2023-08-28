@@ -111,7 +111,7 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
     const ACCESS_KEY_ID = configuration.aws_logging_access_key_id;
     const SECRET_KEY = configuration.aws_logging_secret_key;
 
-    let AWS = require('aws-sdk@2.5.3');
+    let AWS = require('aws-sdk@2.1416.0');
     let sns = new AWS.SNS({
       apiVersion: '2010-03-31',
       accessKeyId: ACCESS_KEY_ID,
