@@ -107,7 +107,7 @@ function AWSFederatedAMR(user, context, callback) {
     // Try to take advantage of a cached copy of the awsGroupRoleMap from a previous webtask run
     // If there is no cached copy, fetch a new one.
     if (!global.awsGroupRoleMap) {
-      let AWS = require('aws-sdk@2.5.3');
+      let AWS = require('aws-sdk@2.1416.0');
       let s3 = new AWS.S3({
         apiVersion: '2006-03-01',
         accessKeyId: ACCESS_KEY_ID,
