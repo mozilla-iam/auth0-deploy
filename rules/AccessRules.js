@@ -1,26 +1,21 @@
 function AccessRules(user, context, callback) {
   // Imports
-  const request = require('request');
+  const fetch = require('node-fetch@2.6.1');
   const YAML = require('js-yaml');
   const jose = require('node-jose');
 
   // Retrieve the access file information/configuration from well-known
   // See also https://github.com/mozilla-iam/cis/blob/profilev2/docs/.well-known/mozilla-iam.json
   function get_access_file_configuration(cb) {
-    var access_file_conf = {};
-    var options = { method: 'GET', url: configuration.iam_well_known };
-    request(options, function (error, response, body) {
-      if (error) throw new Error(error);
-      if (response.statusCode !== 200) {
-        console.log('Could not fetch access file URL: '+response.statusCode);
-      } else {
-        access_file_conf = JSON.parse(body).access_file;
-        // contains mainly:
-        // access_file_conf.endpoint  (URL)
-        // access_file_conf.jwks.keys[]{} (pub keys)
-        // access_file_conf.aai_mappings
+    fetch(configuration.iam_well_known).then(response => {
+      if (response.status !== 200) {
+        return callback(new Error("Could not fetch IAM well known: " + response.body));
       }
-      return cb(access_file_conf);
+      return response.json();
+    }).then( response => {
+      return cb(response.access_file);
+    }).catch( err => {
+      return callback(err);
     });
   }
 
@@ -35,28 +30,31 @@ function AccessRules(user, context, callback) {
     //  return cb(global.access_rules, access_file_conf);
     //}
 
-    var options = { method: 'GET', url: access_file_conf.endpoint };
     var decoded;
-    request(options, function (error, response, body) {
-      if (error) throw new Error(error);
+    fetch(access_file_conf.endpoint).then( response => {
       // Convert key into jose-formatted-key
       // XXX remove this part of the code when well-known and signature exists
       if (access_file_conf.jwks === null) {
         console.log('WARNING: Bypassing access file signature verification');
-        decoded = body;
+        decoded = response.text();
       } else {
         // XXX verify key format when the well-known endpoint exists
         var pubkey = jose.JWK.asKey(access_file_conf.jwks.keys.x5c[0], 'pem').then((jwk) => jwk);
         var verifier = jose.JWS.createVerify(pubkey);
-        var ret = verifier.verify(body).then((response) => response.payload).catch((err) => err);
+        var ret = verifier.verify(response.text).then((response) => response.payload).catch((err) => err);
         decoded = ret.then((data) => data).catch((err) => {
           throw new Error('Signature verification of access file failed (fatal): '+err);
         });
       }
-
+      return decoded;
+    }).then( decoded => {
       global.access_rules = YAML.load(decoded).apps;
       return cb(global.access_rules, access_file_conf);
-    });
+    }).catch( err => {
+      return callback(err);
+    }
+
+    );
   }
 
   // Check if array A has any occurrence from array B
@@ -123,8 +121,8 @@ function AccessRules(user, context, callback) {
     // Here we iterate over all possible user identities and build an array of all groups from them
     var _profile;
     var profile_groups = [];
-    for (var i = 0, len = user.identities.length;i<len;i++) {
-      _profile = user.identities[i];
+    for (var x = 0, len = user.identities.length;x<len;x++) {
+      _profile = user.identities[x];
       if ('profileData' in _profile) {
         if ('groups' in _profile.profileData) {
           Array.prototype.push.apply(profile_groups, _profile.profileData.groups);
@@ -274,7 +272,7 @@ function AccessRules(user, context, callback) {
       console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - due to " +
         "Identity Assurance Level being too low for this RP. Required AAL: "+required_aal+
         " ("+aai_pass+")");
-      context.request.query.redirect_uri = app.url || "https://sso.mozilla.com";
+      context.request.query.redirect_uri = "https://sso.mozilla.com";
       return access_denied(null, user, global.postError('aai_failed', context));
     }
 

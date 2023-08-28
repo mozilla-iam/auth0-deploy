@@ -55,9 +55,11 @@ function GHEGroups(user, context, callback) {
     'UwUgLsXH6YtrWLATQpTuil2iNilYGGhF': 'mozilliansorg_ghe_mozilla-services_users',
     'RLPUxhCQsmmRHyOmDOGkLpu1mArNH3xn': 'mozilliansorg_ghe_firefoxux_users',
     'KMcYzqySOFXHteY1zliDlq577ARCb6gi': 'mozilliansorg_ghe_mozillasocial_users',
+    'IEc83wZvZzcQXMkpUmrnb9P8wztUiokl': 'mozilliansorg_ghe_mozscout_users',
+    'vkoDkHlCEUhlHNhVDtewJqRLVLGVsPrZ': 'mozilliansorg_ghe_mozilla-fakespot_users'
   };
 
-  const fetch = require('node-fetch@2.6.0');
+  const fetch = require('node-fetch@2.6.1');
   const AUTH0_TIMEOUT = 5000;  // milliseconds
   const PERSONAPI_BEARER_TOKEN_REFRESH_AGE = 64770;  // 18 hours - 30 seconds for refresh timeout allowance
   const PERSONAPI_TIMEOUT = 5000;  // milliseconds
