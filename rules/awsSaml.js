@@ -226,28 +226,30 @@ function awsSaml(user, context, callback) {
     const groupActionList = userAuth0Groups(proposedGroups, existingGroups);
     const addToGroup = groupActionList.addToGroup; // DisplayName list
     const removeFromGroup = groupActionList.removeFromGroup; // DisplayName list
+
     if (addToGroup.length > 0 || removeFromGroup.length > 0) {
       console.log(`Add user (${userName}) to: `, addToGroup);
       console.log(`Remove user (${userName}) from: `, removeFromGroup);
+
+      const addToGroupIds = (await getGroupIds(addToGroup)).map(
+        (item) => item.GroupId
+      );
+
+      // From the groupsmembership object, filter and map group ids to be removed from
+      const removeGroupIds = usersAWSGroupNames
+        .filter((item) => removeFromGroup.includes(item.DisplayName))
+        .map((item) => item.GroupId);
+      const removeMembershipId = usersAWSGroups.GroupMemberships.filter((item) =>
+        removeGroupIds.includes(item.GroupId)
+      ).map((item) => item.MembershipId);
+
+      // Create group memberships
+      const addPromise = createGroupMemberships(addToGroupIds);
+
+      // Delete group memberships
+      const removePromise = removeGroupMemberships(removeMembershipId);
+      return Promise.all([addPromise, removePromise]);
     }
-    const addToGroupIds = (await getGroupIds(addToGroup)).map(
-      (item) => item.GroupId
-    );
-
-    // From the groupsmembership object, filter and map group ids to be removed from
-    const removeGroupIds = usersAWSGroupNames
-      .filter((item) => removeFromGroup.includes(item.DisplayName))
-      .map((item) => item.GroupId);
-    const removeMembershipId = usersAWSGroups.GroupMemberships.filter((item) =>
-      removeGroupIds.includes(item.GroupId)
-    ).map((item) => item.MembershipId);
-
-    // Create group memberships
-    const addPromise = createGroupMemberships(addToGroupIds);
-
-    // Delete group memberships
-    const removePromise = removeGroupMemberships(removeMembershipId);
-    return Promise.all([addPromise, removePromise]);
   };
 
   asyncWrapper()
