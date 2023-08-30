@@ -1,6 +1,6 @@
 function awsSaml(user, context, callback) {
   // Only exec this rule if logging into AWS Saml SSO
-  if (context.clientID !== "q8vmyUjlPZj7QnURDVXtjvzSlsXK9AHK")
+  if (context.clientID !== "JR8HkyiM2i00ma2d1X2xfgdbEHzEYZbS")
     return callback(null, user, context); // AWS
 
   var AWS = require("aws-sdk@2.1416.0");
@@ -11,7 +11,6 @@ function awsSaml(user, context, callback) {
     apiVersion: "2020-06-15",
     accessKeyId: configuration.AWS_IDENTITYSTORE_ACCESS_ID,
     secretAccessKey: configuration.AWS_IDENTITYSTORE_ACCESS_KEY,
-    logger: console,
   });
 
   const IdentityStoreId = configuration.AWS_IDENTITYSTORE_ID;
@@ -200,18 +199,12 @@ function awsSaml(user, context, callback) {
     const proposedGroups = filterAWSGRoups(user.groups);
 
     // Fetch users AWS UUID
-    const userIdObj = await fetchAWSUUID().catch((error) => {
-      if (error.code === "ResourceNotFoundException") {
-      } else {
-        throw error;
-      }
-    });
-
-    if (!userIdObj) {
+    const userObjList = await fetchAWSUUID();
+    if (userObjList.Users.length === 0) {
       console.log(`Creating User (${userName}) in AWS IdentityStore`);
       AWSUserId = (await createUser()).UserId;
     } else {
-      AWSUserId = userIdObj.Users[0].UserId;
+      AWSUserId = userObjList.Users[0].UserId;
     }
 
     // Get users existing AWS group membership
