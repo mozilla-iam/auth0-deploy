@@ -78,7 +78,7 @@ function awsSaml(user, context, callback) {
   ];
 
   // Filter the users Auth0 groups down to only those mapped to AWS groups
-  function filterAWSGRoups(groups) {
+  function filterAWSGroups(groups) {
     var filteredGroups = groups.filter((x) => AWS_GROUPS.includes(x));
     return filteredGroups;
   }
@@ -196,7 +196,7 @@ function awsSaml(user, context, callback) {
   // Wrap the entire rule in an async function
   const asyncWrapper = async () => {
     // Get the users group list filtered down to only AWS related groups
-    const proposedGroups = filterAWSGRoups(user.groups);
+    const proposedGroups = filterAWSGroups(user.groups);
 
     // Fetch users AWS UUID
     const userObjList = await fetchAWSUUID();
