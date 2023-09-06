@@ -223,7 +223,9 @@ function awsSaml(user, context, callback) {
     // Fetch users AWS UUID
     const userObjList = await fetchAWSUUID();
     if (userObjList.Users.length === 0) {
-      console.log(`Creating User (${userName}) in AWS IdentityStore`);
+      console.log(
+        `[${IdentityStoreId}] Creating User (${userName}) in AWS IdentityStore`
+      );
       AWSUserId = (await createUser()).UserId;
     } else {
       AWSUserId = userObjList.Users[0].UserId;
@@ -243,8 +245,14 @@ function awsSaml(user, context, callback) {
     const removeFromGroup = groupActionList.removeFromGroup; // DisplayName list
 
     if (addToGroup.length > 0 || removeFromGroup.length > 0) {
-      console.log(`Add user (${userName}) to: `, addToGroup);
-      console.log(`Remove user (${userName}) from: `, removeFromGroup);
+      console.log(
+        `[${IdentityStoreId}] Add user (${userName}) to: `,
+        addToGroup
+      );
+      console.log(
+        `[${IdentityStoreId}] Remove user (${userName}) from: `,
+        removeFromGroup
+      );
 
       const addToGroupIds = (await getGroupIds(addToGroup)).map(
         (item) => item.GroupId
