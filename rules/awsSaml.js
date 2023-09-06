@@ -1,81 +1,103 @@
 function awsSaml(user, context, callback) {
-  // Only exec this rule if logging into AWS Saml SSO
-  if (context.clientID !== "JR8HkyiM2i00ma2d1X2xfgdbEHzEYZbS")
-    return callback(null, user, context); // AWS
+
+  var paramObj = {};
+
+  const clientID = context.clientID || "";
+  switch (clientID) {
+    case 'JR8HkyiM2i00ma2d1X2xfgdbEHzEYZbS':
+      // IT billing account params
+      paramObj.region = "us-west-2";
+      paramObj.IdentityStoreId = configuration.AWS_IDENTITYSTORE_ID_IT;
+      paramObj.accessKeyId = configuration.AWS_IDENTITYSTORE_ACCESS_ID_IT;
+      paramObj.secretAccessKey = configuration.AWS_IDENTITYSTORE_ACCESS_KEY_IT;
+      paramObj.awsGroups = [
+        "aws_095732026120_poweruser",
+        "aws_104923852476_admin",
+        "aws_320464205386_admin",
+        "aws_320464205386_read_only",
+        "aws_359555865025_admin",
+        "aws_558986605633_admin",
+        "aws_622567216674_admin",
+        "aws_839739216564_admin",
+        "aws_consolidatedbilling_admin",
+        "aws_consolidatedbilling_read_only",
+        "aws_discourse_dev",
+        "fuzzing_team",
+        "mozilliansorg_aws_billing_access",
+        "mozilliansorg_cia-aws",
+        "mozilliansorg_consolidated-billing-aws",
+        "mozilliansorg_devtools-code-origin-access",
+        "mozilliansorg_iam-in-transition",
+        "mozilliansorg_iam-in-transition-admin",
+        "mozilliansorg_meao-admins",
+        "mozilliansorg_mofo_aws_admins",
+        "mozilliansorg_mofo_aws_community",
+        "mozilliansorg_mofo_aws_everything",
+        "mozilliansorg_mofo_aws_labs",
+        "mozilliansorg_mofo_aws_projects",
+        "mozilliansorg_mofo_aws_sandbox",
+        "mozilliansorg_mofo_aws_secure",
+        "mozilliansorg_mozilla-moderator-devs",
+        "mozilliansorg_partinfra-aws",
+        "mozilliansorg_pdfjs-testers",
+        "mozilliansorg_pocket_cloudtrail_readers",
+        "mozilliansorg_searchfox-aws",
+        "mozilliansorg_secops-aws-admins",
+        "mozilliansorg_voice_aws_admin_access",
+        "mozilliansorg_web-sre-aws-access",
+        "team_infra",
+        "team_mdn",
+        "team_netops",
+        "team_opsec",
+        "team_se",
+        "team_secops",
+        "voice-dev",
+        "vpn_sumo_aws_devs",
+      ];
+      break;
+    case 'pQ0eb5tzwfYHnAtzGuk88pzxZ68szQtk':
+      // Pocket Billing Account
+      paramObj.region = "us-east-1"
+      paramObj.IdentityStoreId = configuration.AWS_IDENTITYSTORE_ID_POCKET;
+      paramObj.accessKeyId = configuration.AWS_IDENTITYSTORE_ACCESS_ID_POCKET;
+      paramObj.secretAccessKey =  configuration.AWS_IDENTITYSTORE_ACCESS_KEY_POCKET;
+      paramObj.awsGroups = [
+        "mozilliansorg_pocket_admin",
+        "mozilliansorg_pocket_backend",
+        "mozilliansorg_pocket_backup_admin",
+        "mozilliansorg_pocket_backup_readonly",
+        "mozilliansorg_pocket_cloudtrail_readers",
+        "mozilliansorg_pocket_dataanalytics",
+        "mozilliansorg_pocket_datalearning",
+        "mozilliansorg_pocket_developer",
+        "mozilliansorg_pocket_frontend",
+        "mozilliansorg_pocket_marketing",
+        "mozilliansorg_pocket_mozilla_sre",
+        "mozilliansorg_pocket_qa",
+        "mozilliansorg_pocket_readonly",
+        "mozilliansorg_pocket_sales",
+      ];
+      break;
+    default:
+      return callback(null, user, context); // Not an AWS login, continue auth pipeline
+  }
 
   var AWS = require("aws-sdk@2.1416.0");
 
   // Instantate and set Region
   var i = new AWS.IdentityStore({
-    region: "us-west-2",
+    region: paramObj.region,
     apiVersion: "2020-06-15",
-    accessKeyId: configuration.AWS_IDENTITYSTORE_ACCESS_ID,
-    secretAccessKey: configuration.AWS_IDENTITYSTORE_ACCESS_KEY,
+    accessKeyId: paramObj.accessKeyId,
+    secretAccessKey: paramObj.secretAccessKey,
   });
 
-  const IdentityStoreId = configuration.AWS_IDENTITYSTORE_ID;
+  const IdentityStoreId = paramObj.IdentityStoreId;
   const userName = user.email;
   var AWSUserId = "";
 
   // This is a list of groups that are mapped to AWS groups
-  const AWS_GROUPS = [
-    "mozilliansorg_pocket_mozilla_sre",
-    "aws_095732026120_poweruser",
-    "aws_104923852476_admin",
-    "aws_320464205386_admin",
-    "aws_320464205386_read_only",
-    "aws_359555865025_admin",
-    "aws_558986605633_admin",
-    "aws_622567216674_admin",
-    "aws_839739216564_admin",
-    "aws_consolidatedbilling_admin",
-    "aws_consolidatedbilling_read_only",
-    "aws_discourse_dev",
-    "fuzzing_team",
-    "mozilliansorg_aws_billing_access",
-    "mozilliansorg_cia-aws",
-    "mozilliansorg_consolidated-billing-aws",
-    "mozilliansorg_devtools-code-origin-access",
-    "mozilliansorg_iam-in-transition",
-    "mozilliansorg_iam-in-transition-admin",
-    "mozilliansorg_meao-admins",
-    "mozilliansorg_mofo_aws_admins",
-    "mozilliansorg_mofo_aws_community",
-    "mozilliansorg_mofo_aws_everything",
-    "mozilliansorg_mofo_aws_labs",
-    "mozilliansorg_mofo_aws_projects",
-    "mozilliansorg_mofo_aws_sandbox",
-    "mozilliansorg_mofo_aws_secure",
-    "mozilliansorg_mozilla-moderator-devs",
-    "mozilliansorg_partinfra-aws",
-    "mozilliansorg_pdfjs-testers",
-    "mozilliansorg_pocket_admin",
-    "mozilliansorg_pocket_backend",
-    "mozilliansorg_pocket_backup_admin",
-    "mozilliansorg_pocket_backup_readonly",
-    "mozilliansorg_pocket_cloudtrail_readers",
-    "mozilliansorg_pocket_dataanalytics",
-    "mozilliansorg_pocket_datalearning",
-    "mozilliansorg_pocket_developer",
-    "mozilliansorg_pocket_frontend",
-    "mozilliansorg_pocket_marketing",
-    "mozilliansorg_pocket_mozilla_sre",
-    "mozilliansorg_pocket_qa",
-    "mozilliansorg_pocket_readonly",
-    "mozilliansorg_pocket_sales",
-    "mozilliansorg_searchfox-aws",
-    "mozilliansorg_secops-aws-admins",
-    "mozilliansorg_voice_aws_admin_access",
-    "mozilliansorg_web-sre-aws-access",
-    "team_infra",
-    "team_mdn",
-    "team_netops",
-    "team_opsec",
-    "team_se",
-    "team_secops",
-    "voice-dev",
-    "vpn_sumo_aws_devs",
-  ];
+  const AWS_GROUPS = paramObj.awsGroups;
 
   // Filter the users Auth0 groups down to only those mapped to AWS groups
   function filterAWSGroups(groups) {
