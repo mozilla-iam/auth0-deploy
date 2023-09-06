@@ -1,10 +1,9 @@
 function awsSaml(user, context, callback) {
-
   var paramObj = {};
 
   const clientID = context.clientID || "";
   switch (clientID) {
-    case 'JR8HkyiM2i00ma2d1X2xfgdbEHzEYZbS':
+    case "JR8HkyiM2i00ma2d1X2xfgdbEHzEYZbS":
       // IT billing account params
       paramObj.region = "us-west-2";
       paramObj.IdentityStoreId = configuration.AWS_IDENTITYSTORE_ID_IT;
@@ -55,12 +54,13 @@ function awsSaml(user, context, callback) {
         "vpn_sumo_aws_devs",
       ];
       break;
-    case 'pQ0eb5tzwfYHnAtzGuk88pzxZ68szQtk':
+    case "pQ0eb5tzwfYHnAtzGuk88pzxZ68szQtk":
       // Pocket Billing Account
-      paramObj.region = "us-east-1"
+      paramObj.region = "us-east-1";
       paramObj.IdentityStoreId = configuration.AWS_IDENTITYSTORE_ID_POCKET;
       paramObj.accessKeyId = configuration.AWS_IDENTITYSTORE_ACCESS_ID_POCKET;
-      paramObj.secretAccessKey =  configuration.AWS_IDENTITYSTORE_ACCESS_KEY_POCKET;
+      paramObj.secretAccessKey =
+        configuration.AWS_IDENTITYSTORE_ACCESS_KEY_POCKET;
       paramObj.awsGroups = [
         "mozilliansorg_pocket_admin",
         "mozilliansorg_pocket_backend",
@@ -254,8 +254,8 @@ function awsSaml(user, context, callback) {
       const removeGroupIds = usersAWSGroupNames
         .filter((item) => removeFromGroup.includes(item.DisplayName))
         .map((item) => item.GroupId);
-      const removeMembershipId = usersAWSGroups.GroupMemberships.filter((item) =>
-        removeGroupIds.includes(item.GroupId)
+      const removeMembershipId = usersAWSGroups.GroupMemberships.filter(
+        (item) => removeGroupIds.includes(item.GroupId)
       ).map((item) => item.MembershipId);
 
       // Create group memberships
