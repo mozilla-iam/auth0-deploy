@@ -29,13 +29,6 @@ function awsSaml(user, context, callback) {
         "mozilliansorg_iam-in-transition",
         "mozilliansorg_iam-in-transition-admin",
         "mozilliansorg_meao-admins",
-        "mozilliansorg_mofo_aws_admins",
-        "mozilliansorg_mofo_aws_community",
-        "mozilliansorg_mofo_aws_everything",
-        "mozilliansorg_mofo_aws_labs",
-        "mozilliansorg_mofo_aws_projects",
-        "mozilliansorg_mofo_aws_sandbox",
-        "mozilliansorg_mofo_aws_secure",
         "mozilliansorg_mozilla-moderator-devs",
         "mozilliansorg_partinfra-aws",
         "mozilliansorg_pdfjs-testers",
@@ -76,6 +69,23 @@ function awsSaml(user, context, callback) {
         "mozilliansorg_pocket_qa",
         "mozilliansorg_pocket_readonly",
         "mozilliansorg_pocket_sales",
+      ];
+      break;
+    case "jU8r4uSEF3fUCjuJ63s46dBnHAfYMYfj":
+      // MoFo Billing Account
+      paramObj.region = "us-east-2";
+      paramObj.IdentityStoreId = configuration.AWS_IDENTITYSTORE_ID_MOFO;
+      paramObj.accessKeyId = configuration.AWS_IDENTITYSTORE_ACCESS_ID_MOFO;
+      paramObj.secretAccessKey =
+        configuration.AWS_IDENTITYSTORE_ACCESS_KEY_MOFO;
+      paramObj.awsGroups = [
+        "mozilliansorg_mofo_aws_admins",
+        "mozilliansorg_mofo_aws_community",
+        "mozilliansorg_mofo_aws_everything",
+        "mozilliansorg_mofo_aws_labs",
+        "mozilliansorg_mofo_aws_projects",
+        "mozilliansorg_mofo_aws_sandbox",
+        "mozilliansorg_mofo_aws_secure",
       ];
       break;
     default:
