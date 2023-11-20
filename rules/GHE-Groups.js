@@ -167,7 +167,7 @@ const getPersonProfile = async () => {
           // confirm the user has a githubUsername stored in mozillians, otherwise redirect
           if(githubUsername === null) {
             context.redirect = {
-               url: configuration.github_enterprise_wiki_url + "?bc=" + errorCode
+               url: configuration.github_enterprise_wiki_url + "?dbg=" + errorCode
              };
           }
           return callback(null, user, context);
