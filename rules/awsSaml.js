@@ -69,6 +69,8 @@ function awsSaml(user, context, callback) {
         "mozilliansorg_pocket_qa",
         "mozilliansorg_pocket_readonly",
         "mozilliansorg_pocket_sales",
+        "mozilliansorg_pocket_ads",
+        "mozilliansorg_pocket_aws_billing",
       ];
       break;
     case "jU8r4uSEF3fUCjuJ63s46dBnHAfYMYfj":
