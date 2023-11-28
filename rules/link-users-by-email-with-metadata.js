@@ -13,7 +13,7 @@
  */
 
 function linkUsersByEmailWithMetadata(user, context, callback) {
-  const fetch = require("node-fetch@2.6.1");
+  const fetch = require('node-fetch@2.6.1');
 
   // Check if email is verified, we shouldn't automatically
   // merge accounts if this is not the case.
@@ -21,8 +21,8 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
     return callback(null, user, context);
   }
 
-  const userApiUrl = auth0.baseUrl + "/users";
-  const userSearchApiUrl = auth0.baseUrl + "/users-by-email?";
+  const userApiUrl = auth0.baseUrl + '/users';
+  const userSearchApiUrl = auth0.baseUrl + '/users-by-email?';
 
   const params = new URLSearchParams({
     email: user.email,
@@ -30,12 +30,12 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
 
   fetch(userSearchApiUrl + params.toString(), {
     headers: {
-      Authorization: "Bearer " + auth0.accessToken,
+      Authorization: 'Bearer ' + auth0.accessToken,
     },
   })
     .then((response) => {
       if (response.status !== 200)
-        return callback(new Error("API Call failed: " + response.body));
+        return callback(new Error('API Call failed: ' + response.body));
       return response.json();
     })
     .then((data) => {
@@ -79,7 +79,7 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
     // So we need to determine if one or neither are LDAP
     var primaryUser = {};
     var secondaryUser = {};
-    if (user.user_id.startsWith("ad|Mozilla-LDAP")) {
+    if (user.user_id.startsWith('ad|Mozilla-LDAP')) {
       primaryUser = user;
       secondaryUser = otherProfile;
     } else {
@@ -109,11 +109,11 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
       )
       // Link the accounts
       .then(function () {
-        fetch(userApiUrl + "/" + primaryUser.user_id + "/identities", {
-          method: "post",
+        fetch(userApiUrl + '/' + primaryUser.user_id + '/identities', {
+          method: 'post',
           headers: {
-            Authorization: "Bearer " + auth0.accessToken,
-            "Content-Type": "application/json",
+            Authorization: 'Bearer ' + auth0.accessToken,
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             provider: secondaryUser.identities[0].provider,
@@ -121,9 +121,9 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
           }),
         }).then((response) => {
           if (!response.ok && response.status >= 400) {
-            console.log("Error linking account: " + response.statusText);
+            console.log('Error linking account: ' + response.statusText);
             return callback(
-              new Error("Error linking account: " + response.statusText)
+              new Error('Error linking account: ' + response.statusText)
             );
           }
           // Finally, swap user_id so that the current login process has the correct data
@@ -133,17 +133,17 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
         });
       })
       .catch((err) => {
-        console.log("An unknown error occurred while linking accounts: " + err);
+        console.log('An unknown error occurred while linking accounts: ' + err);
         return callback(err);
       });
   };
   const publishSNSMessage = (message) => {
     if (
-      !("aws_logging_sns_topic_arn" in configuration) ||
-      !("aws_logging_access_key_id" in configuration) ||
-      !("aws_logging_secret_key" in configuration)
+      !('aws_logging_sns_topic_arn' in configuration) ||
+      !('aws_logging_access_key_id' in configuration) ||
+      !('aws_logging_secret_key' in configuration)
     ) {
-      console.log("Missing Auth0 AWS SNS logging configuration values");
+      console.log('Missing Auth0 AWS SNS logging configuration values');
       return false;
     }
 
@@ -151,12 +151,12 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
     const ACCESS_KEY_ID = configuration.aws_logging_access_key_id;
     const SECRET_KEY = configuration.aws_logging_secret_key;
 
-    let AWS = require("aws-sdk@2.1416.0");
+    let AWS = require('aws-sdk@2.1416.0');
     let sns = new AWS.SNS({
-      apiVersion: "2010-03-31",
+      apiVersion: '2010-03-31',
       accessKeyId: ACCESS_KEY_ID,
       secretAccessKey: SECRET_KEY,
-      region: "us-west-2",
+      region: 'us-west-2',
       logger: console,
     });
     const params = {
