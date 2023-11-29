@@ -75,8 +75,15 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
     });
 
   const linkAccount = (otherProfile) => {
+    // sanity check if both accounts have LDAP as primary
+    // we should NOT link these accounts and simply allow the user to continue logging in.
+    if (user.user_id.startsWith('ad|Mozilla-LDAP') && otherProfile.user_id.startsWith('ad|Mozilla-LDAP')) {
+      console.error(`Error: both ${user.user_id} and ${otherProfile.user_id} are LDAP Primary accounts. Linking will not occur.`);
+      return callback(null, user, context); // Continue with user login without account linking
+    }
     // LDAP takes priority being the primary identity
     // So we need to determine if one or neither are LDAP
+    // If both are non-primary, linking order doesn't matter
     var primaryUser = {};
     var secondaryUser = {};
     if (user.user_id.startsWith('ad|Mozilla-LDAP')) {
