@@ -25,85 +25,132 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
   const userSearchApiUrl = auth0.baseUrl + '/users-by-email?';
 
   const params = new URLSearchParams({
-    email: user.email
-	});
-
-  fetch(userSearchApiUrl + params.toString(),
-  {
-    headers: {
-      Authorization: 'Bearer ' + auth0.accessToken
-    }
-  }).then((response) => {
-    if (response.status !== 200) return callback(new Error("API Call failed: " + response.body));
-    return response.json();
-  }).then((data) => {
-    // Ignore non-verified users
-    data = data.filter(u => u.email_verified);
-
-    if (data.length === 1) {
-      // The user logged in with an identity which is the only one Auth0 knows about
-      // Do not perform any account linking
-      return callback(null, user, context);
-    }
-
-    if (data.length === 2) {
-      // Auth0 is aware of 2 identities with the same email address which means
-      // that the user just logged in with a new identity that hasn't been linked
-      // into the other existing identity
-      return linkAccount(data.filter(u => u.user_id !== user.user_id)[0]);
-    } else {
-      // data.length is > 2 which, post November 2020 when all identities were
-      // force linked manually, shouldn't be possible
-      var error_message = `Error linking account ${user.user_id} as there are ` +
-          `over 2 identities with the email address ${user.email} ` +
-          data.map(x => x.user_id).join();
-      console.log(error_message);
-      publishSNSMessage(`${error_message}\n\ndata : ${JSON.stringify(data)}\nuser : ${JSON.stringify(user)}`);
-      return callback(new Error(error_message));
-    }
-  }).catch(err => {
-    return callback(err);
+    email: user.email,
   });
 
-  const linkAccount = primaryUser => {
-    // Link the current logged in identity as a secondary into primaryUser as a primary
-    console.log(`Linking secondary identity ${user.user_id} into primary identity ${primaryUser.user_id}`);
+  fetch(userSearchApiUrl + params.toString(), {
+    headers: {
+      Authorization: 'Bearer ' + auth0.accessToken,
+    },
+  })
+    .then((response) => {
+      if (response.status !== 200)
+        return callback(new Error('API Call failed: ' + response.body));
+      return response.json();
+    })
+    .then((data) => {
+      // Ignore non-verified users
+      data = data.filter((u) => u.email_verified);
 
-    // Update app, user metadata as Auth0 won't back this up in user.identities[x].profileData
-    user.app_metadata = user.app_metadata || {};
-    user.user_metadata = user.user_metadata || {};
-    auth0.users.updateAppMetadata(primaryUser.user_id, user.app_metadata)
-    .then(auth0.users.updateUserMetadata(primaryUser.user_id, Object.assign({}, user.user_metadata, primaryUser.user_metadata)))
-    // Link the accounts
-    .then(function() {
-      fetch( userApiUrl + '/' + primaryUser.user_id + '/identities',
-      {
-        method: 'post',
-        headers: {
-          Authorization: 'Bearer ' + auth0.accessToken,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ provider: user.identities[0].provider, user_id: String(user.identities[0].user_id) }),
-      }).then( response => {
-        if (!response.ok && response.status >= 400) {
-          console.log("Error linking account: " + response.statusText);
-          return callback(new Error('Error linking account: ' + response.statusText));
-        }
-        // Finally, swap user_id so that the current login process has the correct data
-        context.primaryUser = primaryUser.user_id;
-        context.primaryUserMetadata = primaryUser.user_metadata || {};
+      if (data.length === 1) {
+        // The user logged in with an identity which is the only one Auth0 knows about
+        // Do not perform any account linking
         return callback(null, user, context);
-      });
-    }).catch( err => {
-      console.log("An unknown error occurred while linking accounts: " + err);
+      }
+
+      if (data.length === 2) {
+        // Auth0 is aware of 2 identities with the same email address which means
+        // that the user just logged in with a new identity that hasn't been linked
+        // into the other existing identity.  Here we pass the other account to the
+        // linking function
+        return linkAccount(data.filter((u) => u.user_id !== user.user_id)[0]);
+      } else {
+        // data.length is > 2 which, post November 2020 when all identities were
+        // force linked manually, shouldn't be possible
+        var error_message =
+          `Error linking account ${user.user_id} as there are ` +
+          `over 2 identities with the email address ${user.email} ` +
+          data.map((x) => x.user_id).join();
+        console.log(error_message);
+        publishSNSMessage(
+          `${error_message}\n\ndata : ${JSON.stringify(
+            data
+          )}\nuser : ${JSON.stringify(user)}`
+        );
+        return callback(new Error(error_message));
+      }
+    })
+    .catch((err) => {
       return callback(err);
     });
+
+  const linkAccount = (otherProfile) => {
+    // sanity check if both accounts have LDAP as primary
+    // we should NOT link these accounts and simply allow the user to continue logging in.
+    if (user.user_id.startsWith('ad|Mozilla-LDAP') && otherProfile.user_id.startsWith('ad|Mozilla-LDAP')) {
+      console.error(`Error: both ${user.user_id} and ${otherProfile.user_id} are LDAP Primary accounts. Linking will not occur.`);
+      return callback(null, user, context); // Continue with user login without account linking
+    }
+    // LDAP takes priority being the primary identity
+    // So we need to determine if one or neither are LDAP
+    // If both are non-primary, linking order doesn't matter
+    var primaryUser = {};
+    var secondaryUser = {};
+    if (user.user_id.startsWith('ad|Mozilla-LDAP')) {
+      primaryUser = user;
+      secondaryUser = otherProfile;
+    } else {
+      primaryUser = otherProfile;
+      secondaryUser = user;
+    }
+
+    // Link the secondary account into the primary account
+    console.log(
+      `Linking secondary identity ${secondaryUser.user_id} into primary identity ${primaryUser.user_id}`
+    );
+
+    // Update app, user metadata as Auth0 won't back this up in user.identities[x].profileData
+    secondaryUser.app_metadata = secondaryUser.app_metadata || {};
+    secondaryUser.user_metadata = secondaryUser.user_metadata || {};
+    auth0.users
+      .updateAppMetadata(primaryUser.user_id, secondaryUser.app_metadata)
+      .then(
+        auth0.users.updateUserMetadata(
+          primaryUser.user_id,
+          Object.assign(
+            {},
+            secondaryUser.user_metadata,
+            primaryUser.user_metadata
+          )
+        )
+      )
+      // Link the accounts
+      .then(function () {
+        fetch(userApiUrl + '/' + primaryUser.user_id + '/identities', {
+          method: 'post',
+          headers: {
+            Authorization: 'Bearer ' + auth0.accessToken,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            provider: secondaryUser.identities[0].provider,
+            user_id: String(secondaryUser.identities[0].user_id),
+          }),
+        }).then((response) => {
+          if (!response.ok && response.status >= 400) {
+            console.log('Error linking account: ' + response.statusText);
+            return callback(
+              new Error('Error linking account: ' + response.statusText)
+            );
+          }
+          // Finally, swap user_id so that the current login process has the correct data
+          context.primaryUser = primaryUser.user_id;
+          context.primaryUserMetadata = primaryUser.user_metadata || {};
+          return callback(null, user, context);
+        });
+      })
+      .catch((err) => {
+        console.log('An unknown error occurred while linking accounts: ' + err);
+        return callback(err);
+      });
   };
-  const publishSNSMessage = message => {
-    if (!("aws_logging_sns_topic_arn" in configuration) ||
-        !("aws_logging_access_key_id" in configuration) ||
-        !("aws_logging_secret_key" in configuration)) {
-      console.log("Missing Auth0 AWS SNS logging configuration values");
+  const publishSNSMessage = (message) => {
+    if (
+      !('aws_logging_sns_topic_arn' in configuration) ||
+      !('aws_logging_access_key_id' in configuration) ||
+      !('aws_logging_secret_key' in configuration)
+    ) {
+      console.log('Missing Auth0 AWS SNS logging configuration values');
       return false;
     }
 
@@ -123,10 +170,9 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
       Message: message,
       TopicArn: SNS_TOPIC_ARN,
     };
-    sns.publish(params, function(err, data) {
+    sns.publish(params, function (err, data) {
       if (err) console.log(err, err.stack); // an error occurred
-      else     console.log(data);           // successful response
+      else console.log(data); // successful response
     });
-
   };
 }
