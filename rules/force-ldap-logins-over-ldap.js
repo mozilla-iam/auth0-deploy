@@ -10,6 +10,8 @@ function forceLDAPLoginsOverLDAP(user, context, callback) {
      'mozillafoundation.org',  // Main org domain
      'getpocket.com',          // Pocket domain
      'thunderbird.net',        // MZLA domain
+     'readitlater.com',
+     'mozilla-japan.org'
   ];
 
   // Sanity checks
