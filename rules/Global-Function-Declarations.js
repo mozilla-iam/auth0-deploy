@@ -3,12 +3,6 @@ function globalFunctionDeclaration(user, context, callback) {
   // This rule MUST be at the top of the rule list (FIRST) or other rules WILL FAIL
   // with a NON RECOVERABLE error, and thus LOGIN WILL FAIL FOR USERS
 
-  // Since we do not use the /continue endpoint let's make sure we explictly fail with an ErrorUnauthorized
-  // otherwise it is possible to continue the session even after a postError redirect is set.
-  if (context.protocol === "redirect-callback") {
-    return callback(new UnauthorizedError('The /continue endpoint is not allowed'));
-  }
-
   // postError(code)
   // @code string with an error code for the SSO Dashboard to display
   // @rcontext the current Auth0 rule context (passed from the rule)
@@ -35,10 +29,8 @@ function globalFunctionDeclaration(user, context, callback) {
       );
 
       skey = undefined;  // auth0 compiler does not allow 'delete' so we undefine instead
-
-      var domain = context.tenant === "dev" ? "sso.allizom.org" : "sso.mozilla.com";
       rcontext.redirect = {
-        url: `https://${domain}/forbidden?error=${token}`
+        url: `https://sso.mozilla.com/forbidden?error=${token}`
       };
 
       return rcontext;
