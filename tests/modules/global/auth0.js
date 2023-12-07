@@ -5,7 +5,7 @@
 // functions of the Auth0 object.
 
 module.exports = {
-  baseUrl: "testing",
+  baseUrl: "https://example.com",
   accessToken: "testing",
   users: {
       updateAppMetadata: (user_id, app_metadata) => {
