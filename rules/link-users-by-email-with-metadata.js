@@ -22,8 +22,6 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
   }
 
   const userApiUrl = auth0.baseUrl + '/users';
-//  const userSearchApiUrl = auth0.baseUrl + '/users-by-email?';
-//  const userSearchApiUrl = new URL('/users-by-email', auth0.baseUrl );
 
   const opts = {
     headers: {
