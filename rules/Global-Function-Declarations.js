@@ -35,8 +35,10 @@ function globalFunctionDeclaration(user, context, callback) {
       );
 
       skey = undefined;  // auth0 compiler does not allow 'delete' so we undefine instead
+
+      var domain = context.tenant === "dev" ? "sso.allizom.org" : "sso.mozilla.com";
       rcontext.redirect = {
-        url: `https://sso.mozilla.com/forbidden?error=${token}`
+        url: `https://${domain}/forbidden?error=${token}`
       };
 
       return rcontext;
