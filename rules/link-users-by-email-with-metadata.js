@@ -24,55 +24,82 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
   const userApiUrl = auth0.baseUrl + '/users';
   const userSearchApiUrl = auth0.baseUrl + '/users-by-email?';
 
-  const params = new URLSearchParams({
-    email: user.email,
-  });
-
-  fetch(userSearchApiUrl + params.toString(), {
+  const opts = {
     headers: {
       Authorization: 'Bearer ' + auth0.accessToken,
     },
-  })
-    .then((response) => {
-      if (response.status !== 200)
+  }
+
+  // Since email addresses within auth0 are allowed to me mixed case and the /user-by-email search endpoint
+  // is case sensitive, we need to search for both situations.  In the first search we search by "this" users email
+  // which might be mixed case (or not).  Our second search is for the lowercase equivalent but only if two searches
+  // would be identical.
+  const searchMultipleEmailCases = async () => {
+    const emailUrl = userSearchApiUrl + new URLSearchParams({ email: user.email }).toString();
+    const emailUrlToLower = userSearchApiUrl + new URLSearchParams({ email: user.email.toLowerCase() }).toString();
+
+    let fetchPromiseArray = [fetch(emailUrl, opts)];
+    // if this user is mixed case, we need to also search for the lower case equivalent
+    if (emailUrl !== emailUrlToLower) {
+      fetchPromiseArray.push(...fetch(emailUrlToLower, opts));
+    }
+    // Call one (or two) api calls to the /user-by-email api endpoint
+    const responsePromises = await Promise.all(fetchPromiseArray);
+
+    // Map each response to its JSON conversion promise
+    const jsonPromises = responsePromises.map(response => {
+      if (!response.ok) {
         return callback(new Error('API Call failed: ' + response.body));
+      }
       return response.json();
-    })
-    .then((data) => {
-      // Ignore non-verified users
-      data = data.filter((u) => u.email_verified);
-
-      if (data.length === 1) {
-        // The user logged in with an identity which is the only one Auth0 knows about
-        // Do not perform any account linking
-        return callback(null, user, context);
-      }
-
-      if (data.length === 2) {
-        // Auth0 is aware of 2 identities with the same email address which means
-        // that the user just logged in with a new identity that hasn't been linked
-        // into the other existing identity.  Here we pass the other account to the
-        // linking function
-        return linkAccount(data.filter((u) => u.user_id !== user.user_id)[0]);
-      } else {
-        // data.length is > 2 which, post November 2020 when all identities were
-        // force linked manually, shouldn't be possible
-        var error_message =
-          `Error linking account ${user.user_id} as there are ` +
-          `over 2 identities with the email address ${user.email} ` +
-          data.map((x) => x.user_id).join();
-        console.log(error_message);
-        publishSNSMessage(
-          `${error_message}\n\ndata : ${JSON.stringify(
-            data
-          )}\nuser : ${JSON.stringify(user)}`
-        );
-        return callback(new Error(error_message));
-      }
-    })
-    .catch((err) => {
-      return callback(err);
     });
+
+    // await all json responses promises to resolve
+    const allResponses = await Promise.all(jsonPromises);
+
+    // flatten the array of arrays to get one array of profiles
+    const mergedProfiles = allResponses.flat();
+
+    return mergedProfiles;
+  }
+
+  const data = searchMultipleEmailCases();
+
+  try {
+    // Ignore non-verified users
+    data = data.filter((u) => u.email_verified);
+
+    if (data.length === 1) {
+      // The user logged in with an identity which is the only one Auth0 knows about
+      // Do not perform any account linking
+      return callback(null, user, context);
+    }
+
+    if (data.length === 2) {
+      // Auth0 is aware of 2 identities with the same email address which means
+      // that the user just logged in with a new identity that hasn't been linked
+      // into the other existing identity.  Here we pass the other account to the
+      // linking function
+      linkAccount(data.filter((u) => u.user_id !== user.user_id)[0]);
+    } else {
+      // data.length is > 2 which, post November 2020 when all identities were
+      // force linked manually, shouldn't be possible
+      var error_message =
+        `Error linking account ${user.user_id} as there are ` +
+        `over 2 identities with the email address ${user.email} ` +
+        data.map((x) => x.user_id).join();
+      console.log(error_message);
+      publishSNSMessage(
+        `${error_message}\n\ndata : ${JSON.stringify(
+          data
+        )}\nuser : ${JSON.stringify(user)}`
+      );
+      return callback(new Error(error_message));
+    }
+  } catch {
+    console.log('An unknown error occurred while linking accounts: ' + err);
+    return callback(err);
+  }
 
   const linkAccount = (otherProfile) => {
     // sanity check if both accounts have LDAP as primary
@@ -99,50 +126,40 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
       `Linking secondary identity ${secondaryUser.user_id} into primary identity ${primaryUser.user_id}`
     );
 
-    // Update app, user metadata as Auth0 won't back this up in user.identities[x].profileData
-    secondaryUser.app_metadata = secondaryUser.app_metadata || {};
-    secondaryUser.user_metadata = secondaryUser.user_metadata || {};
-    auth0.users
-      .updateAppMetadata(primaryUser.user_id, secondaryUser.app_metadata)
-      .then(
-        auth0.users.updateUserMetadata(
-          primaryUser.user_id,
-          Object.assign(
-            {},
-            secondaryUser.user_metadata,
-            primaryUser.user_metadata
-          )
-        )
-      )
-      // Link the accounts
-      .then(function () {
-        fetch(userApiUrl + '/' + primaryUser.user_id + '/identities', {
-          method: 'post',
-          headers: {
-            Authorization: 'Bearer ' + auth0.accessToken,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            provider: secondaryUser.identities[0].provider,
-            user_id: String(secondaryUser.identities[0].user_id),
-          }),
-        }).then((response) => {
-          if (!response.ok && response.status >= 400) {
-            console.log('Error linking account: ' + response.statusText);
-            return callback(
-              new Error('Error linking account: ' + response.statusText)
-            );
-          }
-          // Finally, swap user_id so that the current login process has the correct data
-          context.primaryUser = primaryUser.user_id;
-          context.primaryUserMetadata = primaryUser.user_metadata || {};
-          return callback(null, user, context);
-        });
-      })
-      .catch((err) => {
-        console.log('An unknown error occurred while linking accounts: ' + err);
-        return callback(err);
+    // We no longer keep the user_metadata nor app_metadata from the secondary account
+    // that is being linked.  If the primary account is LDAP, then it's existing
+    // metadata should prevail.  And in the case of both, primary and secondary being
+    // non-ldap, account priority does not matter and neither does the metadata of
+    // the secondary account.
+
+    // Link the accounts
+    try {
+      fetch(userApiUrl + '/' + primaryUser.user_id + '/identities', {
+        method: 'post',
+        headers: {
+          Authorization: 'Bearer ' + auth0.accessToken,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          provider: secondaryUser.identities[0].provider,
+          user_id: String(secondaryUser.identities[0].user_id),
+        }),
+      }).then((response) => {
+        if (!response.ok && response.status >= 400) {
+          console.log('Error linking account: ' + response.statusText);
+          return callback(
+            new Error('Error linking account: ' + response.statusText)
+          );
+        }
+        // Finally, swap user_id so that the current login process has the correct data
+        context.primaryUser = primaryUser.user_id;
+        context.primaryUserMetadata = primaryUser.user_metadata || {};
+        return callback(null, user, context);
       });
+    } catch(err) {
+      console.log('An unknown error occurred while linking accounts: ' + err);
+      return callback(err);
+    };
   };
   const publishSNSMessage = (message) => {
     if (
