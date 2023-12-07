@@ -22,7 +22,8 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
   }
 
   const userApiUrl = auth0.baseUrl + '/users';
-  const userSearchApiUrl = auth0.baseUrl + '/users-by-email?';
+//  const userSearchApiUrl = auth0.baseUrl + '/users-by-email?';
+//  const userSearchApiUrl = new URL('/users-by-email', auth0.baseUrl );
 
   const opts = {
     headers: {
@@ -35,13 +36,16 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
   // which might be mixed case (or not).  Our second search is for the lowercase equivalent but only if two searches
   // would be identical.
   const searchMultipleEmailCases = async () => {
-    const emailUrl = userSearchApiUrl + new URLSearchParams({ email: user.email }).toString();
-    const emailUrlToLower = userSearchApiUrl + new URLSearchParams({ email: user.email.toLowerCase() }).toString();
+    const emailUrl = new URL('/users-by-email', auth0.baseUrl)
+    emailUrl.searchParams.append('email', user.email);
 
-    let fetchPromiseArray = [fetch(emailUrl, opts)];
+    const emailUrlToLower = new URL('/users-by-email', auth0.baseUrl);
+    emailUrlToLower.searchParams.append('email', user.email.toLowerCase());
+
+    let fetchPromiseArray = [fetch(emailUrl.toString(), opts)];
     // if this user is mixed case, we need to also search for the lower case equivalent
-    if (emailUrl !== emailUrlToLower) {
-      fetchPromiseArray.push(...fetch(emailUrlToLower, opts));
+    if (user.email !== user.email.toLowerCase()) {
+      fetchPromiseArray.push(...fetch(emailUrlToLower.toString(), opts));
     }
     // Call one (or two) api calls to the /user-by-email api endpoint
     const responsePromises = await Promise.all(fetchPromiseArray);
@@ -96,7 +100,7 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
       );
       return callback(new Error(error_message));
     }
-  } catch {
+  } catch (err) {
     console.log('An unknown error occurred while linking accounts: ' + err);
     return callback(err);
   }
