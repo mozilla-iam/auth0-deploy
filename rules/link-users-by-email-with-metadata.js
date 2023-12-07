@@ -135,9 +135,13 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
     // the secondary account.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     // Link the accounts
 =======
 >>>>>>> 4c9e892 (Stop overwriting primary metadata with secondary while account linking)
+=======
+    // Link the accounts
+>>>>>>> 4750e4e (major fixes)
     try {
       fetch(userApiUrl + '/' + primaryUser.user_id + '/identities', {
         method: 'post',
