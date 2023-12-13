@@ -99,51 +99,41 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
       `Linking secondary identity ${secondaryUser.user_id} into primary identity ${primaryUser.user_id}`
     );
 
-    // Update app, user metadata as Auth0 won't back this up in user.identities[x].profileData
-    secondaryUser.app_metadata = secondaryUser.app_metadata || {};
-    secondaryUser.user_metadata = secondaryUser.user_metadata || {};
-    auth0.users
-      .updateAppMetadata(primaryUser.user_id, secondaryUser.app_metadata)
-      .then(
-        auth0.users.updateUserMetadata(
-          primaryUser.user_id,
-          Object.assign(
-            {},
-            secondaryUser.user_metadata,
-            primaryUser.user_metadata
-          )
-        )
-      )
-      // Link the accounts
-      .then(function () {
-        fetch(userApiUrl + '/' + primaryUser.user_id + '/identities', {
-          method: 'post',
-          headers: {
-            Authorization: 'Bearer ' + auth0.accessToken,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            provider: secondaryUser.identities[0].provider,
-            user_id: String(secondaryUser.identities[0].user_id),
-          }),
-        }).then((response) => {
-          if (!response.ok && response.status >= 400) {
-            console.log('Error linking account: ' + response.statusText);
-            return callback(
-              new Error('Error linking account: ' + response.statusText)
-            );
-          }
-          // Finally, swap user_id so that the current login process has the correct data
-          context.primaryUser = primaryUser.user_id;
-          context.primaryUserMetadata = primaryUser.user_metadata || {};
-          return callback(null, user, context);
-        });
-      })
-      .catch((err) => {
-        console.log('An unknown error occurred while linking accounts: ' + err);
-        return callback(err);
+    // We no longer keep the user_metadata nor app_metadata from the secondary account
+    // that is being linked.  If the primary account is LDAP, then its existing
+    // metadata should prevail.  And in the case of both, primary and secondary being
+    // non-ldap, account priority does not matter and neither does the metadata of
+    // the secondary account.
+
+    try {
+      fetch(userApiUrl + '/' + primaryUser.user_id + '/identities', {
+        method: 'post',
+        headers: {
+          Authorization: 'Bearer ' + auth0.accessToken,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          provider: secondaryUser.identities[0].provider,
+          user_id: String(secondaryUser.identities[0].user_id),
+        }),
+      }).then((response) => {
+        if (!response.ok && response.status >= 400) {
+          console.log('Error linking account: ' + response.statusText);
+          return callback(
+            new Error('Error linking account: ' + response.statusText)
+          );
+        }
+        // Finally, swap user_id so that the current login process has the correct data
+        context.primaryUser = primaryUser.user_id;
+        context.primaryUserMetadata = primaryUser.user_metadata || {};
+        return callback(null, user, context);
       });
+    } catch(err) {
+      console.log('An unknown error occurred while linking accounts: ' + err);
+      return callback(err);
+    };
   };
+
   const publishSNSMessage = (message) => {
     if (
       !('aws_logging_sns_topic_arn' in configuration) ||
