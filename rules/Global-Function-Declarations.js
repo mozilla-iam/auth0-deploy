@@ -6,7 +6,7 @@ function globalFunctionDeclaration(user, context, callback) {
   // Since we do not use the /continue endpoint let's make sure we explictly fail with an ErrorUnauthorized
   // otherwise it is possible to continue the session even after a postError redirect is set.
   if (context.protocol === "redirect-callback") {
-    return callback(new UnauthorizedError('The /continue endpoint is not allowed'));
+    return callback(new UnauthorizedError('The /continue endpoint is not allowed'), user, context);
   }
 
   // postError(code)
