@@ -134,7 +134,10 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
     // non-ldap, account priority does not matter and neither does the metadata of
     // the secondary account.
 
+<<<<<<< HEAD
     // Link the accounts
+=======
+>>>>>>> 4c9e892 (Stop overwriting primary metadata with secondary while account linking)
     try {
       fetch(userApiUrl + '/' + primaryUser.user_id + '/identities', {
         method: 'post',
@@ -163,6 +166,7 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
       return callback(err);
     };
   };
+
   const publishSNSMessage = (message) => {
     if (
       !('aws_logging_sns_topic_arn' in configuration) ||
