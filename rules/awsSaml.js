@@ -26,6 +26,7 @@ function awsSaml(user, context, callback) {
         "mozilliansorg_cia-aws",
         "mozilliansorg_consolidated-billing-aws",
         "mozilliansorg_devtools-code-origin-access",
+        "mozilliansorg_http-observatory-rds",
         "mozilliansorg_iam-in-transition",
         "mozilliansorg_iam-in-transition-admin",
         "mozilliansorg_meao-admins",
