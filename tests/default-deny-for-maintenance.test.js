@@ -17,8 +17,10 @@ beforeEach(() => {
 });
 
 
-test('Test Placeholder', () => {
+// TODO: We could expand this more to ensure the url matchs sso and ensure the
+// the jwt matches "maintenancemode".
+test('Ensure context.redirect.url is set', () => {
   output = rule(_user, _context, configuration, Global);
 
-  expect(true).toEqual(true);
+  expect(output.context.redirect.url).toBeDefined();
 });
