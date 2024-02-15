@@ -14,5 +14,5 @@ function temporaryUpdateAtConformance(user, context, callback) {
     context.idToken.updated_at = Math.floor(new Date(user.updated_at)/1000);
     return callback(null, user, context);
   }
-  callback(null, user, context);
+  return callback(null, user, context);
 }
