@@ -19,8 +19,8 @@ beforeEach(() => {
 
 // TODO: We could expand this more to ensure the url matchs sso and ensure the
 // the jwt matches "maintenancemode".
-test('Ensure context.redirect.url is set', () => {
+test('Ensure context.redirect.url is set and redirects to sso dashboard forbidden route', () => {
   output = rule(_user, _context, configuration, Global);
 
-  expect(output.context.redirect.url).toBeDefined();
+  expect(output.context.redirect.url).toMatch('https://sso.mozilla.com/forbidden?error=');
 });
