@@ -22,6 +22,7 @@ const consoleMock = `
 
 const handler = (_ = null, user, context) => {
   return {
+    _,
     context,
     user,
   }
