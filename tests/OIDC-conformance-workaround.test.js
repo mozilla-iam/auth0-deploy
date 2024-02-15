@@ -6,7 +6,7 @@ const Global = require('./modules/global/global.js');
 const user = require('./modules/users/user.js');
 
 const loader = require('./modules/rule-loader.js');
-const rule = loader.load('temporary-update-at-conformance.js', false);
+const rule = loader.load('OIDC-conformance-workaround.js', false);
 
 
 // jest setup to reset _user and _context, preventing tests from writing to objects
