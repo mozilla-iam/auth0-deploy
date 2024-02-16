@@ -52,5 +52,6 @@ function aai(user, context, callback) {
     user.aai = user.aai || [];
     user.aal = user.aal || "UNKNOWN";
   }
-  callback(null, user, context);
+
+  return callback(null, user, context);
 }
