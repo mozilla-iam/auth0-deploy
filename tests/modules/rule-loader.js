@@ -20,11 +20,12 @@ const consoleMock = `
   };
 `
 
-const handler = (_ = null, user, context) => {
+const handler = (_, user, context) => {
   return {
     _,
     context,
     user,
+    global,
   }
 };
 
@@ -54,6 +55,15 @@ module.exports = {
     const ruleText = `
       module.exports = (user, context, configuration, global, auth0) => {
         const callback = ${handler.toString()};
+
+        // This mocks the UnauthorizedError class by simply extending the Error object class
+        class UnauthorizedError extends Error {
+          constructor(message) {
+            super(message); // Call the super class constructor and pass in the message
+            this.name = this.constructor.name; // Set the error name to the name of the custom error class
+            Error.captureStackTrace(this, this.constructor); // Captures the stack trace (optional, improves debugging)
+          }
+        }
 
         ${silent ? '' : consoleMock}
 
