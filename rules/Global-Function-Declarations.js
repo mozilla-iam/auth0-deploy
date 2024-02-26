@@ -45,5 +45,5 @@ function globalFunctionDeclaration(user, context, callback) {
     };
   }
 
-  callback(null, user, context);
+  return callback(null, user, context);
 }
