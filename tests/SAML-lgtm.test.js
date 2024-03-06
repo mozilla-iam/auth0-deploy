@@ -24,8 +24,8 @@ const encryptionCert = "-----BEGIN CERTIFICATE-----\nMIIFqDCCA5CgAwIBAgIELygDFTA
 
 
 describe('Ensure rule does not apply when clientID does not match', () => {
-  test('Rule does not change context object', () => {
-    output = rule(_user, _context, configuration, Global);
+  test('Rule does not change context object', async () => {
+    output = await rule(_user, _context, configuration, Global);
 
     expect(output.context).toEqual(context);
     expect(output.user).toEqual(user);
@@ -33,9 +33,9 @@ describe('Ensure rule does not apply when clientID does not match', () => {
 });
 
 describe('Ensure SAML configuration', () => {
-  test.each(clientIDs)('Given client %s, ensure SAML configuration', (clientID) => {
+  test.each(clientIDs)('Given client %s, ensure SAML configuration', async (clientID) => {
     _context.clientID = clientID;
-    output = rule(_user, _context, configuration, Global);
+    output = await rule(_user, _context, configuration, Global);
 
     expect(output.context.samlConfiguration.issuer).toEqual(issuer);
     expect(output.context.samlConfiguration.encryptionPublicKey).toEqual(encryptionPublicKey);

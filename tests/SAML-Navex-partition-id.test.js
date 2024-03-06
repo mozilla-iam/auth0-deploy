@@ -24,8 +24,8 @@ const clientIDs = [
   ];
 
 describe('Ensure rule does not apply when clientID does not match', () => {
-  test('Rule does not change context object', () => {
-    output = rule(_user, _context, configuration, Global);
+  test('Rule does not change context object', async () => {
+    output = await rule(_user, _context, configuration, Global);
 
     expect(output.context).toEqual(context);
     expect(output.user).toEqual(user);
@@ -33,9 +33,9 @@ describe('Ensure rule does not apply when clientID does not match', () => {
 });
 
 describe('Ensure SAML mapping of multiple clientIDs', () => {
-  test.each(clientIDs)('Ensure SAML configuration mappings for client %s', (clientID) => {
+  test.each(clientIDs)('Ensure SAML configuration mappings for client %s', async (clientID) => {
     _context.clientID = clientID;
-    output = rule(_user, _context, configuration, Global);
+    output = await rule(_user, _context, configuration, Global);
 
     expect(output.context.samlConfiguration.mappings).toEqual({
       'PARTITION': 'partition_id',
@@ -44,9 +44,9 @@ describe('Ensure SAML mapping of multiple clientIDs', () => {
 });
 
 describe('Ensure user parition id of multiple clientID coverage', () => {
-  test.each(clientIDs)('Ensure user attrib partition_id for client %s', (clientID) => {
+  test.each(clientIDs)('Ensure user attrib partition_id for client %s', async (clientID) => {
     _context.clientID = clientID;
-    output = rule(_user, _context, configuration, Global);
+    output = await rule(_user, _context, configuration, Global);
 
     expect(output.user.partition_id).toEqual("MOZILLA");
   });

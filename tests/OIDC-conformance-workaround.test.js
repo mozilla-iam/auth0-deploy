@@ -27,17 +27,17 @@ const clientsIDs = [
 describe('Ensure multiple clientID coverage', () => {
   test.each(
     clientsIDs
-  )('given clientID %s, expect context.idToken.updated_at is an int', (clientID) => {
+  )('given clientID %s, expect context.idToken.updated_at is an int', async (clientID) => {
     _context.clientID = clientID;;
-    output = rule(_user, _context, configuration, Global);
+    output = await rule(_user, _context, configuration, Global);
 
     expect(Number.isInteger(output.context.idToken.updated_at)).toBeTruthy();
     });
 });
 
 describe('Ensure Rule is not applied', () => {
-  test('Ensure Rule does not apply when clientID is not covered', () => {
-    output = rule(_user, _context, configuration, Global);
+  test('Ensure Rule does not apply when clientID is not covered', async () => {
+    output = await rule(_user, _context, configuration, Global);
 
     expect(output.context).toEqual(context);
     expect(output.user).toEqual(user);

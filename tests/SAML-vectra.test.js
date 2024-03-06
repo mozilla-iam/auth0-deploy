@@ -19,8 +19,8 @@ beforeEach(() => {
 const clientIDs = ['RmsIEl3T3cZzpKhEmZv1XZDns0OvTzIy'];
 
 describe('Expect rule does not apply when clientID does not match', () => {
-  test('Expect rule does not change context or user object', () => {
-    output = rule(_user, _context, configuration, Global);
+  test('Expect rule does not change context or user object', async () => {
+    output = await rule(_user, _context, configuration, Global);
 
     expect(output.context).toEqual(context);
     expect(output.user).toEqual(user);
@@ -28,9 +28,9 @@ describe('Expect rule does not apply when clientID does not match', () => {
 });
 
 describe('Ensure SAML configuration', () => {
-  test.each(clientIDs)('Given client %s, ensure SAML configuration and vectra user group', (clientID) => {
+  test.each(clientIDs)('Given client %s, ensure SAML configuration and vectra user group', async (clientID) => {
     _context.clientID = clientID;
-    output = rule(_user, _context, configuration, Global);
+    output = await rule(_user, _context, configuration, Global);
 
     expect(output.context.samlConfiguration.mappings).toEqual({
       "https://schema.vectra.ai/role": "vectra_group",

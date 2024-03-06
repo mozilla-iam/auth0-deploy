@@ -32,8 +32,8 @@ const nonMozillaEmailAddresses = [
 ];
 
 describe('Ensure rule does not apply when clientID does not match', () => {
-  test('Rule does not change context object', () => {
-    output = rule(_user, _context, configuration, Global);
+  test('Rule does not change context object', async () => {
+    output = await rule(_user, _context, configuration, Global);
 
     expect(output.context).toEqual(context);
     expect(output.user).toEqual(user);
@@ -41,9 +41,9 @@ describe('Ensure rule does not apply when clientID does not match', () => {
 });
 
 describe('Ensure SAML configuration', () => {
-  test.each(clientIDs)('Given client %s, ensure SAML configuration', (clientID) => {
+  test.each(clientIDs)('Given client %s, ensure SAML configuration', async (clientID) => {
     _context.clientID = clientID;
-    output = rule(_user, _context, configuration, Global);
+    output = await rule(_user, _context, configuration, Global);
 
     expect(output.context.samlConfiguration.mappings).toEqual({
       "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier": "myemail",
@@ -59,11 +59,11 @@ describe('Ensure SAML configuration', () => {
 describe('Ensure mozilla email addresses are altered', () => {
 
   let matrix = clientIDs.flatMap((clientID) => mozillaEmailAddresses.map((emailAddress) => [clientID, emailAddress[0], emailAddress[1]]));
-  test.each(matrix)('Given client %s and users email is %s, expect myemail property to be %s', (clientID, emailAddress, expectedEmailAddress) => {
+  test.each(matrix)('Given client %s and users email is %s, expect myemail property to be %s', async (clientID, emailAddress, expectedEmailAddress) => {
     _user.email = emailAddress;
     _context.clientID = clientID;
 
-    output = rule(_user, _context, configuration, Global);
+    output = await rule(_user, _context, configuration, Global);
     expect(output.user.myemail).toBe(expectedEmailAddress);
   });
 });
@@ -72,11 +72,11 @@ describe('Ensure mozilla email addresses are altered', () => {
 describe('Ensure non-mozilla email addresses are NOT altered', () => {
 
   let matrix = clientIDs.flatMap((clientID) => nonMozillaEmailAddresses.map((emailAddress) => [clientID, emailAddress]));
-  test.each(matrix)('Given client %s and user email is %s, expect myemail property to be the same as the email property', (clientID, emailAddress) => {
+  test.each(matrix)('Given client %s and user email is %s, expect myemail property to be the same as the email property', async (clientID, emailAddress) => {
     _user.email = emailAddress;
     _context.clientID = clientID;
 
-    output = rule(_user, _context, configuration, Global);
+    output = await rule(_user, _context, configuration, Global);
     expect(output.user.myemail).toBe(_user.email);
   });
 });

@@ -9,7 +9,7 @@ const Global = require('./modules/global/global.js');
 const user = require('./modules/users/user.js');
 
 const loader = require('./modules/rule-loader.js');
-const rule = loader.load('Global-Function-Declarations.js', false);
+const rule = loader.load('Global-Function-Declarations.js');
 
 
 // Simple URL format string validator
@@ -35,17 +35,17 @@ beforeEach(() => {
 });
 
 
-test('Expect context and user objects to be unchanged', () => {
-  output = rule(_user, _context, configuration, Global);
+test('Expect context and user objects to be unchanged', async () => {
+  output = await rule(_user, _context, configuration, Global);
 
-  expect(output.user).toEqual(_user);
-  expect(output.context).toEqual(_context);
+  expect(output.user).toEqual(user);
+  expect(output.context).toEqual(context);
 });
 
 describe('Test continue endpoint', () => {
-  test('Expect an UnauthorizedError to be raised if context.protocol is redirect-callback', () => {
+  test('Expect an UnauthorizedError to be raised if context.protocol is redirect-callback', async () => {
     _context.protocol = "redirect-callback";
-    output = rule(_user, _context, configuration, Global);
+    output = await rule(_user, _context, configuration, Global);
 
     expect(output._.name).toEqual("UnauthorizedError");
   });
@@ -53,29 +53,29 @@ describe('Test continue endpoint', () => {
 });
 
 describe('Test postError function', () => {
-  test('Expect global.postError to be set as a function', () => {
-    output = rule(_user, _context, configuration, Global);
+  test('Expect global.postError to be set as a function', async () => {
+    output = await rule(_user, _context, configuration, Global);
 
     expect(typeof(output.global.postError) === 'function').toEqual(true);
   });
 
 
-  test('Expect postError to set context.redirect.url with a valid URL', () => {
-    output = rule(_user, _context, configuration, Global);
+  test('Expect postError to set context.redirect.url with a valid URL', async () => {
+    output = await rule(_user, _context, configuration, Global);
     rcontext = output.global.postError('testing', _context);
 
     expect(isValidUrl(rcontext.redirect.url)).toEqual(true);
   });
 
-  test('Expect postError to set context.redirect.url with a set URL prefix', () => {
-    output = rule(_user, _context, configuration, Global);
+  test('Expect postError to set context.redirect.url with a set URL prefix', async () => {
+    output = await rule(_user, _context, configuration, Global);
     rcontext = output.global.postError('testing', _context);
 
     expect(rcontext.redirect.url.startsWith("https://sso.mozilla.com/forbidden?error=")).toEqual(true);
   });
 
-  test('Expect postError redirect.url to contain a valid jsonwebtoken', () => {
-    output = rule(_user, _context, configuration, Global);
+  test('Expect postError redirect.url to contain a valid jsonwebtoken', async () => {
+    output = await rule(_user, _context, configuration, Global);
 
     rcontext = output.global.postError('testing', _context);
     // parse the redirect URL

@@ -17,38 +17,40 @@ beforeEach(() => {
 });
 
 
-test('whitelisted clients without enforcement', () => {
-  output = rule(_user, _context, configuration, Global);
+test('whitelisted clients without enforcement', async () => {
+  output = await rule(_user, _context, configuration, Global);
 
   expect(output.context).toEqual(context); 
   expect(output.user).toEqual(user); 
 });
 
-test('email account not verified', () => {
+test('email account not verified', async () => {
   const _user = require('./modules/users/user.js');
   _user.email_verified = false;
 
-  output = rule(_user, context, configuration, Global);
+  output = await rule(_user, context, configuration, Global);
 
   expect(output.context.redirect.url).toMatch('https://sso.mozilla.com/forbidden?error=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2Rl');
   delete(context.redirect);
 });
 
-test('staff account not using ldap', () => {
+test('staff account not using ldap', async () => {
   _context.connectionStrategy = 'not-ad';
 
-  ['jdoe@mozilla.com', 'jdoe@mozillafoundation.org'].forEach(email => {
+  ['jdoe@mozilla.com', 'jdoe@mozillafoundation.org'].forEach(async (email) => {
     _user.email = email;
-    output = rule(_user, _context, configuration, Global);
+    output = await rule(_user, _context, configuration, Global);
     expect(output.context.redirect.url).toMatch('https://sso.mozilla.com/forbidden?error=');
   });
 });
 
-test('non-staff account not using ldap', () => {
+test('non-staff account not using ldap', async () => {
   _context.connectionStrategy = 'not-ad';
   _user.email = "jdoe@example.com";
+  modUser = _.cloneDeep(_user);
+  modContext = _.cloneDeep(_context);
 
-  output = rule(_user, _context, configuration, Global);
+  output = await rule(_user, _context, configuration, Global);
 
-  expect(output.user).toEqual(_user);
+  expect(output.user).toEqual(modUser);
 });

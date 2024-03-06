@@ -17,16 +17,16 @@ beforeEach(() => {
 });
 
 
-test('client does not use SAML configuration mappings', () => {
-  output = rule(_user, _context, configuration, Global);
+test('client does not use SAML configuration mappings', async () => {
+  output = await rule(_user, _context, configuration, Global);
 
   expect(output.context).toEqual(context); 
   expect(output.user).toEqual(user); 
 });
 
-test('Sage Intacct', () => {
+test('Sage Intacct', async () => {
   _context.clientID = 'wgh8S9GaE7sJ4i0QrAzeMxFXgWZYtB0l';
-  output = rule(_user, _context, configuration, Global);
+  output = await rule(_user, _context, configuration, Global);
 
   expect(output.context.samlConfiguration.mappings).toEqual({
     'Company Name': 'company_name',
@@ -37,9 +37,9 @@ test('Sage Intacct', () => {
   expect(output.user.company_name).toEqual('MOZ Corp'); 
 });
 
-test('Thinksmart', () => {
+test('Thinksmart', async () => {
   _context.clientID = 'R4djNlyXSl3i8N2KXWkfylghDa9kFQ84';
-  output = rule(_user, _context, configuration, Global);
+  output = await rule(_user, _context, configuration, Global);
 
   expect(output.context.samlConfiguration.mappings).toEqual({
     'Email': 'email',
@@ -48,36 +48,36 @@ test('Thinksmart', () => {
   });
 });
 
-test('stripe-subplat admin has admin rights', () => {
+test('stripe-subplat admin has admin rights', async () => {
   _context.clientID = 'cEfnJekrSStxxxBascTjNEDAZVUPAIU2';
   _user.groups = [..._user.groups, 'stripe_subplat_admin'];
-  output = rule(_user, _context, configuration, Global);
+  output = await rule(_user, _context, configuration, Global);
   expect(output.context.samlConfiguration.mappings).toEqual({
     'Stripe-Role-acct_1EJOaaJNcmPzuWtR': 'app_metadata.acct_1EJOaaJNcmPzuWtR',
   });
   expect(output.user.app_metadata.acct_1EJOaaJNcmPzuWtR).toEqual('admin');
 });
 
-test('stripe-subplat analyst has analyst rights', () => {
+test('stripe-subplat analyst has analyst rights', async () => {
   _context.clientID = 'cEfnJekrSStxxxBascTjNEDAZVUPAIU2';
   _user.groups = [..._user.groups, 'stripe_subplat_analyst'];
-  output = rule(_user, _context, configuration, Global);
+  output = await rule(_user, _context, configuration, Global);
   expect(output.context.samlConfiguration.mappings).toEqual({
     'Stripe-Role-acct_1EJOaaJNcmPzuWtR': 'app_metadata.acct_1EJOaaJNcmPzuWtR',
   });
   expect(output.user.app_metadata.acct_1EJOaaJNcmPzuWtR).toEqual('analyst');
 });
 
-test('stripe-subplat grants no rights to anyone else', () => {
+test('stripe-subplat grants no rights to anyone else', async () => {
   _context.clientID = 'cEfnJekrSStxxxBascTjNEDAZVUPAIU2';
-  output = rule(_user, _context, configuration, Global);
+  output = await rule(_user, _context, configuration, Global);
   expect(output.context.samlConfiguration.mappings).toEqual({});
   expect(output.user.app_metadata).not.toHaveProperty('acct_1EJOaaJNcmPzuWtR');
 });
 
-test('Acoustic stage', () => {
+test('Acoustic stage', async () => {
   _context.clientID = 'inoLoMyAEOzLX1cZOvubQpcW18pk4O1S';
-  output = rule(_user, _context, configuration, Global);
+  output = await rule(_user, _context, configuration, Global);
 
   expect(output.context.samlConfiguration.mappings).toEqual({
     'Nameid': 'email',
@@ -87,9 +87,9 @@ test('Acoustic stage', () => {
   });
 });
 
-test('Acoustic prod', () => {
+test('Acoustic prod', async () => {
   _context.clientID = 'sBImsybtPPLyWlstD0SC35IwnAafE4nB';
-  output = rule(_user, _context, configuration, Global);
+  output = await rule(_user, _context, configuration, Global);
 
   expect(output.context.samlConfiguration.mappings).toEqual({
     'Nameid': 'email',
@@ -99,11 +99,11 @@ test('Acoustic prod', () => {
   });
 });
 
-test('BitSight portfolio managers', () => {
+test('BitSight portfolio managers', async () => {
   _context.clientID = 'eEAeYh6BMPfRyiSDax0tejjxkWi22zkP';
 
   _user.groups = ['mozilliansorg_bitsight-users'];
-  output = rule(_user, _context, configuration, Global);
+  output = await rule(_user, _context, configuration, Global);
 
   expect(output.context.samlConfiguration.mappings).toEqual({
     'urn:oid:0.9.2342.19200300.100.1.3': 'email',
@@ -114,16 +114,16 @@ test('BitSight portfolio managers', () => {
   expect(output.user.app_metadata.bitsight_user_role).toEqual('Customer Portfolio Manager');
 });
 
-test('BitSight admins', () => {
+test('BitSight admins', async () => {
   _context.clientID = 'eEAeYh6BMPfRyiSDax0tejjxkWi22zkP';
   _user.groups = ['mozilliansorg_bitsight-admins', 'mozilliansorg_bitsight-users'];
-  output = rule(_user, _context, configuration, Global);
+  output = await rule(_user, _context, configuration, Global);
   expect(output.user.app_metadata.bitsight_user_role).toEqual('Customer Admin');
 });
 
-test('BitSight users', () => {
+test('BitSight users', async () => {
   _context.clientID = 'eEAeYh6BMPfRyiSDax0tejjxkWi22zkP';
   _user.groups = [];
-  output = rule(_user, _context, configuration, Global);
+  output = await rule(_user, _context, configuration, Global);
   expect(output.user.app_metadata.bitsight_user_role).toEqual('Customer User');
 });
