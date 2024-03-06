@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const requireFromString = require('require-from-string');
 const strip = require('strip-comments');
+const prettier = require('prettier');
 
 const consoleMock = `
   context._log = {
@@ -51,10 +52,21 @@ module.exports = {
     // we have to shim those to trim off the version number
     functionText = functionText.replace(/require\('(.*)@.*'\);/, "require('$1');")
 
+    // We explicitly strip any requires of fetch in the function since it will either
+    // be passed as a mocked function or imported down below.
+    const toRemove = /require\([\"\']node-fetch[\"\']\)/;
+    const splitFuncText = functionText.split('\n').filter(line => !toRemove.test(line));
+    functionText = splitFuncText.join('\n');
+
     // shim auth0 globals into each rule, and set each function to be the global export
     const ruleText = `
-      module.exports = (user, context, configuration, global, auth0) => {
+      module.exports = async (user, context, configuration, global, auth0, fetch) => {
         const callback = ${handler.toString()};
+
+        // If fetch is not passed, make sure it is required here
+        if (!fetch ){
+          fetch = require("node-fetch");
+        }
 
         // This mocks the UnauthorizedError class by simply extending the Error object class
         class UnauthorizedError extends Error {
@@ -70,7 +82,11 @@ module.exports = {
         ${functionText};
       }`;
 
-    const ruleModule = requireFromString(ruleText, filename);
+    // Calling prettier just cleans up and lints the function.  This makes it easier to read
+    // if we print the rule out for debugging after it has been mocked and shimmed
+    // eg. console.log(rule.toString());
+    const ruleFormattedText = prettier.format(ruleText, { semi: true, parser: "babel" })
+    const ruleModule = requireFromString(ruleFormattedText, filename);
 
     return ruleModule;
   }
