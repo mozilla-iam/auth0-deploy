@@ -17,8 +17,8 @@ beforeEach(() => {
 });
 
 
-test('Expect custom claims in idToken to match', () => {
-  output = rule(_user, _context, configuration, Global);
+test('Expect custom claims in idToken to match', async () => {
+  output = await rule(_user, _context, configuration, Global);
 
   const idToken = {
     'https://sso.mozilla.com/claim/groups': [ 'all_ldap_users', 'everyone', 'fakegroup1', 'fakegroup2' ],
@@ -30,10 +30,10 @@ test('Expect custom claims in idToken to match', () => {
   expect(output.context.idToken).toEqual(idToken);
 });
 
-test('When neither profile or custom claim is in scope, expect no custom claims in idToken to match', () => {
+test('When neither profile or custom claim is in scope, expect no custom claims in idToken to match', async () => {
 
   _context.request.query.scope = "";
-  output = rule(_user, _context, configuration, Global);
+  output = await rule(_user, _context, configuration, Global);
 
   expect(output.context.idToken).toEqual({});
 });
