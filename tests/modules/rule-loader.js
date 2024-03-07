@@ -8,16 +8,16 @@ const strip = require('strip-comments');
 const prettier = require('prettier');
 
 const consoleMock = `
-  context._log = {
+  _log = {
     error: [],
     log: [],
     warn: [],
   };
 
   const console = {
-    error: (msg) => { context._log.error.push(msg) },
-    log: (msg) => { context._log.log.push(msg) },
-    warn: (msg) => { context._log.warn.push(msg) },
+    error: (msg) => { _log.error.push(msg) },
+    log: (msg) => { _log.log.push(msg) },
+    warn: (msg) => { _log.warn.push(msg) },
   };
 `
 
@@ -27,6 +27,7 @@ const handler = (_, user, context) => {
     context,
     user,
     global,
+    _log,
   }
 };
 
@@ -61,6 +62,7 @@ module.exports = {
     // shim auth0 globals into each rule, and set each function to be the global export
     const ruleText = `
       module.exports = async (user, context, configuration, global, auth0, fetch) => {
+        let _log = undefined;
         const callback = ${handler.toString()};
 
         // If fetch is not passed, make sure it is required here
