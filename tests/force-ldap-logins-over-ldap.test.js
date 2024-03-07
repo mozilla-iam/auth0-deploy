@@ -47,10 +47,12 @@ test('staff account not using ldap', async () => {
 test('non-staff account not using ldap', async () => {
   _context.connectionStrategy = 'not-ad';
   _user.email = "jdoe@example.com";
+  _user.email_verified = true;
   modUser = _.cloneDeep(_user);
   modContext = _.cloneDeep(_context);
 
   output = await rule(_user, _context, configuration, Global);
 
   expect(output.user).toEqual(modUser);
+  expect(output.context).toEqual(modContext);
 });
