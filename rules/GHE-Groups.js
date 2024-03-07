@@ -63,6 +63,12 @@ function GHEGroups(user, context, callback) {
     'ZemrAl9S2q9GKJNQUdjZCNsLiVmSEg1P': 'mozilliansorg_ghe_mozilla-privacy_users'
   };
 
+  // ClientID isn't mapped here, return callback() and proceed rules processing
+  if (applicationGroupMapping[context.clientID] === undefined) {
+    return callback(null, user, context);
+  }
+
+
   const AUTH0_TIMEOUT = 5000;  // milliseconds
   const PERSONAPI_BEARER_TOKEN_REFRESH_AGE = 64770;  // 18 hours - 30 seconds for refresh timeout allowance
   const PERSONAPI_TIMEOUT = 5000;  // milliseconds
@@ -125,57 +131,57 @@ function GHEGroups(user, context, callback) {
     return await response.json();
   };
 
+  const processProfile = async (profile) => {
+    let errorCode = null;
 
-  // We only care about SSO applications that exist in the applicationGroupMapping
-  // If the SSO ID is undefined in applicationGroupMapping, skip processing and return callback()
-
-  if (applicationGroupMapping[context.clientID] !== undefined) {
-    getPersonProfile().then(profile => {
-      let errorCode = null;
-
-      // Confirm the user has the group defined from mozillians matching the application id
-      if(!user.app_metadata.groups.includes(applicationGroupMapping[context.clientID])) {
-        errorCode = "ghgr";
-        context.redirect = {
-          url: configuration.github_enterprise_wiki_url + "?dbg=" + errorCode
-        };
-        return callback(null, user, context);
-      }
-
-      // Get githubUsername from person api, otherwise we'll redirect
-      let githubUsername = null;
-      try {
-        githubUsername = profile.usernames.values['HACK#GITHUB'];
-        // Explicitely setting githubUsername to null if undefined
-        if(githubUsername === undefined) {
-          console.log("githubUsername is undefined");
-          errorCode = "ghnd";
-          githubUsername = null;
-        }
-        // If somehow dinopark allows a user to store an empty value
-        // Let's set to null to be redirected later
-        if(githubUsername.length === 0) {
-          console.log("empty HACK#GITHUB");
-          errorCode = "ghnd";
-          githubUsername = null;
-        }
-        console.log("githubUsername: " + githubUsername);
-      } catch (e) {
-        console.log("Unable to do the githubUsername lookup: " + e.message);
-        errorCode = "ghul";
-      }
-
-      // confirm the user has a githubUsername stored in mozillians, otherwise redirect
-      if(githubUsername === null) {
-        context.redirect = {
-          url: configuration.github_enterprise_wiki_url + "?dbg=" + errorCode
-        };
-      }
+    // Confirm the user has the group defined from mozillians matching the application id
+    if(!user.app_metadata.groups.includes(applicationGroupMapping[context.clientID])) {
+      errorCode = "ghgr";
+      context.redirect = {
+        url: configuration.github_enterprise_wiki_url + "?dbg=" + errorCode
+      };
       return callback(null, user, context);
-    });
+    }
 
-  // Nothing matched, return callback() and proceed rules processing
-  } else {
+    // Get githubUsername from person api, otherwise we'll redirect
+    let githubUsername = null;
+    try {
+      githubUsername = profile.usernames.values['HACK#GITHUB'];
+      // Explicitely setting githubUsername to null if undefined
+      if(githubUsername === undefined) {
+        console.log("githubUsername is undefined");
+        errorCode = "ghnd";
+        githubUsername = null;
+      }
+      // If somehow dinopark allows a user to store an empty value
+      // Let's set to null to be redirected later
+      if(githubUsername.length === 0) {
+        console.log("empty HACK#GITHUB");
+        errorCode = "ghnd";
+        githubUsername = null;
+      }
+      console.log("githubUsername: " + githubUsername);
+    } catch (e) {
+      console.log("Unable to do the githubUsername lookup: " + e.message);
+      errorCode = "ghul";
+    }
+
+    // confirm the user has a githubUsername stored in mozillians, otherwise redirect
+    if(githubUsername === null) {
+      context.redirect = {
+        url: configuration.github_enterprise_wiki_url + "?dbg=" + errorCode
+      };
+    }
     return callback(null, user, context);
+  };
+
+  // Main
+  try {
+    const bearerToken = await getBearerToken();
+    const userProfile = await getPersonProfile(bearerToken);
+    return await processProfile(userProfile);
+
+  } catch (error) {
+    return callback(error);
   }
 }
