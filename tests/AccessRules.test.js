@@ -19,7 +19,7 @@ beforeEach(() => {
   _context = _.cloneDeep(context);
   output = undefined;
   _user.aai = [];
-  fetch.resetMocks()
+  fetch.resetMocks();
 });
 
 
