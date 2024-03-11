@@ -11,6 +11,9 @@ module.exports = {
       updateAppMetadata: (user_id, app_metadata) => {
       return Promise.resolve(true);
     },
+      updateUserMetadata: (user_id, app_userdata) => {
+      return Promise.resolve(true);
+    },
   }
 };
 

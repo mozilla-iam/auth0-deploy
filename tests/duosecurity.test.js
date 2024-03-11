@@ -19,23 +19,23 @@ beforeEach(() => {
 });
 
 
-test('user in LDAP (ad) requires 2FA', () => {
-  output = rule(_user, _context, configuration, Global);
+test('user in LDAP (ad) requires 2FA', async () => {
+  output = await rule(_user, _context, configuration, Global);
 
   expect(output.context.multifactor.provider).toEqual('duo');
   expect(output.context.multifactor.username).toEqual(user.email);
 });
 
-test('whitelisted account has no duo', () => {
-  output = rule(whitelistedUser, _context, configuration, Global);
+test('whitelisted account has no duo', async () => {
+  output = await rule(whitelistedUser, _context, configuration, Global);
 
   expect(output.context.multifactor).toEqual(true); 
 });
 
-test('email account not verified', () => {
+test('email account not verified', async () => {
   _user.email_verified = false;
 
-  output = rule(_user, _context, configuration, Global);
+  output = await rule(_user, _context, configuration, Global);
 
   expect(output.context.redirect.url).toMatch('https://sso.mozilla.com/forbidden');
 });

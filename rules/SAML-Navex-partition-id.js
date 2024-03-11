@@ -11,14 +11,14 @@ function SAMLNavexPartitionId(user, context, callback) {
 
   if (ALLOWED_CLIENTIDS.indexOf(context.clientID) >= 0) {
 
-      user.partition_id = "MOZILLA";
+    user.partition_id = "MOZILLA";
 
-      context.samlConfiguration.mappings = {
-        "PARTITION":       "partition_id",
-      };
+    context.samlConfiguration.mappings = {
+      "PARTITION":       "partition_id",
+    };
 
-    callback(null, user, context);
-  } else {
-      callback(null, user, context);
+    return callback(null, user, context);
   }
+
+  return callback(null, user, context);
 }

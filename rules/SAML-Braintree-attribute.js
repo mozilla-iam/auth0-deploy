@@ -9,16 +9,15 @@ function SAMLBrainTreeAttribute(user, context, callback) {
   ];
 
   if (ALLOWED_CLIENTIDS.indexOf(context.clientID) >= 0) {
+    user.grant_all_merchant_accounts = "true";
 
-      user.grant_all_merchant_accounts = "true";
+    context.samlConfiguration.mappings = {
+      "grant_all_merchant_accounts":       "grant_all_merchant_accounts",
+      "roles":        "app_metadata.groups",
+    };
 
-      context.samlConfiguration.mappings = {
-        "grant_all_merchant_accounts":       "grant_all_merchant_accounts",
-        "roles":        "app_metadata.groups",
-      };
-
-    callback(null, user, context);
-  } else {
-      callback(null, user, context);
+    return callback(null, user, context);
   }
+
+  return callback(null, user, context);
 }

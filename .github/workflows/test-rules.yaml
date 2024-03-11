@@ -16,6 +16,5 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Test Rules
         run: |
-          cd tests
           npm install
           npm run tests
