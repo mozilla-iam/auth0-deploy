@@ -1,4 +1,10 @@
 function activateNewUsersInCIS(user, context, callback) {
+
+  // Import modules
+  const fetch = require('node-fetch@2.6.1');
+  const jwt = require('jsonwebtoken');
+
+  // Consts
   const AUTH0_TIMEOUT = 5000;  // milliseconds
   const CHANGEAPI_TIMEOUT = 14000;  // milliseconds
   const METADATA = context.primaryUserMetadata || user.user_metadata || {};  // linked account, or if not linked, then user
@@ -16,7 +22,8 @@ function activateNewUsersInCIS(user, context, callback) {
       !configuration.changeapi_url ||
       !configuration.personapi_client_id ||
       !configuration.personapi_client_secret ||
-      !configuration.personapi_url) {
+      !configuration.personapi_url ||
+      !configuration.personapi_audience) {
     console.log('Error: Unable to find PersonAPI and/or ChangeAPI configuration');
     return callback(null, user, context);
   }
@@ -39,9 +46,6 @@ function activateNewUsersInCIS(user, context, callback) {
   if (METADATA.existsInCIS) {
     return callback(null, user, context);
   }
-
-  // we'll need the node-fetch module, to add support for timeouts
-  const fetch = require('node-fetch@2.6.1');
 
   // we also need to decode the private key from base64 into a PEM format that `jsonwebtoken` understands
   // generated with:
@@ -76,12 +80,14 @@ function activateNewUsersInCIS(user, context, callback) {
 
     try {
       const response = await fetch(configuration.personapi_oauth_url, options);
+      if (!response.ok) {
+        // Throw an error if the response status code is not in the 200-299 range
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
-
       // store the bearer token in the global object, so it's not constantly retrieved
       global.personapi_bearer_token = data.access_token;
       global.personapi_bearer_token_creation_time = Date.now();
-
       console.log(`Successfully retrieved bearer token from Auth0`);
       return global.personapi_bearer_token;
     } catch (error) {
@@ -89,7 +95,7 @@ function activateNewUsersInCIS(user, context, callback) {
     }
   };
 
-  const createPersonProfile = async () => {
+  const createPersonProfile = () => {
     console.log(`Generating CIS profile for ${USER_ID}`);
 
     let now = new Date();
@@ -232,44 +238,11 @@ function activateNewUsersInCIS(user, context, callback) {
     return profile;
   };
 
-  const publishSNSMessage = message => {
-    if (!("aws_logging_sns_topic_arn" in configuration) ||
-        !("aws_logging_access_key_id" in configuration) ||
-        !("aws_logging_secret_key" in configuration)) {
-      console.log("Missing Auth0 AWS SNS logging configuration values");
-      return false;
-    }
-
-    const SNS_TOPIC_ARN = configuration.aws_logging_sns_topic_arn;
-    const ACCESS_KEY_ID = configuration.aws_logging_access_key_id;
-    const SECRET_KEY = configuration.aws_logging_secret_key;
-
-    let AWS = require('aws-sdk@2.1416.0');
-    let sns = new AWS.SNS({
-      apiVersion: '2010-03-31',
-      accessKeyId: ACCESS_KEY_ID,
-      secretAccessKey: SECRET_KEY,
-      region: 'us-west-2',
-      logger: console,
-    });
-    const params = {
-      Message: message,
-      TopicArn: SNS_TOPIC_ARN,
-    };
-    console.log(message);
-    sns.publish(params, function(err, data) {
-      if (err) console.log(err, err.stack); // an error occurred
-      else     console.log(data);           // successful response
-    });
-
-  };
-
-  const getPersonProfile = async () => {
-    const bearer = await getBearerToken();
+  const getPersonProfile = async (bearerToken) => {
     const options = {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${bearer}`,
+        'Authorization': `Bearer ${bearerToken}`,
       },
       timeout: PERSONAPI_TIMEOUT,
     };
@@ -277,19 +250,25 @@ function activateNewUsersInCIS(user, context, callback) {
 
     console.log(`Fetching person profile of ${USER_ID}`);
 
-    const response = await fetch(url, options);
-
-    return response.json();
+    try {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        // Throw an error if the response status code is not in the 200-299 range
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    } catch (error) {
+      throw Error(`Unable to retrieve profile from Person API: ${error.message}`);
+    }
   };
 
-  const postProfile = async profile => {
+  const postProfile = async (bearerToken, profile) => {
     console.log(`Posting profile for ${USER_ID} to ChangeAPI`);
 
-    const bearer = await getBearerToken();
     const options = {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${bearer}`,
+        'Authorization': `Bearer ${bearerToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(profile),
@@ -298,9 +277,18 @@ function activateNewUsersInCIS(user, context, callback) {
     const url = `${configuration.changeapi_url}/v2/user?user_id=${encodeURI(USER_ID)}`;
 
     // POST the profile to the ChangeAPI
-    const response = await fetch(url, options);
-
-    return response.json();
+    try {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        // Throw an error if the response status code is not in the 200-299 range
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      console.log(`Successfully created profile for ${user.user_id} in ChangeAPI as ${USER_ID}`);
+      // set their profile as existing in CIS
+      setExistsInCIS();
+    } catch (error) {
+      throw Error(`Unable to create profile for ${USER_ID} in ChangeAPI: ${error.message}`);
+    }
   };
 
   const signAll = profile => {
@@ -317,7 +305,6 @@ function activateNewUsersInCIS(user, context, callback) {
   };
 
   const signAttribute = attr => {
-    const jwt = require('jsonwebtoken');
 
     // we can only sign attributes that access_provider (e.g. auth0) is allowed to sign
     // we also ignore things that don't have a pre-existing signature field
@@ -368,30 +355,30 @@ function activateNewUsersInCIS(user, context, callback) {
 
   // if we get this far, we need to 1) call the PersonAPI to check for existance, and 2) if the user
   // doesn't exist, call the ChangeAPI to create them
-  getPersonProfile()
-    .then(profile => {
-      if (Object.keys(profile).length !== 0) {
-        setExistsInCIS();
-        throw Error(`Profile for ${user.user_id} already exists in PersonAPI as ${USER_ID}`);
-      } else {
-        return createPersonProfile();
-      }
-    })
-    .then(profile => postProfile(profile))
-    .then(response => {
-      if (response.constructor === Object && response.status_code === 200) {
-        console.log(`Successfully created profile for ${user.user_id} in ChangeAPI as ${USER_ID}`);
+  try {
+    // Get a bearer token for accessing both PersonAPI and ChangeAPI
+    const bearerToken = await getBearerToken();
+    // Read the profile, if it exists
+    const profile = await getPersonProfile(bearerToken);
 
-        // set their profile as existing in CIS
-        setExistsInCIS();
+    // If the profile already exists, set the existsInCIS in app.metadata
+    if (Object.keys(profile).length !== 0) {
+      setExistsInCIS();
+      console.warn(`Profile for ${user.user_id} already exists in PersonAPI as ${USER_ID}`);
 
-        return callback(null, user, context);
-      } else {
-        throw Error(`Unable to create profile for ${USER_ID} in ChangeAPI`);
-      }
-    })
-    .catch(error => {
-      console.log(`Error: ${error.message}`);
       return callback(null, user, context);
-    });
+    }
+
+    // Generate a blank profile and populate it with this users data
+    const newProfile = createPersonProfile();
+
+    // Submit the newly created profile to ChangeAPI
+    const response = await postProfile(bearerToken, newProfile);
+
+    return callback(null, user, context);
+  } catch (error) {
+    // Catch error, log it and continue on with workflow
+    console.error(error.message);
+    return callback(null, user, context);
+  }
 }
