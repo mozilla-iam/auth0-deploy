@@ -56,7 +56,9 @@ function GHEGroups(user, context, callback) {
     'RLPUxhCQsmmRHyOmDOGkLpu1mArNH3xn': 'mozilliansorg_ghe_firefoxux_users',
     'KMcYzqySOFXHteY1zliDlq577ARCb6gi': 'mozilliansorg_ghe_mozillasocial_users',
     'IEc83wZvZzcQXMkpUmrnb9P8wztUiokl': 'mozilliansorg_ghe_mozscout_users',
-    'vkoDkHlCEUhlHNhVDtewJqRLVLGVsPrZ': 'mozilliansorg_ghe_mozilla-fakespot_users'
+    'vkoDkHlCEUhlHNhVDtewJqRLVLGVsPrZ': 'mozilliansorg_ghe_mozilla-fakespot_users',
+    'T6mjvGguOB5hkq9Aviaa58tOlwpJG5o6': 'mozilliansorg_ghe_mozilla-necko_users',
+    'ZemrAl9S2q9GKJNQUdjZCNsLiVmSEg1P': 'mozilliansorg_ghe_mozilla-privacy_users'
   };
 
   const fetch = require('node-fetch@2.6.1');
@@ -124,7 +126,7 @@ const getPersonProfile = async () => {
     return await response.json();
 };
 
-  
+
   // We only care about SSO applications that exist in the applicationGroupMapping
   // If the SSO ID is undefined in applicationGroupMapping, skip processing and return callback()
 
@@ -153,7 +155,7 @@ const getPersonProfile = async () => {
             }
             // If somehow dinopark allows a user to store an empty value
             // Let's set to null to be redirected later
-            if(githubUsername.length === 0) { 
+            if(githubUsername.length === 0) {
               console.log("empty HACK#GITHUB");
               errorCode = "ghnd";
               githubUsername = null;
@@ -163,7 +165,7 @@ const getPersonProfile = async () => {
             console.log("Unable to do the githubUsername lookup: " + e.message);
             errorCode = "ghul";
           }
-          
+
           // confirm the user has a githubUsername stored in mozillians, otherwise redirect
           if(githubUsername === null) {
             context.redirect = {
