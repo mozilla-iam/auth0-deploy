@@ -71,8 +71,9 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
     // Ignore non-verified users
     data = data.filter((u) => u.email_verified);
 
-    if (data.length === 1) {
+    if (data.length <= 1) {
       // The user logged in with an identity which is the only one Auth0 knows about
+      // or no data returned
       // Do not perform any account linking
       return callback(null, user, context);
     }
@@ -134,14 +135,7 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
     // non-ldap, account priority does not matter and neither does the metadata of
     // the secondary account.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     // Link the accounts
-=======
->>>>>>> 4c9e892 (Stop overwriting primary metadata with secondary while account linking)
-=======
-    // Link the accounts
->>>>>>> 4750e4e (major fixes)
     try {
       fetch(userApiUrl + '/' + primaryUser.user_id + '/identities', {
         method: 'post',

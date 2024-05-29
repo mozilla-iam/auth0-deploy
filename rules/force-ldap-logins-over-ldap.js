@@ -7,12 +7,14 @@ function forceLDAPLoginsOverLDAP(user, context, callback) {
 
   // The domain strings in this array should always be declared here in lowercase
   const MOZILLA_STAFF_DOMAINS = [
-     'mozilla.com',            // Main corp domain
-     'mozillafoundation.org',  // Main org domain
-     'getpocket.com',          // Pocket domain
-     'thunderbird.net',        // MZLA domain
-     'readitlater.com',
-     'mozilla-japan.org'
+    'mozilla.com',            // Main corp domain
+    'mozillafoundation.org',  // Main org domain
+    'getpocket.com',          // Pocket domain
+    'thunderbird.net',        // MZLA domain
+    'readitlater.com',
+    'mozilla-japan.org',
+    'mozilla.ai',
+    'mozilla.vc'
   ];
 
   // Sanity checks
