@@ -29,10 +29,10 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
     },
   }
 
-  // Since email addresses within auth0 are allowed to me mixed case and the /user-by-email search endpoint
+  // Since email addresses within auth0 are allowed to be mixed case and the /user-by-email search endpoint
   // is case sensitive, we need to search for both situations.  In the first search we search by "this" users email
   // which might be mixed case (or not).  Our second search is for the lowercase equivalent but only if two searches
-  // would be identical.
+  // would be different.
   const searchMultipleEmailCases = async () => {
     const emailUrl = new URL('/users-by-email', auth0.baseUrl)
     emailUrl.searchParams.append('email', user.email);
@@ -129,7 +129,7 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
     );
 
     // We no longer keep the user_metadata nor app_metadata from the secondary account
-    // that is being linked.  If the primary account is LDAP, then it's existing
+    // that is being linked.  If the primary account is LDAP, then its existing
     // metadata should prevail.  And in the case of both, primary and secondary being
     // non-ldap, account priority does not matter and neither does the metadata of
     // the secondary account.
