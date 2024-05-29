@@ -4,6 +4,7 @@ function globalFunctionDeclaration(user, context, callback) {
   // with a NON RECOVERABLE error, and thus LOGIN WILL FAIL FOR USERS
 
   // Since we do not use the /continue endpoint let's make sure we explictly fail with an UnauthorizedError
+
   // otherwise it is possible to continue the session even after a postError redirect is set.
   if (context.protocol === "redirect-callback") {
     return callback(new UnauthorizedError('The /continue endpoint is not allowed'), user, context);
