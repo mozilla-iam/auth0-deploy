@@ -60,6 +60,12 @@ function firefoxAccountsConnection(accessToken, ctx, cb) {
         user_id: id_token.sub,
         picture: p.avatar,
         preferredLanguage: p.locale,
+        // Mozilla accounts (formerly Firefox Accounts), allows mixed case characters in their email property
+        // I'm adding this comment here in case we want to actually enforce email case conformity in the future
+        // Although, it will need extensive testing to ensure we aren't breaking anything.  In the meantime, we will
+        // need to account for the fact that this and other IdP connectors return email with mixed case.
+        // So until otherwise decided, we allow mixed case email.
+        // email: p.email.toLowerCase(),
         email: p.email,
         email_verified: true,
         fxa_sub: id_token.sub,
