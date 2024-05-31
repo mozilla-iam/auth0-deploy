@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,node,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,node,python
 
@@ -142,7 +141,6 @@ dist
 # SvelteKit build / generate output
 .svelte-kit
 
-<<<<<<< HEAD
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
