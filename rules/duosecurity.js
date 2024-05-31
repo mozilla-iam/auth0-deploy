@@ -1,4 +1,4 @@
-function duoSecurity(user, context, callback) {
+async function duoSecurity(user, context, callback) {
   var WHITELIST = [
     'moc+servicenow@mozilla.com',      // MOC see: https://bugzilla.mozilla.org/show_bug.cgi?id=1423903
     'moc-sso-monitoring@mozilla.com',  // MOC see: https://bugzilla.mozilla.org/show_bug.cgi?id=1423903

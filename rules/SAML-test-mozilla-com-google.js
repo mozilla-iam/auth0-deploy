@@ -1,4 +1,4 @@
-function SAMLTestMozillaComGoogle(user, context, callback) {
+async function SAMLTestMozillaComGoogle(user, context, callback) {
   if (!user) {
     // If the user is not presented (i.e. a rule deleted it), just go on, since authenticate will always fail.
     return callback(null, null, context);

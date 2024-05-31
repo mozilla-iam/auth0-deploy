@@ -1,4 +1,4 @@
-function activateNewUsersInCIS(user, context, callback) {
+async function activateNewUsersInCIS(user, context, callback) {
 
   // Import modules
   const fetch = require('node-fetch@2.6.1');

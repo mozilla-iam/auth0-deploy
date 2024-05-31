@@ -47,7 +47,7 @@ module.exports = {
 
     // strip the function call on the top, usually function(user, context, callback)
     // we do this because we call the function with considerably more arguments
-    functionText = functionText.replace(/function\s+[a-zA-Z0-9-_]*\(.*\)/, '');
+    functionText = functionText.replace(/^async\s+function\s+[a-zA-Z0-9-_]*\(.*\)/, '');
 
     // auth0 supports require with module versions, e.g. require('aws-sdk@2.5.3'), and so
     // we have to shim those to trim off the version number

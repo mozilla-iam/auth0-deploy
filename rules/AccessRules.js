@@ -1,4 +1,4 @@
-function AccessRules(user, context, callback) {
+async function AccessRules(user, context, callback) {
 
   // Imports
   const fetch = require('node-fetch@2.6.1');

@@ -1,4 +1,4 @@
-function GHEGroups(user, context, callback) {
+async function GHEGroups(user, context, callback) {
   // Import modules
   const fetch = require('node-fetch@2.6.1');
 

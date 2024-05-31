@@ -1,4 +1,4 @@
-function temporaryUpdateAtConformance(user, context, callback) {
+async function temporaryUpdateAtConformance(user, context, callback) {
   // only affect some apps
   var apps = [
     'aDL5o9SZRaYTH5zzkGntT4l76qydMbZe', // sso dashboard allizom

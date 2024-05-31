@@ -1,4 +1,4 @@
-function globalFunctionDeclaration(user, context, callback) {
+async function globalFunctionDeclaration(user, context, callback) {
   // Declare functions here and assign them to the `global` object (which is cached for a small amount of time)
   // This rule MUST be at the top of the rule list (FIRST) or other rules WILL FAIL
   // with a NON RECOVERABLE error, and thus LOGIN WILL FAIL FOR USERS
