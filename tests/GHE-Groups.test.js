@@ -91,6 +91,14 @@ const applicationGroupMapping = {
   'dlDfXM5oqapRXUvrkCarPwgTN2INIA9G': 'mozilliansorg_ghe_mozilla-metrics_users',
   'lJbj6OE9VFK05i2XjZEiAEljamPyOCkz': 'mozilliansorg_ghe_mozilla-platform-ops_users',
   'AgiLB9xCoW4beavY9z7UuvO36DLmdwJ1': 'mozilliansorg_ghe_mozilla-rally_users',
+  'QfJVAjXlaGzpCo5S48J9D38QvIfhlYzF': 'mozilliansorg_ghe_mozilladatascience_users',
+  'UwUgLsXH6YtrWLATQpTuil2iNilYGGhF': 'mozilliansorg_ghe_mozilla-services_users',
+  'RLPUxhCQsmmRHyOmDOGkLpu1mArNH3xn': 'mozilliansorg_ghe_firefoxux_users',
+  'KMcYzqySOFXHteY1zliDlq577ARCb6gi': 'mozilliansorg_ghe_mozillasocial_users',
+  'IEc83wZvZzcQXMkpUmrnb9P8wztUiokl': 'mozilliansorg_ghe_mozscout_users',
+  'vkoDkHlCEUhlHNhVDtewJqRLVLGVsPrZ': 'mozilliansorg_ghe_mozilla-fakespot_users',
+  'T6mjvGguOB5hkq9Aviaa58tOlwpJG5o6': 'mozilliansorg_ghe_mozilla-necko_users',
+  'ZemrAl9S2q9GKJNQUdjZCNsLiVmSEg1P': 'mozilliansorg_ghe_mozilla-privacy_users'
 };
 
 const applicationGroupEntries = Object.entries(applicationGroupMapping);
