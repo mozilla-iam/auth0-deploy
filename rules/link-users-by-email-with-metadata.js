@@ -43,7 +43,7 @@ function linkUsersByEmailWithMetadata(user, context, callback) {
     let fetchPromiseArray = [fetch(emailUrl.toString(), opts)];
     // if this user is mixed case, we need to also search for the lower case equivalent
     if (user.email !== user.email.toLowerCase()) {
-      fetchPromiseArray.push(...fetch(emailUrlToLower.toString(), opts));
+      fetchPromiseArray.push(fetch(emailUrlToLower.toString(), opts));
     }
     // Call one (or two) api calls to the /user-by-email api endpoint
     const responsePromises = await Promise.all(fetchPromiseArray);
