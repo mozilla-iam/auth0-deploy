@@ -1,4 +1,4 @@
-function awsSaml(user, context, callback) {
+async function awsSaml(user, context, callback) {
   var paramObj = {};
 
   const clientID = context.clientID || "";

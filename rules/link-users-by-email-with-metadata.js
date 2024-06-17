@@ -12,7 +12,7 @@
  *
  */
 
-function linkUsersByEmailWithMetadata(user, context, callback) {
+async function linkUsersByEmailWithMetadata(user, context, callback) {
   const fetch = require('node-fetch@2.6.1');
 
   // Check if email is verified, we shouldn't automatically

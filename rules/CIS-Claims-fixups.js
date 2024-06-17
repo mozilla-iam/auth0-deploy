@@ -1,4 +1,4 @@
-function CISClaimsFixups(user, context, callback) {
+async function CISClaimsFixups(user, context, callback) {
   var namespace = 'https://sso.mozilla.com/claim/';
   var whitelist = ['']; // claim whitelist
 

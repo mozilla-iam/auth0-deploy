@@ -1,4 +1,4 @@
-function defaultDenyForMaintenance(user, context, callback) {
+async function defaultDenyForMaintenance(user, context, callback) {
     // Denies all users from logging in
     // Only use for maintenance purposes
     

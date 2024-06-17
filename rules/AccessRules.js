@@ -1,111 +1,23 @@
-function AccessRules(user, context, callback) {
+async function AccessRules(user, context, callback) {
+
   // Imports
   const fetch = require('node-fetch@2.6.1');
   const YAML = require('js-yaml');
   const jose = require('node-jose');
 
-  // Retrieve the access file information/configuration from well-known
-  // See also https://github.com/mozilla-iam/cis/blob/profilev2/docs/.well-known/mozilla-iam.json
-  function get_access_file_configuration(cb) {
-    fetch(configuration.iam_well_known).then(response => {
-      if (response.status !== 200) {
-        return callback(new Error("Could not fetch IAM well known: " + response.body));
-      }
-      return response.json();
-    }).then( response => {
-      return cb(response.access_file);
-    }).catch( err => {
-      return callback(err);
-    });
-  }
-
-  // Retrieve and verify access rule file itself
-  function get_verified_access_rules(cb, access_file_conf) {
-    // Bypass if we have a cached version present already
-    // Cache is very short lived in webtask, it just means we hit a "hot" task which nodejs process hasn't yet been
-    // terminated. Generally this means we hit the same task within 60s.
-
-    // XXX cache disabled
-    //if (global.access_rules) {
-    //  return cb(global.access_rules, access_file_conf);
-    //}
-
-    var decoded;
-    fetch(access_file_conf.endpoint).then( response => {
-      // Convert key into jose-formatted-key
-      // XXX remove this part of the code when well-known and signature exists
-      if (access_file_conf.jwks === null) {
-        console.log('WARNING: Bypassing access file signature verification');
-        decoded = response.text();
-      } else {
-        // XXX verify key format when the well-known endpoint exists
-        var pubkey = jose.JWK.asKey(access_file_conf.jwks.keys.x5c[0], 'pem').then((jwk) => jwk);
-        var verifier = jose.JWS.createVerify(pubkey);
-        var ret = verifier.verify(response.text).then((response) => response.payload).catch((err) => err);
-        decoded = ret.then((data) => data).catch((err) => {
-          throw new Error('Signature verification of access file failed (fatal): '+err);
-        });
-      }
-      return decoded;
-    }).then( decoded => {
-      global.access_rules = YAML.load(decoded).apps;
-      return cb(global.access_rules, access_file_conf);
-    }).catch( err => {
-      return callback(err);
-    }
-
-    );
-  }
-
   // Check if array A has any occurrence from array B
-  function array_in_array(A, B) {
-    var found = A.some(
-      function(item) {
-        if (!B)
-          return false;
-        return B.indexOf(item) >= 0;
-    });
-    return found;
+  function hasCommonElements(A, B) {
+      return A.some(element => B.includes(element));
   }
 
-  // Update expiration and grant access
+  // Grant access
   function access_granted(a, b, c) {
-    updateAccessExpiration();
     return callback(a, b, c);
   }
 
   // Deny access
   function access_denied(a, b, c) {
     return callback(a, b, c);
-  }
-
-  // updateAccessExpiration()
-  // Always returns - will attempt to update user.app_metadata.authoritativeGroups[].lastUsed timestamp
-  // for the RP/client_id we're currently trying to login to
-  // XXX Use Profilev2 when available
-  function updateAccessExpiration() {
-      user.app_metadata = user.app_metadata || {};
-      if (user.app_metadata.authoritativeGroups === undefined) {
-          console.log('ExpirationOfAccess: not enabled for this user');
-          return;
-      }
-
-      var updated = false;
-      for (var index = 0;index < user.app_metadata.authoritativeGroups.length;++index) {
-        if (user.app_metadata.authoritativeGroups[index].uuid === context.clientID) {
-          user.app_metadata.authoritativeGroups[index].lastUsed = new Date();
-          updated = true;
-          break; // we're done
-        }
-      }
-      if (updated === true) {
-        auth0.users.updateAppMetadata(user.user_id, user.app_metadata)
-          .catch(function(err) {
-          console.log('ExpirationOfAccess: Error updating app_metadata (AuthoritativeGroups) for user '+user.user_id+': '+err);
-        });
-      }
-      console.log('ExpirationOfAccess: Updated lastUsed for '+user.user_id);
-      return;
   }
 
   // Process the access cache decision
@@ -152,7 +64,6 @@ function AccessRules(user, context, callback) {
       //var app = {'client_id': 'pCGEHXW0VQNrQKURDcGi0tghh7NwWGhW', // This is testrp social-ldap-pwless
       //           'authorized_users': ['gdestuynder@mozilla.com'],
       //           'authorized_groups': ['okta_mfa'],
-      //           'expire_access_when_unused_after': 86400,
       //           'aal': 'LOW'
       //          };
 
@@ -165,31 +76,6 @@ function AccessRules(user, context, callback) {
 
         // Set app AAL (AA level) if present
         required_aal = app.AAL || required_aal;
-
-        // EXPIRATION OF ACCESS
-        // Note that the expiration check MUST always run first
-        // Check if the user's access to the RP has expired due to ExpirationOfAccess
-        if ((app.expire_access_when_unused_after !== undefined) && (app.expire_access_when_unused_after > 0)) {
-          user.app_metadata = user.app_metadata || {};
-          // If the user has no authoritativeGroups for this clientID, let the user in
-          if (user.app_metadata.authoritativeGroups !== undefined) {
-            for (var index=0;index < user.app_metadata.authoritativeGroups.length; ++index) {
-              if (user.app_metadata.authoritativeGroups[index].uuid === context.clientID) {
-                // Find the delta for this user and see if access should have expired
-                var lastUsed_ts = new Date(user.app_metadata.authoritativeGroups[index].lastUsed).getTime();
-                var delta = new Date().getTime() - lastUsed_ts;
-                // Access expired?
-                if (delta > app.expire_access_when_unused_after) {
-                    // Do not allow the user in, no matter what other access has been set
-                    console.log("Access denied to "+context.clientID+" for user "+user.email+" ("+user.user_id+") - access has expired");
-                    context.request.query.redirect_uri = app.url || "https://sso.mozilla.com";
-                    return access_denied(null, user, global.postError('accesshasexpired', context));
-                }
-                break;
-              }
-            }
-          }
-        }
 
         // AUTHORIZED_{GROUPS,USERS}
         // XXX this authorized_users SHOULD BE REMOVED as it's unsafe (too easy to make mistakes). USE GROUPS.
@@ -206,7 +92,7 @@ function AccessRules(user, context, callback) {
         if ((app.authorized_users.length > 0 ) && (app.authorized_users.indexOf(user.email) >= 0)) {
           authorized = true;
         // Same dance as above, but for groups
-        } else if ((app.authorized_groups.length > 0) && array_in_array(app.authorized_groups, groups)) {
+        } else if ((app.authorized_groups.length > 0) && hasCommonElements(app.authorized_groups, groups)) {
           authorized = true;
         } else {
           authorized = false;
@@ -280,21 +166,33 @@ function AccessRules(user, context, callback) {
     return access_granted(null, user, context);
   }
 
+  const cdnUrl = 'https://cdn.sso.mozilla.com/apps.yml';
 
-  // "Main" starts here
-  // This is a fake access file conf similar to the well-known endpoint,
-  // until the well-known endpoint is actually available - it is also not signed and disables signing verification
-  const fake_access_file_conf = { endpoint: 'https://cdn.sso.mozilla.com/apps.yml', jwks: null,
-    aai_mapping: {
-      "LOW": [],
-      "MEDIUM": ["2FA", "HIGH_ASSURANCE_IDP"],
-      "HIGH": [],
-      "MAXIMUM": []
+  const access_file_conf = { aai_mapping: {
+    "LOW": [],
+    "MEDIUM": ["2FA", "HIGH_ASSURANCE_IDP"],
+    "HIGH": ["HIGH_NOT_IMPLEMENTED"],
+    "MAXIMUM": ["MAXIMUM_NOT_IMPLEMENTED"]
+  }};
+
+  // This function pulls the apps.yml and returns a promise to yield the application list
+  async function getAppsYaml(url) {
+    try {
+        const response = await fetch(url);
+        const data = await response.text();
+        return YAML.load(data).apps;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        throw error;
     }
-  };
-  // Get access file configuration, then get the access rules (apps.yml), then give all this to the access_decision()
-  // function to decide if the user should be allowed or not. Any failure along the way will forbid the user to get in.
-  return get_access_file_configuration(function(access_file_conf) {
-    return get_verified_access_rules(access_decision, fake_access_file_conf);
-  });
+  }
+
+  // Main try
+  try {
+    const appsYaml = await getAppsYaml(cdnUrl);
+    return access_decision(appsYaml, access_file_conf);
+  } catch (error) {
+    // All error should be caught here and we return the callback handler with the error
+    return callback(error);
+  }
 }

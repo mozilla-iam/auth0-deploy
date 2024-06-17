@@ -1,4 +1,4 @@
-function forceLDAPLoginsOverLDAP(user, context, callback) {
+async function forceLDAPLoginsOverLDAP(user, context, callback) {
   const WHITELIST = [
     'HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH',  // mozillians.org account verification
     't9bMi4eTCPpMp5Y6E1Lu92iVcqU0r1P1',  // https://web-mozillians-staging.production.paas.mozilla.community Verification client

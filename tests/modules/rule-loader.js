@@ -5,25 +5,29 @@ const fs = require('fs');
 const path = require('path');
 const requireFromString = require('require-from-string');
 const strip = require('strip-comments');
+const prettier = require('prettier');
 
 const consoleMock = `
-  context._log = {
+  _log = {
     error: [],
     log: [],
     warn: [],
   };
 
   const console = {
-    error: (msg) => { context._log.error.push(msg) },
-    log: (msg) => { context._log.log.push(msg) },
-    warn: (msg) => { context._log.warn.push(msg) },
+    error: (msg) => { _log.error.push(msg) },
+    log: (msg) => { _log.log.push(msg) },
+    warn: (msg) => { _log.warn.push(msg) },
   };
 `
 
-const handler = (_ = null, user, context) => {
+const handler = (_, user, context) => {
   return {
+    _,
     context,
     user,
+    global,
+    _log,
   }
 };
 
@@ -43,23 +47,48 @@ module.exports = {
 
     // strip the function call on the top, usually function(user, context, callback)
     // we do this because we call the function with considerably more arguments
-    functionText = functionText.replace(/function\s+[a-zA-Z0-9-_]*\(.*\)/, '');
+    functionText = functionText.replace(/^async\s+function\s+[a-zA-Z0-9-_]*\(.*\)/, '');
 
     // auth0 supports require with module versions, e.g. require('aws-sdk@2.5.3'), and so
     // we have to shim those to trim off the version number
     functionText = functionText.replace(/require\('(.*)@.*'\);/, "require('$1');")
 
+    // We explicitly strip any requires of fetch in the function since it will either
+    // be passed as a mocked function or imported down below.
+    const toRemove = /require\([\"\']node-fetch[\"\']\)/;
+    const splitFuncText = functionText.split('\n').filter(line => !toRemove.test(line));
+    functionText = splitFuncText.join('\n');
+
     // shim auth0 globals into each rule, and set each function to be the global export
     const ruleText = `
-      module.exports = (user, context, configuration, global, auth0) => {
+      module.exports = async (user, context, configuration, global, auth0, fetch) => {
+        let _log = undefined;
         const callback = ${handler.toString()};
+
+        // If fetch is not passed, make sure it is required here
+        if (!fetch ){
+          fetch = require("node-fetch");
+        }
+
+        // This mocks the UnauthorizedError class by simply extending the Error object class
+        class UnauthorizedError extends Error {
+          constructor(message) {
+            super(message); // Call the super class constructor and pass in the message
+            this.name = this.constructor.name; // Set the error name to the name of the custom error class
+            Error.captureStackTrace(this, this.constructor); // Captures the stack trace (optional, improves debugging)
+          }
+        }
 
         ${silent ? '' : consoleMock}
 
         ${functionText};
       }`;
 
-    const ruleModule = requireFromString(ruleText, filename);
+    // Calling prettier just cleans up and lints the function.  This makes it easier to read
+    // if we print the rule out for debugging after it has been mocked and shimmed
+    // eg. console.log(rule.toString());
+    const ruleFormattedText = prettier.format(ruleText, { semi: true, parser: "babel" })
+    const ruleModule = requireFromString(ruleFormattedText, filename);
 
     return ruleModule;
   }

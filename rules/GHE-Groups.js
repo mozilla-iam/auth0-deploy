@@ -1,6 +1,8 @@
-function GHEGroups(user, context, callback) {
-  // dictionary of applications and their related mozillians groups to worry about
+async function GHEGroups(user, context, callback) {
+  // Import modules
+  const fetch = require('node-fetch@2.6.1');
 
+  // Object of applications with a 1:1 mapping of clientID and related group
   const applicationGroupMapping = {
   // Dev applications
     '9MR2UMAftbs6758Rmbs8yZ9Dj5AjeT0P': 'mozilliansorg_ghe_ghe-auth-dev_users',
@@ -61,18 +63,25 @@ function GHEGroups(user, context, callback) {
     'ZemrAl9S2q9GKJNQUdjZCNsLiVmSEg1P': 'mozilliansorg_ghe_mozilla-privacy_users'
   };
 
-  const fetch = require('node-fetch@2.6.1');
+  // ClientID isn't mapped here, return callback() and proceed rules processing
+  if (applicationGroupMapping[context.clientID] === undefined) {
+    return callback(null, user, context);
+  }
+
+
   const AUTH0_TIMEOUT = 5000;  // milliseconds
   const PERSONAPI_BEARER_TOKEN_REFRESH_AGE = 64770;  // 18 hours - 30 seconds for refresh timeout allowance
   const PERSONAPI_TIMEOUT = 5000;  // milliseconds
   const USER_ID = context.primaryUser || user.user_id;
+
+  // Get a bearer token in order to access the person api
   const getBearerToken = async () => {
     // if we have the bearer token stored, we don't need to fetch it again
-   if (global.personapi_bearer_token &&
-        global.personapi_bearer_token_creation_time &&
-        Date.now() - global.personapi_bearer_token_creation_time < PERSONAPI_BEARER_TOKEN_REFRESH_AGE) {
+    if (global.personapi_bearer_token &&
+      global.personapi_bearer_token_creation_time &&
+      Date.now() - global.personapi_bearer_token_creation_time < PERSONAPI_BEARER_TOKEN_REFRESH_AGE) {
       return global.personapi_bearer_token;
-   }
+    }
 
     const options = {
       method: 'POST',
@@ -89,12 +98,9 @@ function GHEGroups(user, context, callback) {
     };
 
     try {
-      //console.log("the personapi_oauth_url is: " + configuration.personapi_oauth_url);
-      //console.log("the personapi audience is: " + configuration.personapi_audience);
-      //console.log("the personapi client_id is: " + configuration.personapi_read_profile_api_client_id);
       const response = await fetch(configuration.personapi_oauth_url, options);
       const data = await response.json();
-      //console.log("the access token from the personapi oauth url is: " + data.access_token);
+
       // store the bearer token in the global object, so it's not constantly retrieved
       global.personapi_bearer_token = data.access_token;
       global.personapi_bearer_token_creation_time = Date.now();
@@ -107,7 +113,7 @@ function GHEGroups(user, context, callback) {
   };
 
 
-const getPersonProfile = async () => {
+  const getPersonProfile = async () => {
     // Retrieve a bearer token to gain access to the person api
     // return the profile data
     const bearer = await getBearerToken();
@@ -121,62 +127,61 @@ const getPersonProfile = async () => {
 
     const url = `${configuration.personapi_url}/v2/user/user_id/${encodeURI(USER_ID)}`;
     console.log(`Fetching person profile of ${USER_ID}`);
-    console.log("url is " + url);
     const response = await fetch(url, options);
     return await response.json();
-};
+  };
 
+  const processProfile = async (profile) => {
+    let errorCode = null;
 
-  // We only care about SSO applications that exist in the applicationGroupMapping
-  // If the SSO ID is undefined in applicationGroupMapping, skip processing and return callback()
+    // Confirm the user has the group defined from mozillians matching the application id
+    if(!user.app_metadata.groups.includes(applicationGroupMapping[context.clientID])) {
+      errorCode = "ghgr";
+      context.redirect = {
+        url: configuration.github_enterprise_wiki_url + "?dbg=" + errorCode
+      };
+      return callback(null, user, context);
+    }
 
-  if(applicationGroupMapping[context.clientID] !== undefined) {
-        getPersonProfile().then(profile => {
-          let errorCode = null;
+    // Get githubUsername from person api, otherwise we'll redirect
+    let githubUsername = null;
+    try {
+      githubUsername = profile.usernames.values['HACK#GITHUB'];
+      // Explicitely setting githubUsername to null if undefined
+      if(githubUsername === undefined) {
+        console.log("githubUsername is undefined");
+        errorCode = "ghnd";
+        githubUsername = null;
+      }
+      // If somehow dinopark allows a user to store an empty value
+      // Let's set to null to be redirected later
+      if(githubUsername.length === 0) {
+        console.log("empty HACK#GITHUB");
+        errorCode = "ghnd";
+        githubUsername = null;
+      }
+      console.log("githubUsername: " + githubUsername);
+    } catch (e) {
+      console.log("Unable to do the githubUsername lookup: " + e.message);
+      errorCode = "ghul";
+    }
 
-          // Confirm the user has the group defined from mozillians matching the application id
-          if(!user.app_metadata.groups.includes(applicationGroupMapping[context.clientID])) {
-            errorCode = "ghgr";
-            context.redirect = {
-               url: configuration.github_enterprise_wiki_url + "?dbg=" + errorCode
-            };
-            return callback(null, user, context);
-          }
-
-          // Get githubUsername from person api, otherwise we'll redirect
-          let githubUsername = null;
-          try {
-            githubUsername = profile.usernames.values['HACK#GITHUB'];
-            // Explicitely setting githubUsername to null if undefined
-            if(githubUsername === undefined) {
-              console.log("githubUsername is undefined");
-              errorCode = "ghnd";
-              githubUsername = null;
-            }
-            // If somehow dinopark allows a user to store an empty value
-            // Let's set to null to be redirected later
-            if(githubUsername.length === 0) {
-              console.log("empty HACK#GITHUB");
-              errorCode = "ghnd";
-              githubUsername = null;
-            }
-            console.log("githubUsername: " + githubUsername);
-          } catch (e) {
-            console.log("Unable to do the githubUsername lookup: " + e.message);
-            errorCode = "ghul";
-          }
-
-          // confirm the user has a githubUsername stored in mozillians, otherwise redirect
-          if(githubUsername === null) {
-            context.redirect = {
-               url: configuration.github_enterprise_wiki_url + "?dbg=" + errorCode
-             };
-          }
-          return callback(null, user, context);
-        });
-
-  // Nothing matched, return callback() and proceed rules processing
-  } else {
+    // confirm the user has a githubUsername stored in mozillians, otherwise redirect
+    if(githubUsername === null) {
+      context.redirect = {
+        url: configuration.github_enterprise_wiki_url + "?dbg=" + errorCode
+      };
+    }
     return callback(null, user, context);
+  };
+
+  // Main
+  try {
+    const bearerToken = await getBearerToken();
+    const userProfile = await getPersonProfile(bearerToken);
+    return await processProfile(userProfile);
+
+  } catch (error) {
+    return callback(error);
   }
 }
