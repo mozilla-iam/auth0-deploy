@@ -91,6 +91,16 @@ async function awsSaml(user, context, callback) {
         "mozilliansorg_mofo_aws_secure",
       ];
       break;
+    case "c0x6EoLdp55H2g2OXZTIUuaQ4v8U4xf9":
+      // CloudServices billing account params
+      paramObj.region = "us-west-2";
+      paramObj.IdentityStoreId = configuration.AWS_IDENTITYSTORE_ID_CLOUDSERVICES;
+      paramObj.accessKeyId = configuration.AWS_IDENTITYSTORE_ACCESS_ID_CLOUDSERVICES;
+      paramObj.secretAccessKey = configuration.AWS_IDENTITYSTORE_ACCESS_KEY_CLOUDSERVICES;
+      paramObj.awsGroups = [
+        "mozilliansorg_cloudservices_aws_admin"
+      ];
+      break;
     default:
       return callback(null, user, context); // Not an AWS login, continue auth pipeline
   }
