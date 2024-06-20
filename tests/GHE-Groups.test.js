@@ -98,7 +98,8 @@ const applicationGroupMapping = {
   'IEc83wZvZzcQXMkpUmrnb9P8wztUiokl': 'mozilliansorg_ghe_mozscout_users',
   'vkoDkHlCEUhlHNhVDtewJqRLVLGVsPrZ': 'mozilliansorg_ghe_mozilla-fakespot_users',
   'T6mjvGguOB5hkq9Aviaa58tOlwpJG5o6': 'mozilliansorg_ghe_mozilla-necko_users',
-  'ZemrAl9S2q9GKJNQUdjZCNsLiVmSEg1P': 'mozilliansorg_ghe_mozilla-privacy_users'
+  'ZemrAl9S2q9GKJNQUdjZCNsLiVmSEg1P': 'mozilliansorg_ghe_mozilla-privacy_users',
+  'sZHTTA4iuHgmiQGzbkS7lcXE1bbMGces': 'mozilliansorg_ghe_firefoxgraphics_users'
 };
 
 const applicationGroupEntries = Object.entries(applicationGroupMapping);
