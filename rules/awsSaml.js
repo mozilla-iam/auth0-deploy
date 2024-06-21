@@ -98,7 +98,9 @@ async function awsSaml(user, context, callback) {
       paramObj.accessKeyId = configuration.AWS_IDENTITYSTORE_ACCESS_ID_CLOUDSERVICES;
       paramObj.secretAccessKey = configuration.AWS_IDENTITYSTORE_ACCESS_KEY_CLOUDSERVICES;
       paramObj.awsGroups = [
-        "mozilliansorg_cloudservices_aws_admin"
+        "mozilliansorg_cloudservices_aws_admin",
+        "mozilliansorg_cloudservices_aws_autograph_admin",
+        "mozilliansorg_cloudservices_aws_autograph_dev"
       ];
       break;
     default:
