@@ -100,7 +100,8 @@ async function awsSaml(user, context, callback) {
       paramObj.awsGroups = [
         "mozilliansorg_cloudservices_aws_admin",
         "mozilliansorg_cloudservices_aws_autograph_admin",
-        "mozilliansorg_cloudservices_aws_autograph_dev"
+        "mozilliansorg_cloudservices_aws_autograph_dev",
+        "mozilliansorg_cloudservices_aws_developer_services_dev"
       ];
       break;
     default:
