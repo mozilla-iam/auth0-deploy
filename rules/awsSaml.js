@@ -104,6 +104,7 @@ async function awsSaml(user, context, callback) {
         "mozilliansorg_cloudservices_aws_autograph_admin",
         "mozilliansorg_cloudservices_aws_autograph_dev",
         "mozilliansorg_cloudservices_aws_developer_services_dev",
+        "mozilliansorg_cloudservices_aws_fxa_developers",
         "mozilliansorg_infrasec"
       ];
       break;
