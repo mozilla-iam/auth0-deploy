@@ -16,18 +16,6 @@ This is the list of keys we're using for secrets (and abuse for certain configur
 - `configuration.webtask_clientsecret` Privileged Auth0 management API Client Secret for rules
 - `configuration.iam_well_kwown` The CIS well-known endpoint, such as https://auth.allizom.org/.well-known/mozilla-iam
 - `configuration.iam_jwt_rsa_pkey` The access_file public RSA key which can verify the JWT containing `apps.yml` data
-- `configuration.auth0_aws_assests_s3_bucket` The AWS S3 bucket name of the bucket that stores AWS hosted Auth0 rule
-  assets. These buckets ([`mozilla-infosec-auth0-rule-assets`](https://github.com/mozilla/security/blob/01dd8a08fdffe76286dd22fb4cde92430567e2d9/operations/cloudformation-templates/create_infosec_s3_buckets_us-west-2.yml#L113-L119)
-  and [`mozilla-infosec-auth0-dev-rule-assets`](https://github.com/mozilla/security/blob/01dd8a08fdffe76286dd22fb4cde92430567e2d9/operations/cloudformation-templates/infosec_dev_s3_buckets_us-west-2.yml#L73-L79)
-  are provisioned with CloudFormation. These buckets contains assets like
-  - The [Group Role map file](https://github.com/mozilla-iam/federated-aws-cli/tree/master/cloudformation)) which 
-    describes the relationship between AWS IAM roles across Mozilla AWS accounts and the user groups which are used in
-    those role policies for access control decisions
-- `configuration.auth0_aws_assests_access_key_id` The AWS IAM API Access Key ID of the dedicated service AWS IAM user
-  which is used to authenticate for access to contents in the `auth0_aws_assests_s3_bucket`. This user is provisioned
-  with the [`group_role_map_builder.yaml`](https://github.com/mozilla-iam/federated-aws-cli/blob/211bafd660928813c750ef240c2e3d2cb66ddba3/cloudformation/group_role_map_builder.yaml#L128-L149)
-  CloudFormation template
-- `configuration.auth0_aws_assests_access_secret_key` The AWS IAM API Secret Key of the dedicated service AWS IAM user.
 - `configuration.CIS_access_key_id` The AWS IAM API Key Id for the dedicated Auth0 Publisher hook invocation function.
 - `configuration.CIS_secret_access_key` The AWS IAM API Secret Key for the dicated Auth0 Publisher hook invocation
   function.
@@ -37,8 +25,6 @@ This is the list of keys we're using for secrets (and abuse for certain configur
 - `AccessRules.js` Reads apps.yml, verify it's signature, and uses it's setting to figure out if the user should be
   allowed to login or not. The RP should still do it's own access checks. This is what we call the 2 stages access
   validation (and this is stage 1)
-- `AWS-Federated-AMR.js` Adds and `AMR` OIDC claim to the user containing the groups which they are a member of and
-  which are used in AWS IAM Role policies to govern federated access to AWS accounts.
 - `duosecurity.js` Ensure the user is authenticated with DuoSecurity when using an LDAP account
 - `force-ldap-logins-over-ldap.js` Ensure LDAP users only login with LDAP (i.e. "Staff uses Staff login"). This
   forbids using passwordless, GitHub, etc. login methods with a `@mozilla.com` email for example.
