@@ -29,7 +29,7 @@ $ uploader_rules.py <args>
 
 How do I know which nodejs modules are available to me?
 
-As of July 2021 [the production tenant of Auth0 runs node v8.17.0](https://manage.mozilla.auth0.com/dashboard/pi/auth/tenant/advanced).
+As of Oct 2024 [the production tenant of Auth0 runs Node v18.19.1](https://manage.mozilla.auth0.com/dashboard/pi/auth/tenant/advanced).
 The module list that is cached inside webtasks is listed here:
 https://auth0-extensions.github.io/canirequire/
 
@@ -139,7 +139,7 @@ Next run the tests
 The Auth0 web UI where you can view and modify rules, for example at
 https://manage-dev.mozilla.auth0.com/dashboard/pi/auth-dev/rules
 has a jshint built in which isn't aware that Auth0 rules are run under
-Node version `8.17.0` and as a result shows errors for things like
+Node version `18.19.1` and as a result shows errors for things like
 `require` and `let`. To work around this add this to the top of your rule
 
 ```
