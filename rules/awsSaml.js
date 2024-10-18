@@ -33,6 +33,7 @@ async function awsSaml(user, context, callback) {
         "mozilliansorg_pocket_cloudtrail_readers",
         "mozilliansorg_searchfox-aws",
         "mozilliansorg_secops-aws-admins",
+        "mozilliansorg_sre",
         "mozilliansorg_voice_aws_admin_access",
         "mozilliansorg_web-sre-aws-access",
         "team_infra",
