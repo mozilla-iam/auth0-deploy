@@ -22,7 +22,6 @@ async function awsSaml(user, context, callback) {
         "mozilliansorg_aws_billing_access",
         "mozilliansorg_cia-aws",
         "mozilliansorg_consolidated-billing-aws",
-        "mozilliansorg_devtools-code-origin-access",
         "mozilliansorg_http-observatory-rds",
         "mozilliansorg_iam-in-transition",
         "mozilliansorg_iam-in-transition-admin",
@@ -36,7 +35,6 @@ async function awsSaml(user, context, callback) {
         "mozilliansorg_sre",
         "mozilliansorg_voice_aws_admin_access",
         "mozilliansorg_web-sre-aws-access",
-        "team_infra",
         "team_mdn",
         "team_netops",
         "team_opsec",
@@ -69,8 +67,7 @@ async function awsSaml(user, context, callback) {
         "mozilliansorg_pocket_readonly",
         "mozilliansorg_pocket_sales",
         "mozilliansorg_pocket_ads",
-        "mozilliansorg_pocket_aws_billing",
-        "mozilliansorg_infrasec"
+        "mozilliansorg_pocket_aws_billing"
       ];
       break;
     case "jU8r4uSEF3fUCjuJ63s46dBnHAfYMYfj":
@@ -87,8 +84,7 @@ async function awsSaml(user, context, callback) {
         "mozilliansorg_mofo_aws_labs",
         "mozilliansorg_mofo_aws_projects",
         "mozilliansorg_mofo_aws_sandbox",
-        "mozilliansorg_mofo_aws_secure",
-        "mozilliansorg_infrasec"
+        "mozilliansorg_mofo_aws_secure"
       ];
       break;
     case "c0x6EoLdp55H2g2OXZTIUuaQ4v8U4xf9":
@@ -103,8 +99,7 @@ async function awsSaml(user, context, callback) {
         "mozilliansorg_cloudservices_aws_autograph_admin",
         "mozilliansorg_cloudservices_aws_autograph_dev",
         "mozilliansorg_cloudservices_aws_developer_services_dev",
-        "mozilliansorg_cloudservices_aws_fxa_developers",
-        "mozilliansorg_infrasec"
+        "mozilliansorg_cloudservices_aws_fxa_developers"
       ];
       break;
     default:
