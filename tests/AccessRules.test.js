@@ -1,5 +1,4 @@
 const _ = require('lodash');
-
 const querystring = require('querystring');
 const jwt = require('jsonwebtoken');
 
@@ -12,6 +11,7 @@ const loader = require('./modules/rule-loader.js');
 const rule = loader.load('AccessRules.js');
 const appsYaml = require('./modules/apps/apps.yml.js').load();
 
+require('jest-fetch-mock').enableMocks();
 
 // jest setup to reset _user and _context, preventing tests from writing to objects
 beforeEach(() => {

@@ -9,6 +9,7 @@ const auth0 = require('./modules/global/auth0.js');
 const loader = require('./modules/rule-loader.js');
 const rule = loader.load('activate-new-users-in-CIS.js', false);
 
+require('jest-fetch-mock').enableMocks();
 
 // jest setup to reset _user and _context, preventing tests from writing to objects
 beforeEach(() => {
