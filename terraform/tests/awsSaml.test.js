@@ -89,9 +89,6 @@ const clientGroupMaps = [
       "aws_320464205386_admin",
       "aws_320464205386_read_only",
       "aws_359555865025_admin",
-      "aws_558986605633_admin",
-      "aws_622567216674_admin",
-      "aws_839739216564_admin",
       "aws_consolidatedbilling_admin",
       "aws_consolidatedbilling_read_only",
       "aws_discourse_dev",
@@ -99,7 +96,6 @@ const clientGroupMaps = [
       "mozilliansorg_aws_billing_access",
       "mozilliansorg_cia-aws",
       "mozilliansorg_consolidated-billing-aws",
-      "mozilliansorg_devtools-code-origin-access",
       "mozilliansorg_http-observatory-rds",
       "mozilliansorg_iam-in-transition",
       "mozilliansorg_iam-in-transition-admin",
@@ -110,9 +106,9 @@ const clientGroupMaps = [
       "mozilliansorg_pocket_cloudtrail_readers",
       "mozilliansorg_searchfox-aws",
       "mozilliansorg_secops-aws-admins",
+      "mozilliansorg_sre",
       "mozilliansorg_voice_aws_admin_access",
       "mozilliansorg_web-sre-aws-access",
-      "team_infra",
       "team_mdn",
       "team_netops",
       "team_opsec",
@@ -149,7 +145,12 @@ const clientGroupMaps = [
       "mozilliansorg_mofo_aws_secure"
   ]},
   { 'c0x6EoLdp55H2g2OXZTIUuaQ4v8U4xf9': [
-      "mozilliansorg_cloudservices_aws_admin"
+      "mozilliansorg_aws_billing_access",
+      "mozilliansorg_cloudservices_aws_admin",
+      "mozilliansorg_cloudservices_aws_autograph_admin",
+      "mozilliansorg_cloudservices_aws_autograph_dev",
+      "mozilliansorg_cloudservices_aws_developer_services_dev",
+      "mozilliansorg_cloudservices_aws_fxa_developers"
   ]},
 ];
 

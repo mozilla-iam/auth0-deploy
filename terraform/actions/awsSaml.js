@@ -24,9 +24,6 @@ exports.onExecutePostLogin = async (event, api) => {
         "aws_320464205386_admin",
         "aws_320464205386_read_only",
         "aws_359555865025_admin",
-        "aws_558986605633_admin",
-        "aws_622567216674_admin",
-        "aws_839739216564_admin",
         "aws_consolidatedbilling_admin",
         "aws_consolidatedbilling_read_only",
         "aws_discourse_dev",
@@ -34,7 +31,6 @@ exports.onExecutePostLogin = async (event, api) => {
         "mozilliansorg_aws_billing_access",
         "mozilliansorg_cia-aws",
         "mozilliansorg_consolidated-billing-aws",
-        "mozilliansorg_devtools-code-origin-access",
         "mozilliansorg_http-observatory-rds",
         "mozilliansorg_iam-in-transition",
         "mozilliansorg_iam-in-transition-admin",
@@ -45,16 +41,16 @@ exports.onExecutePostLogin = async (event, api) => {
         "mozilliansorg_pocket_cloudtrail_readers",
         "mozilliansorg_searchfox-aws",
         "mozilliansorg_secops-aws-admins",
+        "mozilliansorg_sre",
         "mozilliansorg_voice_aws_admin_access",
         "mozilliansorg_web-sre-aws-access",
-        "team_infra",
         "team_mdn",
         "team_netops",
         "team_opsec",
         "team_se",
         "team_secops",
         "voice-dev",
-        "vpn_sumo_aws_devs",
+        "vpn_sumo_aws_devs"
       ];
       break;
     case "pQ0eb5tzwfYHnAtzGuk88pzxZ68szQtk":
@@ -80,7 +76,7 @@ exports.onExecutePostLogin = async (event, api) => {
         "mozilliansorg_pocket_readonly",
         "mozilliansorg_pocket_sales",
         "mozilliansorg_pocket_ads",
-        "mozilliansorg_pocket_aws_billing",
+        "mozilliansorg_pocket_aws_billing"
       ];
       break;
     case "jU8r4uSEF3fUCjuJ63s46dBnHAfYMYfj":
@@ -107,7 +103,12 @@ exports.onExecutePostLogin = async (event, api) => {
       paramObj.accessKeyId = event.secret.AWS_IDENTITYSTORE_ACCESS_ID_CLOUDSERVICES;
       paramObj.secretAccessKey = event.secret.AWS_IDENTITYSTORE_ACCESS_KEY_CLOUDSERVICES;
       paramObj.awsGroups = [
-        "mozilliansorg_cloudservices_aws_admin"
+        "mozilliansorg_aws_billing_access",
+        "mozilliansorg_cloudservices_aws_admin",
+        "mozilliansorg_cloudservices_aws_autograph_admin",
+        "mozilliansorg_cloudservices_aws_autograph_dev",
+        "mozilliansorg_cloudservices_aws_developer_services_dev",
+        "mozilliansorg_cloudservices_aws_fxa_developers"
       ];
       break;
     default:
