@@ -35,9 +35,6 @@
     "strip-comments": "^2.0.1"
   },
   "jest": {
-    "automock": false,
-    "setupFiles": [
-      "./setupJest.js"
-    ]
+    "automock": false
   }
 }
