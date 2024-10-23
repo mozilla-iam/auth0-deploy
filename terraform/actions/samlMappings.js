@@ -1,43 +1,11 @@
 exports.onExecutePostLogin = async (event, api) => {
   console.log("Running actions:", "samlMappings");
 
-  //if(event.client.client_id === 'DuNr1CAl27af2VFcjNImljfQ6ES3U8L1') {
-  //  api.samlResponse.setAttribute('Company Name', 'MOZ Corp');
-  //  api.samlResponse.setAttribute('testing', event.user.name);
-  //}
-
- // const clients = [
- //   'wgh8S9GaE7sJ4i0QrAzeMxFXgWZYtB0l', // Sage Intacct
- //   'R4djNlyXSl3i8N2KXWkfylghDa9kFQ84', // mozilla.tap.thinksmart.com
- //   'cEfnJekrSStxxxBascTjNEDAZVUPAIU2', // Stripe - subplat
- //   'inoLoMyAEOzLX1cZOvubQpcW18pk4O1S', // Acoustic stage
- //   'sBImsybtPPLyWlstD0SC35IwnAafE4nB', // Acoustic prod
- //   'H5ddlJSCfGP8ab65EnWaB2sd541CJAlM', // Planful prod
- //   'pUmRmcBrAJEdsgRTVXIW84jZoc3wtuYO', // Planful dev
- //   'eEAeYh6BMPfRyiSDax0tejjxkWi22zkP', // BitSight
- // ];
-
- // // Continue with login if the client isn't explicitly defined here
- // if (!clients.includes(event.client.client_id)) {
- //   return;
- // }
-
-  // In context.samlConfiguration.mappings the keys (left side) are the field
-  // names that the Relying Party (RP) is expecting.
-  // The values (right side) are the Auth0 profile field names
-  // ie. api.samlResponse.setAttribute('Email', event.user.email);
-  // Would map the contents of the Auth0 field 'email' into the RP's field 'emailAddress'
-
   switch(event.client.client_id) {
     case "wgh8S9GaE7sJ4i0QrAzeMxFXgWZYtB0l": // sage-intacct
       api.samlResponse.setAttribute('Company Name', 'MOZ Corp');
       api.samlResponse.setAttribute('emailAddress', event.user.email);
       api.samlResponse.setAttribute('name', event.user.name);
-      break;
-    // TODO: delete this. Testing only.
-    case 'DuNr1CAl27af2VFcjNImljfQ6ES3U8L1':
-      api.samlResponse.setAttribute('Company Name', 'MOZ Corp');
-      api.samlResponse.setAttribute('testing', event.user.name);
       break;
 
     case "pUmRmcBrAJEdsgRTVXIW84jZoc3wtuYO": // planful-dev

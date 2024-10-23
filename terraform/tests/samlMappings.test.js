@@ -230,27 +230,6 @@ describe('Thinksmart SAML tests', () => {
   });
 });
 
-
-
-    //case "cEfnJekrSStxxxBascTjNEDAZVUPAIU2": // stripe-subplat
-    //  const groupToStripeRoleMap = {
-    //    //  LDAP group name          stripe_role_name           stripe_account_id
-    //    'stripe_subplat_admin': [{'role': 'admin', 'account': 'acct_1EJOaaJNcmPzuWtR'}],
-    //    'stripe_subplat_developer': [{'role': 'developer', 'account': 'acct_1EJOaaJNcmPzuWtR'}],
-    //    'stripe_subplat_supportsp': [{'role': 'support_specialist', 'account': 'acct_1EJOaaJNcmPzuWtR'}],
-    //    'stripe_subplat_analyst': [{'role': 'analyst', 'account': 'acct_1EJOaaJNcmPzuWtR'}],
-    //    'stripe_subplat_viewonly': [{'role': 'view_only', 'account': 'acct_1EJOaaJNcmPzuWtR'}]
-    //  };
-
-    //  Object.keys(groupToStripeRoleMap).forEach((groupName) => {
-    //    if (event.user.hasOwnProperty('groups') && event.user.groups.includes(groupName)) {
-    //      groupToStripeRoleMap[groupName].forEach((roleInfo) => {
-    //        api.samlResponse.setAttribute(`Stripe-Role-${roleInfo.account}`, roleInfo.role);
-    //      });
-    //    }
-    //  });
-
-
 describe('Stripe-Subplat SAML tests', () => {
   const clientIDs = ['cEfnJekrSStxxxBascTjNEDAZVUPAIU2'];
   const roles = [
@@ -422,17 +401,6 @@ describe('Navex SAML tests', () => {
     expect(_samlAttributes).toEqual(expectedSamlAttributes);
   });
 });
-
-
-   // case "Ury9HCvBS4B1SzAH8f3YASbbcGf5QlQf":
-   //   // This rule sets a specific public key to encrypt the SAML assertion generated from Auth0
-   //   // and overrides the Issuer, because the client hardcodes a validation check for URL format
-   //   // TODO: In actions, the issuer cannot be overridden
-
-   //   //context.samlConfiguration.issuer = "https://auth.mozilla.auth0.com";
-   //   api.samlResponse.setEncryptionPublicKey("-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAo0pAWRHxJ3NWnItdWa7G\nsmBt4sQF7TlBDGDNUB55ojtl29ifLMfijmElgiBDwDn0IuzI+hKMHSCHlmBFvLMq\nIqJ36J//PPx6wVnkzuiRjKirRKP5CCbchF/McHH2cMi8SVrX2a+zIefPkLVoxDub\nAITQpmos/g5AkD07U/Js+130gTY1QJdYeJOOxkuJ9Afsrd0rJWvULh6+I/saP7zu\nSNMpPqYOxACXkqqdUMkTUE4EMhVIqcuw1qUO09JRjrGOkS1NKE+x7u8vpbevst9q\nntPglJ0730xx5cVJKXwQDWMXsxC4RSlrI6FZyryez0bwq5UGO9oBvtFsVy+rIWj2\nVSdzw7tmkrhED4oCItapgFLsKQWrKiRsCaWZOnW2Fz+cWFkepgelHE/oOZGBv+k3\nIvNZr7MxYLPPJQ7p4SMmT+TLPWXWmRGpL9uqE8ZwvGrUF4R1GzEQrVFd2NxbKzuO\nPHYwiPzzJNJwME541jL5A1cqsayEAXy0YltGGnofNa1mfk2PmfqfzZPXp79QOwW/\nNXPKNKAPgFI5g7zHQvbmnlnrOzUn8jrOHhxfZmY+hkQ0Mtju7H4L5AKJ5Dn7p2nv\nkK4HIymsXOdcj6WUcTi88yZX2yTXDnYtglXUIBKJVks6WiuF/yrhiaT2HLWa8WF0\nkD+1uOvqgm9nCKm7H6zHk7MCAwEAAQ==\n-----END PUBLIC KEY-----\n");
-   //   api.samlResponse.setEncryptionCert("-----BEGIN CERTIFICATE-----\nMIIFqDCCA5CgAwIBAgIELygDFTANBgkqhkiG9w0BAQsFADCBhDELMAkGA1UEBhMC\nR0IxFDASBgNVBAgTC094Zm9yZHNoaXJlMQ8wDQYDVQQHEwZPeGZvcmQxEzARBgNV\nBAoTClNlbW1sZSBMdGQxDTALBgNVBAsTBExHVE0xKjAoBgNVBAMTIUxHVE0gQXV0\nby1HZW5lcmF0ZWQgT25lbG9naW4gY2VydDAeFw0xOTA1MjEwNjEyNTdaFw0yMjA1\nMjAwNjEyNTdaMIGEMQswCQYDVQQGEwJHQjEUMBIGA1UECBMLT3hmb3Jkc2hpcmUx\nDzANBgNVBAcTBk94Zm9yZDETMBEGA1UEChMKU2VtbWxlIEx0ZDENMAsGA1UECxME\nTEdUTTEqMCgGA1UEAxMhTEdUTSBBdXRvLUdlbmVyYXRlZCBPbmVsb2dpbiBjZXJ0\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAo0pAWRHxJ3NWnItdWa7G\nsmBt4sQF7TlBDGDNUB55ojtl29ifLMfijmElgiBDwDn0IuzI+hKMHSCHlmBFvLMq\nIqJ36J//PPx6wVnkzuiRjKirRKP5CCbchF/McHH2cMi8SVrX2a+zIefPkLVoxDub\nAITQpmos/g5AkD07U/Js+130gTY1QJdYeJOOxkuJ9Afsrd0rJWvULh6+I/saP7zu\nSNMpPqYOxACXkqqdUMkTUE4EMhVIqcuw1qUO09JRjrGOkS1NKE+x7u8vpbevst9q\nntPglJ0730xx5cVJKXwQDWMXsxC4RSlrI6FZyryez0bwq5UGO9oBvtFsVy+rIWj2\nVSdzw7tmkrhED4oCItapgFLsKQWrKiRsCaWZOnW2Fz+cWFkepgelHE/oOZGBv+k3\nIvNZr7MxYLPPJQ7p4SMmT+TLPWXWmRGpL9uqE8ZwvGrUF4R1GzEQrVFd2NxbKzuO\nPHYwiPzzJNJwME541jL5A1cqsayEAXy0YltGGnofNa1mfk2PmfqfzZPXp79QOwW/\nNXPKNKAPgFI5g7zHQvbmnlnrOzUn8jrOHhxfZmY+hkQ0Mtju7H4L5AKJ5Dn7p2nv\nkK4HIymsXOdcj6WUcTi88yZX2yTXDnYtglXUIBKJVks6WiuF/yrhiaT2HLWa8WF0\nkD+1uOvqgm9nCKm7H6zHk7MCAwEAAaMgMB4wDAYDVR0TBAUwAwEB/zAOBgNVHQ8B\nAf8EBAMCAQYwDQYJKoZIhvcNAQELBQADggIBAH/xAuVUXRDGo5vn/uERfssPc8Fa\nyL0wurpoy5jXVvYALSZouNGG26M6kJ+UTaxwBMm0zk3hGOE24qiIMNoDLupwsVFq\n8r9DsbD2hbcIqwzReI03KiKZ4PBBugV/I4nZVpu69yxk+lfNPW34CRYuRQGcISbA\nVIh5MS6fp2+7eCdxGCobLPMUmGSitgJUzUlvIIvvIyQ9mPP4S5MnIjNEnE7qolmz\nhPz2cLTJzRAVtOc2QAtMFEBysIXzJ5X3xkN750dflgHeo5voX07J/PEUN1vfTBBN\n8WJZBfqgNXauARnDCUsOrN+5NeBXmURiSrO+JGJu72Bwbabuw44EwrPap5otC/Hu\nTDIHJy/MnPmwXAhiW7jY9luNxtJL/9DfBEHNHU4AF3/0D90NU6artINqwKCebr/8\nlX4xmavcXRXh3EP6iqaCG+zpdyCquuE3GaCv48VY7WzKiajDE6abmy78nmu7nk++\n+7aGLMisf4CNIBDL9L6ZvdgHV2Oaom7h5P2L0Z0OfslE4C+IpAI+9lxcMzTOJHTf\n0khlXKceA5ky+1rne4IezyUbvwAKJ32M99yYRvCyevJW9XpoVQIYLc/iVbi5VjxL\nQGFqYSnLIlzudgiJq5x/24VqLB8EC5H+6XzLAzAolwYj/CKTBQsBIQqa/CKa6nOu\nyZliiPtDlnK3bBeY\n-----END CERTIFICATE-----\n");
-   //   break;
 
 describe('LGTM SAML tests', () => {
   const clientIDs = ['Ury9HCvBS4B1SzAH8f3YASbbcGf5QlQf'];
