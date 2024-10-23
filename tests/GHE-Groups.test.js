@@ -8,6 +8,7 @@ const user = require('./modules/users/user.js');
 const loader = require('./modules/rule-loader.js');
 const rule = loader.load('GHE-Groups.js', false);
 
+require('jest-fetch-mock').enableMocks();
 
 // jest setup to reset _user and _context, preventing tests from writing to objects
 beforeEach(() => {
