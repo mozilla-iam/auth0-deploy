@@ -5,6 +5,7 @@ exports.onExecutePostLogin = async (event, api) => {
 
   // Only continue on auth0 prod tenant
   if (event.tenant.id !== "auth") {
+    console.log(`Skipping awsSAML; tenant is ${event.tenant.id}`);
     return;
   }
 
@@ -15,9 +16,9 @@ exports.onExecutePostLogin = async (event, api) => {
     case "JR8HkyiM2i00ma2d1X2xfgdbEHzEYZbS":
       // IT billing account params
       paramObj.region = "us-west-2";
-      paramObj.IdentityStoreId = event.secret.AWS_IDENTITYSTORE_ID_IT;
-      paramObj.accessKeyId = event.secret.AWS_IDENTITYSTORE_ACCESS_ID_IT;
-      paramObj.secretAccessKey = event.secret.AWS_IDENTITYSTORE_ACCESS_KEY_IT;
+      paramObj.IdentityStoreId = event.secrets.AWS_IDENTITYSTORE_ID_IT;
+      paramObj.accessKeyId = event.secrets.AWS_IDENTITYSTORE_ACCESS_ID_IT;
+      paramObj.secretAccessKey = event.secrets.AWS_IDENTITYSTORE_ACCESS_KEY_IT;
       paramObj.awsGroups = [
         "aws_095732026120_poweruser",
         "aws_104923852476_admin",
@@ -56,10 +57,10 @@ exports.onExecutePostLogin = async (event, api) => {
     case "pQ0eb5tzwfYHnAtzGuk88pzxZ68szQtk":
       // Pocket Billing Account
       paramObj.region = "us-east-1";
-      paramObj.IdentityStoreId = event.secret.AWS_IDENTITYSTORE_ID_POCKET;
-      paramObj.accessKeyId = event.secret.AWS_IDENTITYSTORE_ACCESS_ID_POCKET;
+      paramObj.IdentityStoreId = event.secrets.AWS_IDENTITYSTORE_ID_POCKET;
+      paramObj.accessKeyId = event.secrets.AWS_IDENTITYSTORE_ACCESS_ID_POCKET;
       paramObj.secretAccessKey =
-        event.secret.AWS_IDENTITYSTORE_ACCESS_KEY_POCKET;
+        event.secrets.AWS_IDENTITYSTORE_ACCESS_KEY_POCKET;
       paramObj.awsGroups = [
         "mozilliansorg_pocket_admin",
         "mozilliansorg_pocket_backend",
@@ -82,10 +83,10 @@ exports.onExecutePostLogin = async (event, api) => {
     case "jU8r4uSEF3fUCjuJ63s46dBnHAfYMYfj":
       // MoFo Billing Account
       paramObj.region = "us-east-2";
-      paramObj.IdentityStoreId = event.secret.AWS_IDENTITYSTORE_ID_MOFO;
-      paramObj.accessKeyId = event.secret.AWS_IDENTITYSTORE_ACCESS_ID_MOFO;
+      paramObj.IdentityStoreId = event.secrets.AWS_IDENTITYSTORE_ID_MOFO;
+      paramObj.accessKeyId = event.secrets.AWS_IDENTITYSTORE_ACCESS_ID_MOFO;
       paramObj.secretAccessKey =
-        event.secret.AWS_IDENTITYSTORE_ACCESS_KEY_MOFO;
+        event.secrets.AWS_IDENTITYSTORE_ACCESS_KEY_MOFO;
       paramObj.awsGroups = [
         "mozilliansorg_mofo_aws_admins",
         "mozilliansorg_mofo_aws_community",
@@ -99,9 +100,9 @@ exports.onExecutePostLogin = async (event, api) => {
     case "c0x6EoLdp55H2g2OXZTIUuaQ4v8U4xf9":
       // CloudServices billing account params
       paramObj.region = "us-west-2";
-      paramObj.IdentityStoreId = event.secret.AWS_IDENTITYSTORE_ID_CLOUDSERVICES;
-      paramObj.accessKeyId = event.secret.AWS_IDENTITYSTORE_ACCESS_ID_CLOUDSERVICES;
-      paramObj.secretAccessKey = event.secret.AWS_IDENTITYSTORE_ACCESS_KEY_CLOUDSERVICES;
+      paramObj.IdentityStoreId = event.secrets.AWS_IDENTITYSTORE_ID_CLOUDSERVICES;
+      paramObj.accessKeyId = event.secrets.AWS_IDENTITYSTORE_ACCESS_ID_CLOUDSERVICES;
+      paramObj.secretAccessKey = event.secrets.AWS_IDENTITYSTORE_ACCESS_KEY_CLOUDSERVICES;
       paramObj.awsGroups = [
         "mozilliansorg_aws_billing_access",
         "mozilliansorg_cloudservices_aws_admin",

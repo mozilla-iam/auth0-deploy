@@ -24,11 +24,9 @@ exports.onExecutePostLogin = async (event, api) => {
       });
 
       const secretsManager = new AWS.SecretsManager();
-      const secretPath = "/iam/auth0/dev/actions";
-      // const secretPath = event.tenant.id === "dev" ? "/iam/auth0/dev/actions" : "/iam/auth0/prod/actions";
+      const secretPath = event.tenant.id === "dev" ? "/iam/auth0/dev/actions" : "/iam/auth0/prod/actions";
       const data = await secretsManager.getSecretValue({ SecretId: secretPath }).promise();
       // handle string or binary
-      console.log(typeof(data));
       if ('SecretString' in data) {
         return JSON.parse(data.SecretString);
       } else {
@@ -43,7 +41,6 @@ exports.onExecutePostLogin = async (event, api) => {
   // Load secrets
   const accessKeyId = event.secrets.accessKeyId;
   const secretAccessKey = event.secrets.secretAccessKey;
-  console.log(accessKeyId, secretAccessKey);
   // Load secrets from AWS Secrets Manager
   const secrets = await getSecrets(accessKeyId, secretAccessKey);
   const jwtMsgsRsaSkey = secrets.jwtMsgsRsaSkey;

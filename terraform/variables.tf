@@ -26,7 +26,6 @@ variable "action_flow_prod" {
     "awsSaml",
     "linkUserByEmail",
     "activateNewUsersInCIS",
-    "OIDCConformanceWorkaround",
-    "configurationDumper"
+    "OIDCConformanceWorkaround"
   ]
 }
