@@ -84,10 +84,11 @@ exports.onExecutePostLogin = async (event, api) => {
     const cachedBearerToken = api.cache.get("personapi_bearer_token");
     const cachedBearerTokenCreationTime = api.cache.get("personapi_bearer_token_creation_time");
     // If we have the bearer token stored, we don't need to fetch it again
-    if ( cachedBearerToken.value && cachedBearerTokenCreationTime.value &&
-      Date.now() - Number(cachedBearerTokenCreationTime) < PERSONAPI_BEARER_TOKEN_REFRESH_AGE) {
-      console.log("Returning cached token", cashedBearerToken);
-      return cachedBearerToken;
+    if ( cachedBearerToken?.value && cachedBearerTokenCreationTime?.value ) {
+      if (Date.now() - Number(cachedBearerTokenCreationTime.value) < PERSONAPI_BEARER_TOKEN_REFRESH_AGE) {
+        console.log("Returning cached token", cachedBearerToken);
+        return cachedBearerToken.value;
+      }
     }
 
     const options = {

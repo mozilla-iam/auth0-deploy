@@ -1,5 +1,5 @@
 data "google_secret_manager_secret_version" "secret-json" {
-  secret  = "auth0-deploy-dev"
+  secret  = "auth0-deploy-${terraform.workspace}"
   project = "iam-auth0"
 }
 

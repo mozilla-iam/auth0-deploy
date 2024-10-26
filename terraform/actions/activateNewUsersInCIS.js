@@ -369,7 +369,7 @@ exports.onExecutePostLogin = async (event, api) => {
   const setExistsInCIS = () => {
     // update user metadata to store them existing
     api.user.setAppMetadata("existsInCIS", true);
-    console.log(`Updated user metadata on ${_event.user.user_id} to set existsInCIS`);
+    console.log(`Updated user metadata on ${event.user.user_id} to set existsInCIS`);
   };
 
   // if we get this far, we need to 1) call the PersonAPI to check for existance, and 2) if the user
