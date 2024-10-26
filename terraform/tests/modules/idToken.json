@@ -1,0 +1,22 @@
+{
+  "acr": "http://schemas.openid.net/pape/policies/2007/06/multi-factor",
+  "amr": [
+    "mfa"
+  ],
+  "aud": [
+    "2KNOUCxN8AFnGGjDCGtqiDIzq8MKXi2h"
+  ],
+  "email": "jdoe@mozilla.com",
+  "email_verified": true,
+  "exp": 1725257331,
+  "family_name": "Doe",
+  "given_name": "John",
+  "iat": 1725221331,
+  "iss": "https://dev.mozilla-dev.auth0.com/",
+  "name": "John Doe",
+  "nickname": "John Doe",
+  "nonce": "ErtmqMCzyd5FW0Lx",
+  "sid": "HQse6N6gwD0z07jQmscIUGLXOmSJh3BR",
+  "sub": "ad|Mozilla-LDAP-Dev|jdoe",
+  "updated_at": "1725220384"
+}
