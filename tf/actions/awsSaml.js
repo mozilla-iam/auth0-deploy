@@ -20,6 +20,7 @@ exports.onExecutePostLogin = async (event, api) => {
       paramObj.accessKeyId = event.secrets.AWS_IDENTITYSTORE_ACCESS_ID_IT;
       paramObj.secretAccessKey = event.secrets.AWS_IDENTITYSTORE_ACCESS_KEY_IT;
       paramObj.awsGroups = [
+        // TODO(bhee): delete as a part of https://mozilla-hub.atlassian.net/browse/IAM-1474
         "aws_095732026120_poweruser",
         "aws_104923852476_admin",
         "aws_320464205386_admin",
@@ -43,6 +44,8 @@ exports.onExecutePostLogin = async (event, api) => {
         "mozilliansorg_searchfox-aws",
         "mozilliansorg_secops-aws-admins",
         "mozilliansorg_sre",
+        "mozilliansorg_sumo-admins",
+        "mozilliansorg_sumo-devs",
         "mozilliansorg_voice_aws_admin_access",
         "mozilliansorg_web-sre-aws-access",
         "team_mdn",
