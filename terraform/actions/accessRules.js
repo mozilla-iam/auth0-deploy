@@ -19,7 +19,7 @@ exports.onExecutePostLogin = async (event, api) => {
       AWS.config.update({
         region: 'us-west-2',
         accessKeyId: event.secrets.accessKeyId,
-        secretAccessKey: event.secretssecretAccessKey
+        secretAccessKey: event.secrets.secretAccessKey
       });
 
       const secretsManager = new AWS.SecretsManager();
@@ -82,8 +82,7 @@ exports.onExecutePostLogin = async (event, api) => {
   }
 
   if (!event.user.email_verified) {
-    const msg = `User primary email NOT verified, refusing login for ${event.user.email}`;
-    console.log(msg);
+    console.log(`User primary email NOT verified, refusing login for ${event.user.email}`);
     // This post error is broken in sso dashboard
     postError("primarynotverified", event, api, jwt, jwtMsgsRsaSkey);
     return;
