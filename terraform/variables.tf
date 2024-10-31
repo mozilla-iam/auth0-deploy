@@ -2,7 +2,6 @@ variable "action_flow_dev" {
   type = list(string)
   default = [
     "continueEndPoint",
-    "duoSecurity",
     "samlMappings",
     "gheGroups",
     "ensureLdapUsersUseLdap",
@@ -18,7 +17,6 @@ variable "action_flow_prod" {
   type = list(string)
   default = [
     "continueEndPoint",
-    "duoSecurity",
     "samlMappings",
     "gheGroups",
     "ensureLdapUsersUseLdap",
