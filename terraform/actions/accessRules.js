@@ -9,18 +9,17 @@ exports.onExecutePostLogin = async (event, api) => {
   console.log("Running actions:", "accessRules");
 
   // Retrieve and return a secret from AWS Secrets Manager
-  const getSecrets = async (AWS, accessKeyId, secretAccessKey) => {
+  const getSecrets = async () => {
     try {
-
-      if (!accessKeyId || !secretAccessKey) {
+      if (!event.secrets.accessKeyId || !event.secrets.secretAccessKey) {
         throw new Error('AWS access keys are not defined.');
       }
 
-      // set AWS config so we can retrieve secrets
+      // Set up AWS client
       AWS.config.update({
         region: 'us-west-2',
-        accessKeyId: accessKeyId,
-        secretAccessKey: secretAccessKey
+        accessKeyId: event.secrets.accessKeyId,
+        secretAccessKey: event.secretssecretAccessKey
       });
 
       const secretsManager = new AWS.SecretsManager();
@@ -40,9 +39,7 @@ exports.onExecutePostLogin = async (event, api) => {
   }
 
   // Load secrets
-  const accessKeyId = event.secrets.accessKeyId;
-  const secretAccessKey = event.secrets.secretAccessKey;
-  const secrets = await getSecrets(AWS, accessKeyId, secretAccessKey);
+  const secrets = await getSecrets();
 	const jwtMsgsRsaSkey = secrets.jwtMsgsRsaSkey;
 
   // postError(code)
@@ -84,6 +81,13 @@ exports.onExecutePostLogin = async (event, api) => {
     }
   }
 
+  if (!event.user.email_verified) {
+    const msg = `User primary email NOT verified, refusing login for ${event.user.email}`;
+    console.log(msg);
+    // This post error is broken in sso dashboard
+    postError("primarynotverified", event, api, jwt, jwtMsgsRsaSkey);
+    return;
+  }
 
   const namespace = 'https://sso.mozilla.com/claim';
 
@@ -92,6 +96,13 @@ exports.onExecutePostLogin = async (event, api) => {
     'moc+servicenow@mozilla.com',      // MOC see: https://bugzilla.mozilla.org/show_bug.cgi?id=1423903
     'moc-sso-monitoring@mozilla.com',  // MOC see: https://bugzilla.mozilla.org/show_bug.cgi?id=1423903
   ];
+
+  const duoConfig = {
+    "host": event.secrets.duo_apihost_mozilla,
+    "ikey": event.secrets.duo_ikey_mozilla,
+    "skey": event.secrets.duo_skey_mozilla,
+    "username": event.user.email,
+  };
 
   // Check if array A has any occurrence from array B
   const hasCommonElements = (A, B) => {
@@ -235,6 +246,17 @@ exports.onExecutePostLogin = async (event, api) => {
     let aai = [];
     let aal = "UNKNOWN";
 
+    // Allow certain LDAP service accounts to fake their MFA. For all other LDAPi accounts, enforce MFA
+    if (event.connection.strategy === "ad") {
+      if (mfaBypassAccounts.includes(event.user.email)) {
+        console.log(`LDAP service account (${event.user.email}) is allowed to bypass MFA`);
+        aai.push("2FA");
+      } else {
+        api.multifactor.enable("duo", { "providerOptions": duoConfig, "allowRememberBrowser": true });
+        console.log(`duosecurity: ${event.user.email} is in LDAP and requires 2FA check`);
+      }
+    }
+
     const profileData = getProfileData(event.connection.name);
 
     //GitHub attribute
@@ -264,12 +286,6 @@ exports.onExecutePostLogin = async (event, api) => {
       // Note that this is not the same as "2FA" and other indicators, as we simply do not have a technically accurate
       // indicator of what the authenticator supports at this time for Google accounts
       aai.push("HIGH_ASSURANCE_IDP");
-    }
-
-    // Allow certain LDAP service accounts to fake their MFA
-    if (mfaBypassAccounts.includes(event.user.email) && (event.connection.strategy === "ad")) {
-      console.log(`LDAP service account (${event.user.email}) is allowed to bypass MFA`);
-      aai.push("2FA");
     }
 
     // AAI (AUTHENTICATOR ASSURANCE INDICATOR) REQUIREMENTS
@@ -369,7 +385,6 @@ exports.onExecutePostLogin = async (event, api) => {
 			postError(decision);
       return;
     }
-
   } catch (err) {
     // All error should be caught here and we return the callback handler with the error
     console.log("AccessRules:", err);

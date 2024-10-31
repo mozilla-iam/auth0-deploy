@@ -24,6 +24,7 @@ beforeEach(() => {
     text: jest.fn().mockResolvedValue(appsYaml),
   });
 
+  // Mock auth0 api object
   api = {
     idToken: {
       setCustomClaim: jest.fn()
@@ -33,16 +34,29 @@ beforeEach(() => {
     },
     redirect: {
       sendUserTo: jest.fn()
+    },
+    user: {
+      setAppMetadata: jest.fn()
+    },
+    multifactor: {
+      enable: jest.fn()
     }
   };
 
+  // Mock setCustomClaim
   api.idToken.setCustomClaim.mockImplementation((key, value) => {
     _idToken[key] = value;
   });
 
+  // Mock sendUserTo
 	api.redirect.sendUserTo.mockImplementation((uri) => {
 		_event.transaction["redirect_uri"] = uri;
 	});
+
+  // Mock setAppMetadata
+  api.user.setAppMetadata.mockImplementation((key, value) => {
+    _event.user.app_metadata[key] = value;
+  });
 
   // Spy on console
   consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
@@ -70,6 +84,66 @@ describe('Basic tests', () => {
   it('should execute without throwing', async () => {
     await expect(onExecutePostLogin(_event, api)).resolves.not.toThrow();
   });
+});
+
+test("Expect onExecutePostLogin to be defined", async () => {
+  // Expect onExecutePostLogin to be defined
+  expect(onExecutePostLogin).toBeDefined();
+});
+
+test('Connection is not LDAP, do not call api.multifactor.enable', async () => {
+  // Execute onExecutePostLogin
+  await onExecutePostLogin(_event, api);
+
+  // Expect api.multifactor.enable to have been called
+  expect(api.multifactor.enable).not.toHaveBeenCalled();
+});
+
+test('user in LDAP (ad) requires 2FA', async () => {
+  _event.connection = {
+    id: "con_qVLhpUZQxluxX5kN",
+    metadata: {},
+    name: "Mozilla-LDAP-Dev",
+    strategy: "ad"
+  },
+
+  // Execute onExecutePostLogin
+  await onExecutePostLogin(_event, api);
+
+  // Expect api.multifactor.enable to have been called
+  expect(api.multifactor.enable).toHaveBeenCalled();
+});
+
+test('service account MFA bypass', async () => {
+  _event.connection = {
+    id: "con_qVLhpUZQxluxX5kN",
+    metadata: {},
+    name: "Mozilla-LDAP-Dev",
+    strategy: "ad"
+  },
+  _event.user.email = "moc-sso-monitoring@mozilla.com";
+
+  // Execute onExecutePostLogin
+  await onExecutePostLogin(_event, api);
+
+  // Expect api.multifactor.enable to have been called
+  expect(api.multifactor.enable).not.toHaveBeenCalled();
+});
+
+test('email account not verified', async () => {
+  _event.user.email_verified = false;
+  _event.connection = {
+    id: "con_qVLhpUZQxluxX5kN",
+    metadata: {},
+    name: "Mozilla-LDAP-Dev",
+    strategy: "ad"
+  },
+
+  // Execute onExecutePostLogin
+  await onExecutePostLogin(_event, api);
+
+  expect(_event.transaction.redirect_uri).toBeDefined();
+  expect(decodeRedirect(_event.transaction.redirect_uri)).toEqual("primarynotverified");
 });
 
 describe('Test group merges', () => {

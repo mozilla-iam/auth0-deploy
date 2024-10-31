@@ -11,10 +11,6 @@ locals {
       id           = auth0_action.continueEndPoint.id
       display_name = auth0_action.continueEndPoint.name
     }
-    duoSecurity = {
-      id           = auth0_action.duoSecurity.id
-      display_name = auth0_action.duoSecurity.name
-    }
     samlMappings = {
       id           = auth0_action.samlMappings.id
       display_name = auth0_action.samlMappings.name
@@ -77,53 +73,6 @@ resource "auth0_action" "continueEndPoint" {
   supported_triggers {
     id      = "post-login"
     version = "v3"
-  }
-}
-
-resource "auth0_action" "duoSecurity" {
-  name    = format("duoSecurity")
-  runtime = "node18"
-  deploy  = true
-  code    = file("${path.module}/actions/duoSecurity.js")
-
-  supported_triggers {
-    id      = "post-login"
-    version = "v3"
-  }
-
-  dependencies {
-    name    = "aws-sdk"
-    version = "2.1646.0"
-  }
-
-  dependencies {
-    name    = "jsonwebtoken"
-    version = "9.0.2"
-  }
-
-  secrets {
-    name  = "duo_apihost_mozilla"
-    value = local.parsed_secrets["duoSecurity_duo_apihost"]
-  }
-
-  secrets {
-    name  = "duo_ikey_mozilla"
-    value = local.parsed_secrets["duoSecurity_duo_ikey"]
-  }
-
-  secrets {
-    name  = "duo_skey_mozilla"
-    value = local.parsed_secrets["duoSecurity_duo_skey"]
-  }
-
-  secrets {
-    name  = "accessKeyId"
-    value = local.parsed_secrets["duoSecurity_accessKeyId"]
-  }
-
-  secrets {
-    name  = "secretAccessKey"
-    value = local.parsed_secrets["duoSecurity_secretAccessKey"]
   }
 }
 
@@ -242,6 +191,21 @@ resource "auth0_action" "accessRules" {
   dependencies {
     name    = "aws-sdk"
     version = "2.1646.0"
+  }
+
+  secrets {
+    name  = "duo_apihost_mozilla"
+    value = local.parsed_secrets["duoSecurity_duo_apihost"]
+  }
+
+  secrets {
+    name  = "duo_ikey_mozilla"
+    value = local.parsed_secrets["duoSecurity_duo_ikey"]
+  }
+
+  secrets {
+    name  = "duo_skey_mozilla"
+    value = local.parsed_secrets["duoSecurity_duo_skey"]
   }
 
   secrets {
