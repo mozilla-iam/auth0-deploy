@@ -77,7 +77,8 @@ exports.onExecutePostLogin = async (event, api) => {
         "mozilliansorg_pocket_readonly",
         "mozilliansorg_pocket_sales",
         "mozilliansorg_pocket_ads",
-        "mozilliansorg_pocket_aws_billing"
+        "mozilliansorg_pocket_aws_billing",
+        "mozilliansorg_infrasec"
       ];
       break;
     case "jU8r4uSEF3fUCjuJ63s46dBnHAfYMYfj":
@@ -95,6 +96,7 @@ exports.onExecutePostLogin = async (event, api) => {
         "mozilliansorg_mofo_aws_projects",
         "mozilliansorg_mofo_aws_sandbox",
         "mozilliansorg_mofo_aws_secure",
+        "mozilliansorg_infrasec"
       ];
       break;
     case "c0x6EoLdp55H2g2OXZTIUuaQ4v8U4xf9":
@@ -109,7 +111,8 @@ exports.onExecutePostLogin = async (event, api) => {
         "mozilliansorg_cloudservices_aws_autograph_admin",
         "mozilliansorg_cloudservices_aws_autograph_dev",
         "mozilliansorg_cloudservices_aws_developer_services_dev",
-        "mozilliansorg_cloudservices_aws_fxa_developers"
+        "mozilliansorg_cloudservices_aws_fxa_developers",
+        "mozilliansorg_infrasec"
       ];
       break;
     default:
