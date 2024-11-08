@@ -126,6 +126,7 @@ const clientGroupMaps = [
       "mozilliansorg_pocket_dataanalytics",
       "mozilliansorg_pocket_datalearning",
       "mozilliansorg_pocket_developer",
+      "mozilliansorg_pocket_fin_ops",
       "mozilliansorg_pocket_frontend",
       "mozilliansorg_pocket_marketing",
       "mozilliansorg_pocket_mozilla_sre",
