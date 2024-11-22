@@ -109,6 +109,7 @@ const clientGroupMaps = [
       "mozilliansorg_sre",
       "mozilliansorg_sumo-admins",
       "mozilliansorg_sumo-devs",
+      "mozilliansorg_relay_developer",
       "mozilliansorg_voice_aws_admin_access",
       "mozilliansorg_web-sre-aws-access",
       "team_mdn",
