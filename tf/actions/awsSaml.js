@@ -21,34 +21,48 @@ exports.onExecutePostLogin = async (event, api) => {
       paramObj.secretAccessKey = event.secrets.AWS_IDENTITYSTORE_ACCESS_KEY_IT;
       paramObj.awsGroups = [
         // TODO(bhee): delete as a part of https://mozilla-hub.atlassian.net/browse/IAM-1474
+        // Replaced by mozilliansorg_sumo-admins and mozilliansorg_sumo-devs.
         "aws_095732026120_poweruser",
+        // Replaced by created mozilliansorg_project-guardian-admins.
         "aws_104923852476_admin",
+        // Replaced by created mozilliansorg_iam-admins.
         "aws_320464205386_admin",
+        // Replaced by created mozilliansorg_iam-readonly.
         "aws_320464205386_read_only",
+        // Replaced by created mozilliansorg_webcompat-alexa-admins.
         "aws_359555865025_admin",
+        // Replaced by existed mozilliansorg_consolidated-billing-aws.
         "aws_consolidatedbilling_admin",
+        // Replaced by created mozilliansorg_consolidated-billing-aws-readonly.
         "aws_consolidatedbilling_read_only",
+        // Replaced by created mozilliansorg_discourse-devs.
         "aws_discourse_dev",
         "fuzzing_team",
         "mozilliansorg_aws_billing_access",
         "mozilliansorg_cia-aws",
         "mozilliansorg_consolidated-billing-aws",
+        "mozilliansorg_consolidated-billing-aws-readonly",
+        "mozilliansorg_discourse-devs",
         "mozilliansorg_http-observatory-rds",
+        "mozilliansorg_iam-admins",
         "mozilliansorg_iam-in-transition",
         "mozilliansorg_iam-in-transition-admin",
+        "mozilliansorg_iam-readonly",
         "mozilliansorg_meao-admins",
         "mozilliansorg_mozilla-moderator-devs",
         "mozilliansorg_partinfra-aws",
         "mozilliansorg_pdfjs-testers",
         "mozilliansorg_pocket_cloudtrail_readers",
+        "mozilliansorg_project-guardian-admins",
+        "mozilliansorg_relay_developer",
         "mozilliansorg_searchfox-aws",
         "mozilliansorg_secops-aws-admins",
         "mozilliansorg_sre",
         "mozilliansorg_sumo-admins",
         "mozilliansorg_sumo-devs",
-        "mozilliansorg_relay_developer",
         "mozilliansorg_voice_aws_admin_access",
         "mozilliansorg_web-sre-aws-access",
+        "mozilliansorg_webcompat-alexa-admins",
         "team_mdn",
         "team_netops",
         "team_opsec",
