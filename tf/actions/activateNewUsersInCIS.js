@@ -15,7 +15,7 @@ exports.onExecutePostLogin = async (event, api) => {
   }
 
   // If you're explicitly flagged as existing in CIS, then we don't need to continue onward
-  if (event.user.user_metadata.existsInCIS) {
+  if (event.user.app_metadata?.existsInCIS) {
     console.log(`${event.user.user_id} existsInCIS is True.  Skip activateNewUsersInCIS`);
     return;
   }
