@@ -283,7 +283,7 @@ exports.onExecutePostLogin = async (event, api) => {
         // Throw an error if the response status code is not in the 200-299 range
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return response.json();
+      return await response.json();
     } catch (error) {
       throw Error(`Unable to retrieve profile from Person API: ${error}`);
     }
