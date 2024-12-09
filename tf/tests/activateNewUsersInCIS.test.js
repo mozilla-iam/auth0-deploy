@@ -166,7 +166,7 @@ test('When existsInCIS is already set, expect empty logs and workflow to continu
   fetch.mockImplementation(fetchRespCallback);
 
   // Set existsInCIS in user metadata
-  _event.user.user_metadata = { existsInCIS: true };
+  _event.user.app_metadata = { existsInCIS: true };
 
   // Execute onExecutePostLogin
   await onExecutePostLogin(_event, api);
