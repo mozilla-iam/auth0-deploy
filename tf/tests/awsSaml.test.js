@@ -84,14 +84,6 @@ afterEach(() => {
 
 const clientGroupMaps = [
   { 'JR8HkyiM2i00ma2d1X2xfgdbEHzEYZbS': [
-      "aws_095732026120_poweruser",
-      "aws_104923852476_admin",
-      "aws_320464205386_admin",
-      "aws_320464205386_read_only",
-      "aws_359555865025_admin",
-      "aws_consolidatedbilling_admin",
-      "aws_consolidatedbilling_read_only",
-      "aws_discourse_dev",
       "fuzzing_team",
       "mozilliansorg_aws_billing_access",
       "mozilliansorg_cia-aws",
