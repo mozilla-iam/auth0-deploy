@@ -2,6 +2,22 @@ exports.onExecutePostLogin = async (event, api) => {
   console.log("Running actions:", "samlMappings");
 
   switch(event.client.client_id) {
+    case "cPH0znP4n74JvPf9Efc1w6O8KQWwT634": // Tines
+      // Only pass relative groups. These should match the authorized apps in apps.yml
+      const tineGroups = [
+        'mozilliansorg_sec_tines-admin',
+        'mozilliansorg_sec_tines-access',
+        'team_moco',
+        'team_mofo',
+        'team_mzla',
+        'team_mzai',
+        'team_mzvc'
+        ];
+      const userGroups = event.user.metadata?.groups || [];
+      const selectGroups = tineGroups.filter(group => userGroups.includes(group));
+      api.samlResponse.setAttribute("groups", selectGroups);
+      break;
+
     case "wgh8S9GaE7sJ4i0QrAzeMxFXgWZYtB0l": // sage-intacct
       api.samlResponse.setAttribute('Company Name', 'MOZ Corp');
       api.samlResponse.setAttribute('emailAddress', event.user.email);
