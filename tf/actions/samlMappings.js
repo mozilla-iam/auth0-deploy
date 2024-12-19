@@ -13,9 +13,11 @@ exports.onExecutePostLogin = async (event, api) => {
         'team_mzai',
         'team_mzvc'
         ];
-      const userGroups = event.user.metadata?.groups || [];
+      const userGroups = event.user.app_metadata?.groups || [];
       const selectGroups = tineGroups.filter(group => userGroups.includes(group));
-      api.samlResponse.setAttribute("groups", selectGroups);
+      api.samlResponse.setAttribute("http://sso.mozilla.com/claim/groups", selectGroups);
+      // DELETE the standard group claim
+      api.samlResponse.setAttribute("http://schemas.xmlsoap.org/claims/Group", null);
       break;
 
     case "wgh8S9GaE7sJ4i0QrAzeMxFXgWZYtB0l": // sage-intacct
