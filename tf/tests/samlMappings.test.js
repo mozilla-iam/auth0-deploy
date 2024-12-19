@@ -118,8 +118,8 @@ describe('Tines SAML tests', () => {
   test.each(clientIDs)('Ensure SAML configuration mappings for client %s', async (clientID) => {
     _event.client.client_id = clientID;
 
-    _event.user.metadata = {};
-    _event.user.metadata.groups = [
+    _event.user.app_metadata = {};
+    _event.user.app_metadata.groups = [
       'mozilliansorg_sec_tines-admin',
       'foo',
       'mozilliansorg_sec_tines-access',
@@ -132,7 +132,7 @@ describe('Tines SAML tests', () => {
     ];
 
     expectedSamlAttributes = {
-      "groups": [
+      "http://sso.mozilla.com/claim/groups": [
         'mozilliansorg_sec_tines-admin',
         'mozilliansorg_sec_tines-access',
         'team_moco',
@@ -140,7 +140,9 @@ describe('Tines SAML tests', () => {
         'team_mzla',
         'team_mzai',
         'team_mzvc'
-    ]};
+      ],
+      "http://schemas.xmlsoap.org/claims/Group": null
+    };
 
     // Execute onExecutePostLogin
     await onExecutePostLogin(_event, api);
