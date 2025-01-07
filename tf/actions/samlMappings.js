@@ -2,6 +2,12 @@ exports.onExecutePostLogin = async (event, api) => {
   console.log("Running actions:", "samlMappings");
 
   switch(event.client.client_id) {
+
+    case "pFf6sBIfp4n3Wcs3F9Q7a9ry8MTrbi2F": // matrix-oidc
+      const preferred_username = event.user.email.split('@')[0];
+      api.idToken.setCustomClaim("preferred_username", preferred_username);
+      break;
+
     case "cPH0znP4n74JvPf9Efc1w6O8KQWwT634": // Tines
       // Only pass relative groups. These should match the authorized apps in apps.yml
       const tineGroups = [
