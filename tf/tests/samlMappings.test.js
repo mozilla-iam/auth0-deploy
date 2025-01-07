@@ -112,6 +112,26 @@ test('Client ID does not match, no SAML attributes set', async () => {
 
 });
 
+describe('Matrix idToken tests', () => {
+  const clientIDs = ['pFf6sBIfp4n3Wcs3F9Q7a9ry8MTrbi2F'];
+
+  test.each(clientIDs)('Ensure OIDC claim mapping for client %s', async (clientID) => {
+    _event.client.client_id = clientID;
+
+    const preferred_username = _event.user.email.split('@')[0];
+    expectedIdTokenAttributes = {
+      'preferred_username': preferred_username
+    };
+
+    // Execute onExecutePostLogin
+    await onExecutePostLogin(_event, api);
+
+    const idTokenMatches = extractMatchingPairs(_idToken, expectedIdTokenAttributes);
+    expect(api.idToken.setCustomClaim).toHaveBeenCalled();
+    expect(idTokenMatches).toStrictEqual(expectedIdTokenAttributes);
+  });
+});
+
 describe('Tines SAML tests', () => {
   const clientIDs = ['cPH0znP4n74JvPf9Efc1w6O8KQWwT634'];
 
