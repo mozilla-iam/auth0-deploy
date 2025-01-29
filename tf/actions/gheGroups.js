@@ -63,7 +63,8 @@ exports.onExecutePostLogin = async (event, api) => {
     'vkoDkHlCEUhlHNhVDtewJqRLVLGVsPrZ': 'mozilliansorg_ghe_mozilla-fakespot_users',
     'T6mjvGguOB5hkq9Aviaa58tOlwpJG5o6': 'mozilliansorg_ghe_mozilla-necko_users',
     'ZemrAl9S2q9GKJNQUdjZCNsLiVmSEg1P': 'mozilliansorg_ghe_mozilla-privacy_users',
-    'sZHTTA4iuHgmiQGzbkS7lcXE1bbMGces': 'mozilliansorg_ghe_firefoxgraphics_users'
+    'sZHTTA4iuHgmiQGzbkS7lcXE1bbMGces': 'mozilliansorg_ghe_firefoxgraphics_users',
+    'JDiNCQVrXzw2ILureegz1T8c3OrUZCUb': 'mozilliansorg_ghe-mozilla-firefox_users'
   };
 
   // ClientID isn't mapped here, return callback() and proceed rules processing
