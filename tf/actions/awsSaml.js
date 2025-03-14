@@ -52,7 +52,7 @@ exports.onExecutePostLogin = async (event, api) => {
         "team_se",
         "team_secops",
         "voice-dev",
-        "vpn_sumo_aws_devs"
+        "vpn_sumo_aws_devs",
       ];
       break;
     case "pQ0eb5tzwfYHnAtzGuk88pzxZ68szQtk":
@@ -80,7 +80,7 @@ exports.onExecutePostLogin = async (event, api) => {
         "mozilliansorg_pocket_sales",
         "mozilliansorg_pocket_ads",
         "mozilliansorg_pocket_aws_billing",
-        "mozilliansorg_infrasec"
+        "mozilliansorg_infrasec",
       ];
       break;
     case "jU8r4uSEF3fUCjuJ63s46dBnHAfYMYfj":
@@ -98,15 +98,18 @@ exports.onExecutePostLogin = async (event, api) => {
         "mozilliansorg_mofo_aws_projects",
         "mozilliansorg_mofo_aws_sandbox",
         "mozilliansorg_mofo_aws_secure",
-        "mozilliansorg_infrasec"
+        "mozilliansorg_infrasec",
       ];
       break;
     case "c0x6EoLdp55H2g2OXZTIUuaQ4v8U4xf9":
       // CloudServices billing account params
       paramObj.region = "us-west-2";
-      paramObj.IdentityStoreId = event.secrets.AWS_IDENTITYSTORE_ID_CLOUDSERVICES;
-      paramObj.accessKeyId = event.secrets.AWS_IDENTITYSTORE_ACCESS_ID_CLOUDSERVICES;
-      paramObj.secretAccessKey = event.secrets.AWS_IDENTITYSTORE_ACCESS_KEY_CLOUDSERVICES;
+      paramObj.IdentityStoreId =
+        event.secrets.AWS_IDENTITYSTORE_ID_CLOUDSERVICES;
+      paramObj.accessKeyId =
+        event.secrets.AWS_IDENTITYSTORE_ACCESS_ID_CLOUDSERVICES;
+      paramObj.secretAccessKey =
+        event.secrets.AWS_IDENTITYSTORE_ACCESS_KEY_CLOUDSERVICES;
       paramObj.awsGroups = [
         "mozilliansorg_aws_billing_access",
         "mozilliansorg_cloudservices_aws_admin",
@@ -116,7 +119,7 @@ exports.onExecutePostLogin = async (event, api) => {
         "mozilliansorg_cloudservices_aws_developer_services_dev",
         "mozilliansorg_cloudservices_aws_fxa_developers",
         "mozilliansorg_cloudservices_aws_taskcluster_devs",
-        "mozilliansorg_infrasec"
+        "mozilliansorg_infrasec",
       ];
       break;
     default:
@@ -318,4 +321,4 @@ exports.onExecutePostLogin = async (event, api) => {
     console.error(err);
     return api.access.deny(err);
   }
-}
+};

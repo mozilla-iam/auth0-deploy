@@ -1,9 +1,9 @@
-const _ = require('lodash');
+const _ = require("lodash");
 
-const eventObj = require('./modules/event.json');
-const { onExecutePostLogin } = require('../actions/awsSaml.js');
+const eventObj = require("./modules/event.json");
+const { onExecutePostLogin } = require("../actions/awsSaml.js");
 
-jest.mock('node-fetch');
+jest.mock("node-fetch");
 
 const compileGroups = async (_event) => {
   // Ensure we have the correct group data
@@ -16,7 +16,7 @@ const compileGroups = async (_event) => {
   let _identity;
   let identityGroups = [];
   // Iterate over each identity
-  for (let x = 0, len = _event.user.identities.length; x<len; x++) {
+  for (let x = 0, len = _event.user.identities.length; x < len; x++) {
     // Get profile for the given identity
     _identity = _event.user.identities[x];
     // If the identity contains profileData
@@ -30,14 +30,20 @@ const compileGroups = async (_event) => {
   }
 
   // Collect all variations of groups and merge them together for access evaluation
-  let groups = [...user_groups, ...app_metadata_groups, ...ldap_groups, ...identityGroups];
+  let groups = [
+    ...user_groups,
+    ...app_metadata_groups,
+    ...ldap_groups,
+    ...identityGroups,
+  ];
 
   // Inject the everyone group and filter for duplicates
   groups.push("everyone");
-  groups = groups.filter((value, index, array) => array.indexOf(value) === index);
+  groups = groups.filter(
+    (value, index, array) => array.indexOf(value) === index
+  );
   return groups;
 };
-
 
 beforeEach(() => {
   _event = _.cloneDeep(eventObj);
@@ -49,20 +55,20 @@ beforeEach(() => {
 
   api = {
     idToken: {
-      setCustomClaim: jest.fn()
+      setCustomClaim: jest.fn(),
     },
     access: {
-      deny: jest.fn()
+      deny: jest.fn(),
     },
     redirect: {
-      sendUserTo: jest.fn()
-    }
+      sendUserTo: jest.fn(),
+    },
   };
 
   // Spy on console
-  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  consoleLogSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+  consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+  consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 });
 
 afterEach(() => {
@@ -81,9 +87,9 @@ afterEach(() => {
 //getGroupId
 //createUser
 
-
 const clientGroupMaps = [
-  { 'JR8HkyiM2i00ma2d1X2xfgdbEHzEYZbS': [
+  {
+    JR8HkyiM2i00ma2d1X2xfgdbEHzEYZbS: [
       "fuzzing_team",
       "mozilliansorg_aws_billing_access",
       "mozilliansorg_cia-aws",
@@ -110,9 +116,11 @@ const clientGroupMaps = [
       "team_se",
       "team_secops",
       "voice-dev",
-      "vpn_sumo_aws_devs"
-  ]},
-  { 'pQ0eb5tzwfYHnAtzGuk88pzxZ68szQtk': [
+      "vpn_sumo_aws_devs",
+    ],
+  },
+  {
+    pQ0eb5tzwfYHnAtzGuk88pzxZ68szQtk: [
       "mozilliansorg_pocket_admin",
       "mozilliansorg_pocket_backend",
       "mozilliansorg_pocket_backup_admin",
@@ -129,33 +137,38 @@ const clientGroupMaps = [
       "mozilliansorg_pocket_readonly",
       "mozilliansorg_pocket_sales",
       "mozilliansorg_pocket_ads",
-      "mozilliansorg_pocket_aws_billing"
-  ]},
-  { 'jU8r4uSEF3fUCjuJ63s46dBnHAfYMYfj': [
+      "mozilliansorg_pocket_aws_billing",
+    ],
+  },
+  {
+    jU8r4uSEF3fUCjuJ63s46dBnHAfYMYfj: [
       "mozilliansorg_mofo_aws_admins",
       "mozilliansorg_mofo_aws_community",
       "mozilliansorg_mofo_aws_everything",
       "mozilliansorg_mofo_aws_labs",
       "mozilliansorg_mofo_aws_projects",
       "mozilliansorg_mofo_aws_sandbox",
-      "mozilliansorg_mofo_aws_secure"
-  ]},
-  { 'c0x6EoLdp55H2g2OXZTIUuaQ4v8U4xf9': [
+      "mozilliansorg_mofo_aws_secure",
+    ],
+  },
+  {
+    c0x6EoLdp55H2g2OXZTIUuaQ4v8U4xf9: [
       "mozilliansorg_aws_billing_access",
       "mozilliansorg_cloudservices_aws_admin",
       "mozilliansorg_cloudservices_aws_autograph_admin",
       "mozilliansorg_cloudservices_aws_autograph_dev",
       "mozilliansorg_cloudservices_aws_developer_services_dev",
-      "mozilliansorg_cloudservices_aws_fxa_developers"
-  ]},
+      "mozilliansorg_cloudservices_aws_fxa_developers",
+    ],
+  },
 ];
 
-describe('Basic tests', () => {
-  it('should be defined', () => {
+describe("Basic tests", () => {
+  it("should be defined", () => {
     expect(onExecutePostLogin).toBeDefined();
   });
 
-  it('should execute without throwing', async () => {
+  it("should execute without throwing", async () => {
     await expect(onExecutePostLogin(_event, api)).resolves.not.toThrow();
   });
 });
