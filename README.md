@@ -44,3 +44,9 @@ npm run format
 # Or, if you're checking
 npm run lint
 ```
+
+When running `git blame`, you may want to ignore some commits:
+
+```
+git config blame.ignoreRevsFile dev/git-blame-ignore-revisions
+```
