@@ -1,18 +1,18 @@
-const _ = require('lodash');
+const _ = require("lodash");
 
-const eventObj = require('./modules/event.json');
-const decodeRedirect = require('./modules/decodePostErrorUrl.js');
-const { onExecutePostLogin } = require('../actions/ensureLdapUsersUseLdap.js');
+const eventObj = require("./modules/event.json");
+const decodeRedirect = require("./modules/decodePostErrorUrl.js");
+const { onExecutePostLogin } = require("../actions/ensureLdapUsersUseLdap.js");
 
 // Take all log enteries and combine them into a single array
 const combineLog = (consoleLogs) => {
   let combinedLog = [];
   for (let i = 0; i < consoleLogs.length; i++) {
-    singleStr = consoleLogs[i].join(' ');
+    singleStr = consoleLogs[i].join(" ");
     combinedLog.push(singleStr);
   }
   return combinedLog;
-}
+};
 
 beforeEach(() => {
   // Clone the event object to be used before each test
@@ -30,20 +30,20 @@ beforeEach(() => {
   // Mock auth0 api object
   api = {
     idToken: {
-      setCustomClaim: jest.fn()
+      setCustomClaim: jest.fn(),
     },
     access: {
-      deny: jest.fn()
+      deny: jest.fn(),
     },
     redirect: {
-      sendUserTo: jest.fn()
+      sendUserTo: jest.fn(),
     },
     user: {
-      setAppMetadata: jest.fn()
+      setAppMetadata: jest.fn(),
     },
     multifactor: {
-      enable: jest.fn()
-    }
+      enable: jest.fn(),
+    },
   };
 
   // Mock setCustomClaim
@@ -52,9 +52,9 @@ beforeEach(() => {
   });
 
   // Mock sendUserTo
-	api.redirect.sendUserTo.mockImplementation((uri) => {
-		_event.transaction["redirect_uri"] = uri;
-	});
+  api.redirect.sendUserTo.mockImplementation((uri) => {
+    _event.transaction["redirect_uri"] = uri;
+  });
 
   // Mock setAppMetadata
   api.user.setAppMetadata.mockImplementation((key, value) => {
@@ -62,9 +62,9 @@ beforeEach(() => {
   });
 
   // Spy on console
-  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  consoleLogSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+  consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+  consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 });
 
 afterEach(() => {
@@ -76,20 +76,20 @@ afterEach(() => {
 });
 
 const WHITELIST = [
-	'HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH',  // mozillians.org account verification
-	't9bMi4eTCPpMp5Y6E1Lu92iVcqU0r1P1',  // https://web-mozillians-staging.production.paas.mozilla.community Verification client
-	'jijaIzcZmFCDRtV74scMb9lI87MtYNTA',  // mozillians.org Verification Client
+  "HvN5D3R64YNNhvcHKuMKny1O0KJZOOwH", // mozillians.org account verification
+  "t9bMi4eTCPpMp5Y6E1Lu92iVcqU0r1P1", // https://web-mozillians-staging.production.paas.mozilla.community Verification client
+  "jijaIzcZmFCDRtV74scMb9lI87MtYNTA", // mozillians.org Verification Client
 ];
 
 const MOZILLA_STAFF_DOMAINS = [
-  'mozilla.com',            // Main corp domain
-  'mozillafoundation.org',  // Main org domain
-  'getpocket.com',          // Pocket domain
-  'thunderbird.net',        // MZLA domain
-  'readitlater.com',
-  'mozilla-japan.org',
-  'mozilla.ai',
-  'mozilla.vc'
+  "mozilla.com", // Main corp domain
+  "mozillafoundation.org", // Main org domain
+  "getpocket.com", // Pocket domain
+  "thunderbird.net", // MZLA domain
+  "readitlater.com",
+  "mozilla-japan.org",
+  "mozilla.ai",
+  "mozilla.vc",
 ];
 
 test("Expect onExecutePostLogin to be defined", async () => {
@@ -97,62 +97,71 @@ test("Expect onExecutePostLogin to be defined", async () => {
   expect(onExecutePostLogin).toBeDefined();
 });
 
-test.each(WHITELIST)('Whitelisted client %s, without enforcement', async (clientId) => {
-  // Set the connection as LDAP
-  _event.connection = {
-    id: "con_qVLhpUZQxluxX5kN",
-    metadata: {},
-    name: "Mozilla-LDAP-Dev",
-    strategy: "ad"
-  },
+test.each(WHITELIST)(
+  "Whitelisted client %s, without enforcement",
+  async (clientId) => {
+    // Set the connection as LDAP
+    (_event.connection = {
+      id: "con_qVLhpUZQxluxX5kN",
+      metadata: {},
+      name: "Mozilla-LDAP-Dev",
+      strategy: "ad",
+    }),
+      // Set clientId for each WHITELIST element
+      (_event.client.client_id = clientId);
 
-  // Set clientId for each WHITELIST element
-  _event.client.client_id = clientId;
+    // Execute onExecutePostLogin
+    await onExecutePostLogin(_event, api);
 
-  // Execute onExecutePostLogin
-  await onExecutePostLogin(_event, api);
+    // Expect redirect_uri to be undefined
+    expect(_event.transaction.redirect_uri).toBe(undefined);
 
-  // Expect redirect_uri to be undefined
-  expect(_event.transaction.redirect_uri).toBe(undefined);
+    // Collect console logs and expect searchString to exist in logs
+    const combinedLogs = combineLog(consoleLogSpy.mock.calls);
+    const searchString = `Whitelisted client ${clientId}, no login enforcement taking place`;
+    expect(combinedLogs.some((element) => element.includes(searchString))).toBe(
+      true
+    );
 
-  // Collect console logs and expect searchString to exist in logs
-  const combinedLogs = combineLog(consoleLogSpy.mock.calls);
-  const searchString = `Whitelisted client ${clientId}, no login enforcement taking place`;
-  expect(combinedLogs.some(element => element.includes(searchString))).toBe(true);
+    // Expect no Errors to be raised outside of onExecutePostLogin
+    await expect(onExecutePostLogin(_event, api)).resolves.not.toThrow();
+  }
+);
 
-  // Expect no Errors to be raised outside of onExecutePostLogin
-  await expect(onExecutePostLogin(_event, api)).resolves.not.toThrow();
-});
-
-test('email account not verified', async () => {
+test("email account not verified", async () => {
   _event.user.email_verified = false;
-  _event.connection = {
+  (_event.connection = {
     id: "con_qVLhpUZQxluxX5kN",
     metadata: {},
     name: "Mozilla-LDAP-Dev",
-    strategy: "ad"
-  },
-
-  // Execute onExecutePostLogin
-  await onExecutePostLogin(_event, api);
-
-  expect(_event.transaction.redirect_uri).toBeDefined();
-  expect(decodeRedirect(_event.transaction.redirect_uri)).toEqual("primarynotverified");
-});
-
-test.each(MOZILLA_STAFF_DOMAINS)('Staff account with domain %s, not using ldap', async (domain) => {
-
-  _event.user.email = `jdoe@${domain}`;
-
-  // Execute onExecutePostLogin
-  await onExecutePostLogin(_event, api);
+    strategy: "ad",
+  }),
+    // Execute onExecutePostLogin
+    await onExecutePostLogin(_event, api);
 
   expect(_event.transaction.redirect_uri).toBeDefined();
-  expect(decodeRedirect(_event.transaction.redirect_uri)).toEqual("staffmustuseldap");
+  expect(decodeRedirect(_event.transaction.redirect_uri)).toEqual(
+    "primarynotverified"
+  );
 });
 
-test('Non-staff account not using ldap', async () => {
-  _event.connection.strategy = 'not-ad';
+test.each(MOZILLA_STAFF_DOMAINS)(
+  "Staff account with domain %s, not using ldap",
+  async (domain) => {
+    _event.user.email = `jdoe@${domain}`;
+
+    // Execute onExecutePostLogin
+    await onExecutePostLogin(_event, api);
+
+    expect(_event.transaction.redirect_uri).toBeDefined();
+    expect(decodeRedirect(_event.transaction.redirect_uri)).toEqual(
+      "staffmustuseldap"
+    );
+  }
+);
+
+test("Non-staff account not using ldap", async () => {
+  _event.connection.strategy = "not-ad";
   _event.user.email = "jdoe@example.com";
   _event.user.email_verified = true;
 

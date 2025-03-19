@@ -1,21 +1,21 @@
-const _ = require('lodash');
-const fetch = require('node-fetch');
+const _ = require("lodash");
+const fetch = require("node-fetch");
 
-const eventObj = require('./modules/event.json');
-const { onExecutePostLogin } = require('../actions/activateNewUsersInCIS.js');
+const eventObj = require("./modules/event.json");
+const { onExecutePostLogin } = require("../actions/activateNewUsersInCIS.js");
 
 // Mock the node-fetch module
-jest.mock('node-fetch');
+jest.mock("node-fetch");
 
 // Take all log enteries and combine them into a single array
 const combineLog = (consoleLogs) => {
   let combinedLog = [];
   for (let i = 0; i < consoleLogs.length; i++) {
-    singleStr = consoleLogs[i].join(' ');
+    singleStr = consoleLogs[i].join(" ");
     combinedLog.push(singleStr);
   }
   return combinedLog;
-}
+};
 
 beforeEach(() => {
   // Clone the event object to be used before each test
@@ -30,7 +30,7 @@ beforeEach(() => {
     personapi_client_id: "fakefakefakefake",
     personapi_client_secret: "fakefakefakefake",
     personapi_url: "https://person.api.dev.sso.allizom.org",
-    personapi_audience: "api.dev.sso.allizom.org"
+    personapi_audience: "api.dev.sso.allizom.org",
   };
 
   // Make sure redirect_url is undefined before each test
@@ -50,17 +50,17 @@ beforeEach(() => {
   // Mock auth0 api object
   api = {
     idToken: {
-      setCustomClaim: jest.fn()
+      setCustomClaim: jest.fn(),
     },
     access: {
-      deny: jest.fn()
+      deny: jest.fn(),
     },
     redirect: {
-      sendUserTo: jest.fn()
+      sendUserTo: jest.fn(),
     },
     user: {
-      setAppMetadata: jest.fn()
-    }
+      setAppMetadata: jest.fn(),
+    },
   };
 
   // Mock setCustomClaim
@@ -69,9 +69,9 @@ beforeEach(() => {
   });
 
   // Mock sendUserTo
-	api.redirect.sendUserTo.mockImplementation((uri) => {
-		_event.transaction["redirect_uri"] = uri;
-	});
+  api.redirect.sendUserTo.mockImplementation((uri) => {
+    _event.transaction["redirect_uri"] = uri;
+  });
 
   // Mock setAppMetadata
   api.user.setAppMetadata.mockImplementation((key, value) => {
@@ -79,9 +79,9 @@ beforeEach(() => {
   });
 
   // Spy on console
-  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  consoleLogSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+  consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+  consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
   // Example api responses
   // personResp = { usernames: { values: { 'HACK#GITHUB': 'jdoegithub' }}};
@@ -91,30 +91,34 @@ beforeEach(() => {
   fetchRespCallback = (url) => {
     // https://person.api.dev.sso.allizom.org/v2/user/user_id/${encodeURI(USER_ID)}
     const encodedUserId = encodeURI(_event.user.user_id);
-    if (url.startsWith(`https://person.api.dev.sso.allizom.org/v2/user/user_id/${encodedUserId}`)) {
+    if (
+      url.startsWith(
+        `https://person.api.dev.sso.allizom.org/v2/user/user_id/${encodedUserId}`
+      )
+    ) {
       return Promise.resolve({
         json: jest.fn().mockResolvedValue(personResp),
         ok: personResponseStatusOk,
-        status: personResponseStatusCode
+        status: personResponseStatusCode,
       });
-    // https://auth.mozilla.auth0.com/oauth/token
-    } else if (url === 'https://auth.mozilla.auth0.com/oauth/token') {
+      // https://auth.mozilla.auth0.com/oauth/token
+    } else if (url === "https://auth.mozilla.auth0.com/oauth/token") {
       return Promise.resolve({
         json: jest.fn().mockResolvedValue(tokenResp),
         ok: tokenResponseStatusOk,
-        status: tokenResponseStatusCode
+        status: tokenResponseStatusCode,
       });
-    // https://change.api.dev.sso.allizom.org
-    } else if (url.startsWith('https://change.api.dev.sso.allizom.org')) {
+      // https://change.api.dev.sso.allizom.org
+    } else if (url.startsWith("https://change.api.dev.sso.allizom.org")) {
       return Promise.resolve({
         json: jest.fn().mockResolvedValue(changeResp),
         ok: changeResponseStatusOk,
-        status: changeResponseStatusCode
+        status: changeResponseStatusCode,
       });
-    // Default response for URLs that aren't matched
+      // Default response for URLs that aren't matched
     } else {
       return Promise.resolve({
-        json: jest.fn().mockResolvedValue({ error: 'Unknown URL' }),
+        json: jest.fn().mockResolvedValue({ error: "Unknown URL" }),
         ok: false,
         status: 404,
       });
@@ -131,15 +135,21 @@ afterEach(() => {
 });
 
 // Connections that are actually used in dev/prod Auth0 tenants
-const WHITELISTED_CONNECTIONS = ['email', 'firefoxaccounts', 'github', 'google-oauth2', 'Mozilla-LDAP', 'Mozilla-LDAP-Dev'];
+const WHITELISTED_CONNECTIONS = [
+  "email",
+  "firefoxaccounts",
+  "github",
+  "google-oauth2",
+  "Mozilla-LDAP",
+  "Mozilla-LDAP-Dev",
+];
 
 test("Expect onExecutePostLogin to be defined", async () => {
   // Expect onExecutePostLogin to be defined
   expect(onExecutePostLogin).toBeDefined();
 });
 
-
-test('When connection does not match, expect empty logs and workflow to continue', async () => {
+test("When connection does not match, expect empty logs and workflow to continue", async () => {
   // Mock Fetch
   fetch.mockImplementation(fetchRespCallback);
 
@@ -154,14 +164,17 @@ test('When connection does not match, expect empty logs and workflow to continue
 
   // Collect console logs and expect searchString to exist in logs
   const combinedLogs = combineLog(consoleLogSpy.mock.calls);
-  const searchString = "non_whitelisted_provider is not whitelisted. Skip activateNewUsersInCIS";
-  expect(combinedLogs.some(element => element.includes(searchString))).toBe(true);
+  const searchString =
+    "non_whitelisted_provider is not whitelisted. Skip activateNewUsersInCIS";
+  expect(combinedLogs.some((element) => element.includes(searchString))).toBe(
+    true
+  );
 
   // Expect no Errors to be raised outside of onExecutePostLogin
   await expect(onExecutePostLogin(_event, api)).resolves.not.toThrow();
 });
 
-test('When existsInCIS is already set, expect empty logs and workflow to continue', async () => {
+test("When existsInCIS is already set, expect empty logs and workflow to continue", async () => {
   // Mock Fetch
   fetch.mockImplementation(fetchRespCallback);
 
@@ -176,14 +189,14 @@ test('When existsInCIS is already set, expect empty logs and workflow to continu
 
   // Expect log entry
   expect(consoleLogSpy).toHaveBeenCalledWith(
-      `${_event.user.user_id} existsInCIS is True.  Skip activateNewUsersInCIS`
+    `${_event.user.user_id} existsInCIS is True.  Skip activateNewUsersInCIS`
   );
 
   // Expect no Errors to be raised outside of onExecutePostLogin
   await expect(onExecutePostLogin(_event, api)).resolves.not.toThrow();
 });
 
-test('When failing to load secrets, expect error logged and workflow to continue', async () => {
+test("When failing to load secrets, expect error logged and workflow to continue", async () => {
   // Mock Fetch
   fetch.mockImplementation(fetchRespCallback);
 
@@ -201,10 +214,9 @@ test('When failing to load secrets, expect error logged and workflow to continue
 
   // Expect no Errors to be raised outside of onExecutePostLogin
   await expect(onExecutePostLogin(_event, api)).resolves.not.toThrow();
-
 });
 
-test('When failing to get beartoken, expect error logged and workflow to continue', async () => {
+test("When failing to get beartoken, expect error logged and workflow to continue", async () => {
   // Mock Fetch
   fetch.mockImplementation(fetchRespCallback);
 
@@ -221,22 +233,25 @@ test('When failing to get beartoken, expect error logged and workflow to continu
 
   // Collect console logs and expect searchString to exist in logs
   const combinedLogs = combineLog(consoleErrorSpy.mock.calls);
-  const searchString = "Error: Unable to retrieve bearer token from Auth0: Error: HTTP error! status: 403";
-  expect(combinedLogs.some(element => element.includes(searchString))).toBe(true);
+  const searchString =
+    "Error: Unable to retrieve bearer token from Auth0: Error: HTTP error! status: 403";
+  expect(combinedLogs.some((element) => element.includes(searchString))).toBe(
+    true
+  );
 
   // Expect no Errors to be raised outside of onExecutePostLogin
   await expect(onExecutePostLogin(_event, api)).resolves.not.toThrow();
 });
 
-test('When failing to get profile, expect error logged and workflow to continue', async () => {
+test("When failing to get profile, expect error logged and workflow to continue", async () => {
   // Mock Fetch
   fetch.mockImplementation(fetchRespCallback);
 
   // Set token and person fetch responses
-  tokenResp = { access_token: "fakefakefakefake"};
+  tokenResp = { access_token: "fakefakefakefake" };
   personResponseStatusOk = false;
   personResponseStatusCode = 403;
-  personResp = { usernames: { values: { 'HACK#GITHUB': 'jdoegithub' }}};
+  personResp = { usernames: { values: { "HACK#GITHUB": "jdoegithub" } } };
 
   // Execute onExecutePostLogin
   await onExecutePostLogin(_event, api);
@@ -246,20 +261,22 @@ test('When failing to get profile, expect error logged and workflow to continue'
 
   // Collect console logs and expect searchString to exist in logs
   const combinedLogs = combineLog(consoleErrorSpy.mock.calls);
-  const searchString = "Error: Unable to retrieve profile from Person API: Error: HTTP error! status: 403";
-  expect(combinedLogs.some(element => element.includes(searchString))).toBe(true);
+  const searchString =
+    "Error: Unable to retrieve profile from Person API: Error: HTTP error! status: 403";
+  expect(combinedLogs.some((element) => element.includes(searchString))).toBe(
+    true
+  );
 
   // Expect no Errors to be raised outside of onExecutePostLogin
   await expect(onExecutePostLogin(_event, api)).resolves.not.toThrow();
 });
 
-
-test('When change API fails, expect error logged and workflow to continue', async () => {
+test("When change API fails, expect error logged and workflow to continue", async () => {
   // Mock Fetch
   fetch.mockImplementation(fetchRespCallback);
 
   // Set token, person and change responses
-  tokenResp = { access_token: "fakefakefakefake"};
+  tokenResp = { access_token: "fakefakefakefake" };
   personResp = {};
   changeResp = {};
   changeResponseStatusOk = false;
@@ -274,55 +291,60 @@ test('When change API fails, expect error logged and workflow to continue', asyn
   // Collect console logs and expect searchString to exist in logs
   const combinedLogs = combineLog(consoleErrorSpy.mock.calls);
   const searchString = `Error: Unable to create profile for ${_event.user.user_id} in ChangeAPI: Error: HTTP error! status: 403`;
-  expect(combinedLogs.some(element => element.includes(searchString))).toBe(true);
+  expect(combinedLogs.some((element) => element.includes(searchString))).toBe(
+    true
+  );
 
   // Expect no Errors to be raised outside of onExecutePostLogin
   await expect(onExecutePostLogin(_event, api)).resolves.not.toThrow();
 });
 
-test.each(WHITELISTED_CONNECTIONS)('When new user with %s connection is created, expect it logged and workflow to continue', async (connection) => {
-  // Mock Fetch
-  fetch.mockImplementation(fetchRespCallback);
+test.each(WHITELISTED_CONNECTIONS)(
+  "When new user with %s connection is created, expect it logged and workflow to continue",
+  async (connection) => {
+    // Mock Fetch
+    fetch.mockImplementation(fetchRespCallback);
 
-  // Set token, person and change responses
-  tokenResp = { access_token: "fakefakefakefake"};
-  personResp = {};
-  changeResp = {};
+    // Set token, person and change responses
+    tokenResp = { access_token: "fakefakefakefake" };
+    personResp = {};
+    changeResp = {};
 
-  // Set connection name for each iteration of this test
-  _event.connection.name = connection;
+    // Set connection name for each iteration of this test
+    _event.connection.name = connection;
 
-  // Execute onExecutePostLogin
-  await onExecutePostLogin(_event, api);
+    // Execute onExecutePostLogin
+    await onExecutePostLogin(_event, api);
 
-  // Collect logs and expect log entry array to match consoleLog array
-  consoleLog = [
-    'Running action: activateNewUsersInCIS',
-    'Retrieving bearer token to create new user in CIS',
-    'Successfully retrieved bearer token from Auth0',
-    `Fetching person profile of ${_event.user.user_id}`,
-    `Generating CIS profile for ${_event.user.user_id}`,
-    `Posting profile for ${_event.user.user_id} to ChangeAPI`,
-    `Successfully created profile for ${_event.user.user_id} in ChangeAPI as ${_event.user.user_id}`,
-    `Updated user metadata on ${_event.user.user_id} to set existsInCIS`
-  ];
-  const combinedLogs = combineLog(consoleLogSpy.mock.calls);
-  expect(combinedLogs).toEqual(consoleLog);
+    // Collect logs and expect log entry array to match consoleLog array
+    consoleLog = [
+      "Running action: activateNewUsersInCIS",
+      "Retrieving bearer token to create new user in CIS",
+      "Successfully retrieved bearer token from Auth0",
+      `Fetching person profile of ${_event.user.user_id}`,
+      `Generating CIS profile for ${_event.user.user_id}`,
+      `Posting profile for ${_event.user.user_id} to ChangeAPI`,
+      `Successfully created profile for ${_event.user.user_id} in ChangeAPI as ${_event.user.user_id}`,
+      `Updated user metadata on ${_event.user.user_id} to set existsInCIS`,
+    ];
+    const combinedLogs = combineLog(consoleLogSpy.mock.calls);
+    expect(combinedLogs).toEqual(consoleLog);
 
-  // Expect Fetch to have been called
-  expect(api.user.setAppMetadata).toHaveBeenCalled();
+    // Expect Fetch to have been called
+    expect(api.user.setAppMetadata).toHaveBeenCalled();
 
-  // Expect no Errors to be raised outside of onExecutePostLogin
-  await expect(onExecutePostLogin(_event, api)).resolves.not.toThrow();
-});
+    // Expect no Errors to be raised outside of onExecutePostLogin
+    await expect(onExecutePostLogin(_event, api)).resolves.not.toThrow();
+  }
+);
 
-test('When person API profile exists, expect set existsInCIS', async () => {
+test("When person API profile exists, expect set existsInCIS", async () => {
   // Mock Fetch
   fetch.mockImplementation(fetchRespCallback);
 
   // Set token and person fetch responses
-  tokenResp = { access_token: "fakefakefakefake"};
-  personResp = { usernames: { values: { 'HACK#GITHUB': 'jdoegithub' }}};
+  tokenResp = { access_token: "fakefakefakefake" };
+  personResp = { usernames: { values: { "HACK#GITHUB": "jdoegithub" } } };
 
   // Execute onExecutePostLogin
   await onExecutePostLogin(_event, api);
@@ -334,10 +356,13 @@ test('When person API profile exists, expect set existsInCIS', async () => {
   const combinedLogs = combineLog(consoleLogSpy.mock.calls);
   const existsMsg = `Profile for ${_event.user.user_id} already exists in PersonAPI as ${_event.user.user_id}`;
   const updateMsg = `Updated user metadata on ${_event.user.user_id} to set existsInCIS`;
-  expect(combinedLogs.some(element => element.includes(existsMsg))).toBe(true);
-  expect(combinedLogs.some(element => element.includes(updateMsg))).toBe(true);
+  expect(combinedLogs.some((element) => element.includes(existsMsg))).toBe(
+    true
+  );
+  expect(combinedLogs.some((element) => element.includes(updateMsg))).toBe(
+    true
+  );
 
   // Expect no Errors to be raised outside of onExecutePostLogin
   await expect(onExecutePostLogin(_event, api)).resolves.not.toThrow();
 });
-

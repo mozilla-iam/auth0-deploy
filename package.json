@@ -4,7 +4,9 @@
   "description": "Modules used by auth0 rules",
   "scripts": {
     "test": "jest --verbose",
-    "tests": "jest --verbose"
+    "tests": "jest --verbose",
+    "lint": "prettier tf/actions tf/tests --check",
+    "format": "prettier tf/actions tf/tests --write"
   },
   "repository": {
     "type": "git",

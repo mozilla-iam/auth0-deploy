@@ -57,6 +57,5 @@ apps:
     client_id: client00000000000000000000000008
 `;
     return appsYaml;
-  }
-}
-
+  },
+};

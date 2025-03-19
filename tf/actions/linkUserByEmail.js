@@ -23,7 +23,10 @@ exports.onExecutePostLogin = async (event, api) => {
     return;
   }
 
-  const mgmtAuth0Domain = event.tenant.id === "dev" ? "dev.mozilla-dev.auth0.com" : "auth.mozilla.auth0.com";
+  const mgmtAuth0Domain =
+    event.tenant.id === "dev"
+      ? "dev.mozilla-dev.auth0.com"
+      : "auth.mozilla.auth0.com";
 
   // Create an Auth0 Management API Client
   const ManagementClient = auth0Sdk.ManagementClient;
@@ -31,7 +34,7 @@ exports.onExecutePostLogin = async (event, api) => {
     domain: mgmtAuth0Domain,
     clientId: event.secrets.mgmtClientId,
     clientSecret: event.secrets.mgmtClientSecret,
-    scope: "update:users"
+    scope: "update:users",
   });
 
   // Since email addresses within auth0 are allowed to be mixed case and the /user-by-email search endpoint
@@ -39,15 +42,20 @@ exports.onExecutePostLogin = async (event, api) => {
   // which might be mixed case (or not).  Our second search is for the lowercase equivalent but only if two searches
   // would be different.
   const searchMultipleEmailCases = async () => {
-
     let userAccountsFound = [];
 
     // Push the
-    userAccountsFound.push(mgmtClient.usersByEmail.getByEmail({"email": event.user.email}));
+    userAccountsFound.push(
+      mgmtClient.usersByEmail.getByEmail({ email: event.user.email })
+    );
 
     // if this user is mixed case, we need to also search for the lower case equivalent
     if (event.user.email !== event.user.email.toLowerCase()) {
-      userAccountsFound.push(mgmtClient.usersByEmail.getByEmail({"email": event.user.email.toLowerCase()}));
+      userAccountsFound.push(
+        mgmtClient.usersByEmail.getByEmail({
+          email: event.user.email.toLowerCase(),
+        })
+      );
     }
 
     // await all json responses promises to resolve
@@ -55,18 +63,22 @@ exports.onExecutePostLogin = async (event, api) => {
 
     // flatten the array of arrays to get one array of profiles
     const mergedDataProfiles = allJSONResponses.reduce((acc, response) => {
-        return acc.concat(response.data);
+      return acc.concat(response.data);
     }, []);
 
     return mergedDataProfiles;
   };
 
   const linkAccount = async (otherProfile) => {
-
     // sanity check if both accounts have LDAP as primary
     // we should NOT link these accounts and simply allow the user to continue logging in.
-    if (event.user.user_id.startsWith('ad|Mozilla-LDAP') && otherProfile.user_id.startsWith('ad|Mozilla-LDAP')) {
-      console.error(`Error: both ${event.user.user_id} and ${otherProfile.user_id} are LDAP Primary accounts. Linking will not occur.`);
+    if (
+      event.user.user_id.startsWith("ad|Mozilla-LDAP") &&
+      otherProfile.user_id.startsWith("ad|Mozilla-LDAP")
+    ) {
+      console.error(
+        `Error: both ${event.user.user_id} and ${otherProfile.user_id} are LDAP Primary accounts. Linking will not occur.`
+      );
       return; // Continue with user login without account linking
     }
 
@@ -76,7 +88,7 @@ exports.onExecutePostLogin = async (event, api) => {
     let primaryUser;
     let secondaryUser;
 
-    if (event.user.user_id.startsWith('ad|Mozilla-LDAP')) {
+    if (event.user.user_id.startsWith("ad|Mozilla-LDAP")) {
       primaryUser = event.user;
       secondaryUser = otherProfile;
     } else {
@@ -97,22 +109,20 @@ exports.onExecutePostLogin = async (event, api) => {
 
     // Link the accounts
     try {
-
       await mgmtClient.users.link(
         { id: String(primaryUser.user_id) },
         {
           provider: secondaryUser.identities[0].provider,
-          user_id: secondaryUser.identities[0].user_id
+          user_id: secondaryUser.identities[0].user_id,
         }
       );
 
       // Auth0 Action api object provides a method for updating the current
       // authenticated user to the new user_id after account linking has taken place
       api.authentication.setPrimaryUser(primaryUser.user_id);
-
     } catch (err) {
-      console.log('An unknown error occurred while linking accounts: ' + err);
-      throw (err);
+      console.log("An unknown error occurred while linking accounts: " + err);
+      throw err;
     }
 
     return;
@@ -139,8 +149,9 @@ exports.onExecutePostLogin = async (event, api) => {
       // into the other existing identity.  Here we pass the other account to the
       // linking function
 
-      await linkAccount(userAccountList.filter((u) => u.user_id !== event.user.user_id)[0]);
-
+      await linkAccount(
+        userAccountList.filter((u) => u.user_id !== event.user.user_id)[0]
+      );
     } else {
       // data.length is > 2 which, post November 2020 when all identities were
       // force linked manually, shouldn't be possible
@@ -152,9 +163,9 @@ exports.onExecutePostLogin = async (event, api) => {
       throw new Error(error_message);
     }
   } catch (err) {
-    console.log('An error occurred while linking accounts: ' + err);
-    return api.access.deny(err);;
+    console.log("An error occurred while linking accounts: " + err);
+    return api.access.deny(err);
   }
 
   return;
-}
+};

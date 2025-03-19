@@ -23,20 +23,30 @@ $ terraform apply terraform-dev.plan
 
 To deploy to the Auth0 prod tenant, use the same procedure except with prod env credentials and the workspace set to `prod`
 
-## Style
+## Development
 
-Please follow the [Google JavaScript Style Guide](https://google.github.io/styleguide/jsguide.html)
+Install the dependencies:
 
-## Testing
+```
+npm install
+```
 
-Test are run by GitHub actions on every Pull Request.
-To run the tests locally, first setup your testing environment.
+Run the tests (ran on every pull request):
 
-This is a one time step
+```
+npm run tests
+```
 
-* `npm install`
+Format your code (ran on every pull request):
 
-Next run the tests
+```
+npm run format
+# Or, if you're checking
+npm run lint
+```
 
-* `npm run tests` 
+When running `git blame`, you may want to ignore some commits:
 
+```
+git config blame.ignoreRevsFile dev/git-blame-ignore-revisions
+```

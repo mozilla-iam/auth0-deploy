@@ -1,11 +1,7 @@
 {
   "acr": "http://schemas.openid.net/pape/policies/2007/06/multi-factor",
-  "amr": [
-    "mfa"
-  ],
-  "aud": [
-    "2KNOUCxN8AFnGGjDCGtqiDIzq8MKXi2h"
-  ],
+  "amr": ["mfa"],
+  "aud": ["2KNOUCxN8AFnGGjDCGtqiDIzq8MKXi2h"],
   "email": "jdoe@mozilla.com",
   "email_verified": true,
   "exp": 1725257331,
