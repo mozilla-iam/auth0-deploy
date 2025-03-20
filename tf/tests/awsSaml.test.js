@@ -94,6 +94,7 @@ const clientGroupMaps = [
       "mozilliansorg_aws_billing_access",
       "mozilliansorg_cia-aws",
       "mozilliansorg_consolidated-billing-aws",
+      "mozilliansorg_fakespot_mturk_developer",
       "mozilliansorg_http-observatory-rds",
       "mozilliansorg_iam-in-transition",
       "mozilliansorg_iam-in-transition-admin",
