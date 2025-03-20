@@ -26,6 +26,7 @@ exports.onExecutePostLogin = async (event, api) => {
         "mozilliansorg_consolidated-billing-aws",
         "mozilliansorg_consolidated-billing-aws-readonly",
         "mozilliansorg_discourse-devs",
+        "mozilliansorg_fakespot_mturk_developer",
         "mozilliansorg_http-observatory-rds",
         "mozilliansorg_iam-admins",
         "mozilliansorg_iam-in-transition",
