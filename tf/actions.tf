@@ -232,7 +232,7 @@ resource "auth0_action" "awsSaml" {
 
   dependencies {
     name    = "aws-sdk"
-    version = "2.1416.0"
+    version = "2.1646.0"
   }
 
   secrets {
@@ -301,7 +301,7 @@ resource "auth0_action" "linkUserByEmail" {
 
   dependencies {
     name    = "auth0"
-    version = "4.6.0"
+    version = "4.9.0"
   }
 
   secrets {
