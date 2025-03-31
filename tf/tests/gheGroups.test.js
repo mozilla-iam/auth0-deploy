@@ -1,11 +1,7 @@
 const _ = require("lodash");
-const fetch = require("node-fetch");
 
 const eventObj = require("./modules/event.json");
 const { onExecutePostLogin } = require("../actions/gheGroups.js");
-
-// Mock the node-fetch module
-jest.mock("node-fetch");
 
 // Take all log enteries and combine them into a single array
 const combineLog = (consoleLogs) => {
@@ -128,6 +124,7 @@ beforeEach(() => {
       });
     }
   };
+  fetchSpy = jest.spyOn(global, "fetch").mockImplementation(fetchRespCallback);
 });
 
 afterEach(() => {
@@ -136,6 +133,7 @@ afterEach(() => {
   consoleLogSpy.mockRestore();
   consoleWarnSpy.mockRestore();
   consoleErrorSpy.mockRestore();
+  fetchSpy.mockRestore();
 });
 
 const applicationGroupMapping = {
@@ -222,9 +220,6 @@ test("Client ID is not a member of applicationGroupMapping", async () => {
 });
 
 test("Failed to get bearer token; expect error", async () => {
-  // Mock Fetch
-  fetch.mockImplementation(fetchRespCallback);
-
   // Set token fetch responses
   tokenResp = {};
   tokenResponseStatusOk = false;
@@ -253,9 +248,6 @@ test("Failed to get bearer token; expect error", async () => {
 });
 
 test("Failed to get person api profile; expect error", async () => {
-  // Mock Fetch
-  fetch.mockImplementation(fetchRespCallback);
-
   // Set token and person fetch responses
   tokenResp = { access_token: "faketoken" };
   personResp = undefined;
@@ -281,9 +273,6 @@ test("Failed to get person api profile; expect error", async () => {
 });
 
 test("User not in proper group; expect redirect", async () => {
-  // Mock Fetch
-  fetch.mockImplementation(fetchRespCallback);
-
   // Set token and person fetch responses
   personResp = { usernames: { values: { "HACK#GITHUB": "jdoegithub" } } };
   tokenResp = { access_token: "faketoken" };
@@ -301,9 +290,6 @@ test("User not in proper group; expect redirect", async () => {
 });
 
 test("Users github username is undefined; expect redirect", async () => {
-  // Mock Fetch
-  fetch.mockImplementation(fetchRespCallback);
-
   // Set token and person fetch responses
   personResp = { usernames: { values: { "HACK#GITHUB": undefined } } };
   tokenResp = { access_token: "faketoken" };
@@ -330,9 +316,6 @@ test("Users github username is undefined; expect redirect", async () => {
 });
 
 test("Users github username is empty string; expect redirect", async () => {
-  // Mock Fetch
-  fetch.mockImplementation(fetchRespCallback);
-
   // Set token and person fetch responses
   personResp = { usernames: { values: { "HACK#GITHUB": "" } } };
   tokenResp = { access_token: "faketoken" };
@@ -359,9 +342,6 @@ test("Users github username is empty string; expect redirect", async () => {
 });
 
 test("Failed to find users github username; expect redirect", async () => {
-  // Mock Fetch
-  fetch.mockImplementation(fetchRespCallback);
-
   // Set token and person fetch responses
   personResp = {};
   tokenResp = { access_token: "faketoken" };
@@ -390,9 +370,6 @@ test("Failed to find users github username; expect redirect", async () => {
 test.each(applicationGroupEntries)(
   "Given client is %s, group is %s and users github username lookup succeeds; expect no redirection",
   async (clientID, group) => {
-    // Mock Fetch
-    fetch.mockImplementation(fetchRespCallback);
-
     // Set token and person fetch responses
     personResp = { usernames: { values: { "HACK#GITHUB": "jdoegithub" } } };
     tokenResp = { access_token: "faketoken" };

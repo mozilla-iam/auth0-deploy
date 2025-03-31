@@ -1,5 +1,4 @@
 // Required Libraries
-const fetch = require("node-fetch");
 const YAML = require("js-yaml");
 const jwt = require("jsonwebtoken");
 const AWS = require("aws-sdk");

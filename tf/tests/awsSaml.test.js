@@ -3,8 +3,6 @@ const _ = require("lodash");
 const eventObj = require("./modules/event.json");
 const { onExecutePostLogin } = require("../actions/awsSaml.js");
 
-jest.mock("node-fetch");
-
 const compileGroups = async (_event) => {
   // Ensure we have the correct group data
   const app_metadata_groups = _event.user.app_metadata.groups || [];

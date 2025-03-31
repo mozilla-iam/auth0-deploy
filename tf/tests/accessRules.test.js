@@ -1,13 +1,10 @@
 const _ = require("lodash");
-const fetch = require("node-fetch");
 
 const appsYaml = require("./modules/apps.yml.js").load();
 const eventObj = require("./modules/event.json");
 const decodeRedirect = require("./modules/decodePostErrorUrl.js");
 const idTokenObj = require("./modules/idToken.json");
 const { onExecutePostLogin } = require("../actions/accessRules.js");
-
-jest.mock("node-fetch");
 
 beforeEach(() => {
   _event = _.cloneDeep(eventObj);
@@ -19,10 +16,6 @@ beforeEach(() => {
   _event.transaction.redirect_uri = undefined;
 
   _idToken = _.cloneDeep(idTokenObj);
-
-  fetch.mockResolvedValue({
-    text: jest.fn().mockResolvedValue(appsYaml),
-  });
 
   // Mock auth0 api object
   api = {
@@ -62,6 +55,9 @@ beforeEach(() => {
   consoleLogSpy = jest.spyOn(console, "log").mockImplementation(() => {});
   consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
   consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+  fetchSpy = jest.spyOn(global, "fetch").mockResolvedValue({
+    text: jest.fn().mockResolvedValue(appsYaml),
+  });
 });
 
 afterEach(() => {
@@ -70,6 +66,7 @@ afterEach(() => {
   consoleLogSpy.mockRestore();
   consoleWarnSpy.mockRestore();
   consoleErrorSpy.mockRestore();
+  fetchSpy.mockRestore();
 });
 
 // TODO: test whitelisted duo users
