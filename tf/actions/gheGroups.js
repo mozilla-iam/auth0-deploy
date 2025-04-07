@@ -1,6 +1,3 @@
-// Required Libraries
-const fetch = require("node-fetch");
-
 exports.onExecutePostLogin = async (event, api) => {
   console.log("Running action:", "gheGroups");
 

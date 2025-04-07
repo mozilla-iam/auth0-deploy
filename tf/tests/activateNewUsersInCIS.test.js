@@ -1,11 +1,6 @@
 const _ = require("lodash");
-const fetch = require("node-fetch");
-
 const eventObj = require("./modules/event.json");
 const { onExecutePostLogin } = require("../actions/activateNewUsersInCIS.js");
-
-// Mock the node-fetch module
-jest.mock("node-fetch");
 
 // Take all log enteries and combine them into a single array
 const combineLog = (consoleLogs) => {
@@ -124,11 +119,13 @@ beforeEach(() => {
       });
     }
   };
+  fetchSpy = jest.spyOn(global, "fetch").mockImplementation(fetchRespCallback);
 });
 
 afterEach(() => {
   // Clean up after each test
   jest.clearAllMocks();
+  fetchSpy.mockRestore();
   consoleLogSpy.mockRestore();
   consoleWarnSpy.mockRestore();
   consoleErrorSpy.mockRestore();
@@ -150,9 +147,6 @@ test("Expect onExecutePostLogin to be defined", async () => {
 });
 
 test("When connection does not match, expect empty logs and workflow to continue", async () => {
-  // Mock Fetch
-  fetch.mockImplementation(fetchRespCallback);
-
   // Set connection name to a connection other than WHITELISTED_CONNECTIONS
   _event.connection.name = "non_whitelisted_provider";
 
@@ -175,9 +169,6 @@ test("When connection does not match, expect empty logs and workflow to continue
 });
 
 test("When existsInCIS is already set, expect empty logs and workflow to continue", async () => {
-  // Mock Fetch
-  fetch.mockImplementation(fetchRespCallback);
-
   // Set existsInCIS in user metadata
   _event.user.app_metadata = { existsInCIS: true };
 
@@ -244,9 +235,6 @@ test("When failing to get beartoken, expect error logged and workflow to continu
 });
 
 test("When failing to get profile, expect error logged and workflow to continue", async () => {
-  // Mock Fetch
-  fetch.mockImplementation(fetchRespCallback);
-
   // Set token and person fetch responses
   tokenResp = { access_token: "fakefakefakefake" };
   personResponseStatusOk = false;
@@ -272,9 +260,6 @@ test("When failing to get profile, expect error logged and workflow to continue"
 });
 
 test("When change API fails, expect error logged and workflow to continue", async () => {
-  // Mock Fetch
-  fetch.mockImplementation(fetchRespCallback);
-
   // Set token, person and change responses
   tokenResp = { access_token: "fakefakefakefake" };
   personResp = {};
@@ -302,9 +287,6 @@ test("When change API fails, expect error logged and workflow to continue", asyn
 test.each(WHITELISTED_CONNECTIONS)(
   "When new user with %s connection is created, expect it logged and workflow to continue",
   async (connection) => {
-    // Mock Fetch
-    fetch.mockImplementation(fetchRespCallback);
-
     // Set token, person and change responses
     tokenResp = { access_token: "fakefakefakefake" };
     personResp = {};
@@ -339,9 +321,6 @@ test.each(WHITELISTED_CONNECTIONS)(
 );
 
 test("When person API profile exists, expect set existsInCIS", async () => {
-  // Mock Fetch
-  fetch.mockImplementation(fetchRespCallback);
-
   // Set token and person fetch responses
   tokenResp = { access_token: "fakefakefakefake" };
   personResp = { usernames: { values: { "HACK#GITHUB": "jdoegithub" } } };

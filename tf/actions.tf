@@ -99,11 +99,6 @@ resource "auth0_action" "gheGroups" {
     version = "v3"
   }
 
-  dependencies {
-    name    = "node-fetch"
-    version = "2.7.0"
-  }
-
   secrets {
     name  = "personapi_audience"
     value = local.parsed_secrets["gheGroups_personapi_audience"]
@@ -171,11 +166,6 @@ resource "auth0_action" "accessRules" {
   supported_triggers {
     id      = "post-login"
     version = "v3"
-  }
-
-  dependencies {
-    name    = "node-fetch"
-    version = "2.7.0"
   }
 
   dependencies {
@@ -324,11 +314,6 @@ resource "auth0_action" "activateNewUsersInCIS" {
   supported_triggers {
     id      = "post-login"
     version = "v3"
-  }
-
-  dependencies {
-    name    = "node-fetch"
-    version = "2.7.0"
   }
 
   dependencies {
