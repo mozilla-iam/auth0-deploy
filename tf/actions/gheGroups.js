@@ -114,7 +114,7 @@ exports.onExecutePostLogin = async (event, api) => {
       headers: {
         "Content-Type": "application/json",
       },
-      timeout: AUTH0_TIMEOUT,
+      signal: AbortSignal.timeout(AUTH0_TIMEOUT),
       body: JSON.stringify({
         audience: event.secrets.personapi_audience,
         client_id: event.secrets.personapi_read_profile_api_client_id,
@@ -151,7 +151,7 @@ exports.onExecutePostLogin = async (event, api) => {
         headers: {
           Authorization: `Bearer ${bearerToken}`,
         },
-        timeout: PERSONAPI_TIMEOUT,
+        signal: AbortSignal.timeout(PERSONAPI_TIMEOUT),
       };
 
       const url = `${event.secrets.personapi_url}/v2/user/user_id/${encodeURI(
