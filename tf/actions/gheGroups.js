@@ -1,6 +1,30 @@
 exports.onExecutePostLogin = async (event, api) => {
   console.log("Running action:", "gheGroups");
 
+  // There's a way for us to store these configs in a "friendlier" way, but the
+  // method we use may change.
+  //
+  // For now it's easier to hard-code these values until we resolve IAM-1499,
+  // "Change the way apps.yaml is accessed".
+  //
+  // TODO(bhee) If in a ~1yr (2026-04-07) we haven't made progress on IAM-1499
+  // or there's too much toil, we should consider stashing a yml file somewhere
+  // and `fetch`ing it here.
+  const GHE_ADMINS_GROUP = "mozilliansorg_ghe_admins";
+
+  // See comment for `GHE_ADMINS_GROUP`.
+  //
+  // I chatted with cknowles, and the security managers group will need access
+  // to all orgs as well, though under a different team/role in each GitHub
+  // org.
+  //
+  // If this group ever needs _less_ access, see the original PR ([0], [1]) for
+  // this commit which shows a possible approach.
+  //
+  // [0]: https://github.com/mozilla-iam/auth0-deploy/pull/502
+  // [1]: https://github.com/mozilla-iam/auth0-deploy/commit/52fdd114301a3e22603b8a869f936f24180521e1
+  const GHE_SECURITY_MANAGERS_GROUP = "mozilliansorg_ghe_security-managers";
+
   // Object of applications with a 1:1 mapping of clientID and related group
   const applicationGroupMapping = {
     // Dev applications
@@ -169,52 +193,64 @@ exports.onExecutePostLogin = async (event, api) => {
     }
   };
 
-  const processProfile = (profile) => {
-    // Create a new URL object
+  const bail = (errorCode) => {
     const gheWikiUrl = new URL("https://wiki.mozilla.org/GitHub/SAML_issues");
-
-    // Set the tenant searchParam
     gheWikiUrl.searchParams.set("auth", event.tenant.id);
+    gheWikiUrl.searchParams.set("dbg", errorCode);
+    api.redirect.sendUserTo(gheWikiUrl.href);
+    return api.access.deny(`Access denied: See ${gheWikiUrl.href}`);
+  };
 
-    let errorCode;
-
-    // Confirm the user has the group defined from mozillians matching the application id
+  // Confirm the user has a githubUsername stored in mozillians and they have
+  // the correct access groups.
+  const processProfile = (profile) => {
+    // Get githubUsername from person api, otherwise we'll redirect
+    let githubUsername;
+    try {
+      githubUsername = profile.usernames.values["HACK#GITHUB"];
+    } catch (err) {
+      console.log("Unable to do the githubUsername lookup: " + err);
+      return bail("ghul");
+    }
+    // If profile does not hold key/value for githubUsername
+    if (githubUsername === undefined) {
+      console.log("githubUsername is undefined");
+      return bail("ghnd");
+    } else if (githubUsername.length === 0) {
+      // If somehow dinopark allows a user to store an empty value
+      console.log("empty HACK#GITHUB");
+      return bail("ghnd");
+    }
+    // Confirm the user has the group defined from mozillians matching the
+    // application's client id.
     if (
-      !event.user.app_metadata.groups?.includes(
+      event.user.app_metadata.groups?.includes(
         applicationGroupMapping[event.client.client_id]
       )
     ) {
-      errorCode = "ghgr";
-    } else {
-      // Get githubUsername from person api, otherwise we'll redirect
-      let githubUsername;
-
-      try {
-        githubUsername = profile.usernames.values["HACK#GITHUB"];
-        // If profile does not hold key/value for githubUsername
-        if (githubUsername === undefined) {
-          console.log("githubUsername is undefined");
-          errorCode = "ghnd";
-        } else if (githubUsername.length === 0) {
-          // If somehow dinopark allows a user to store an empty value
-          console.log("empty HACK#GITHUB");
-          errorCode = "ghnd";
-        }
-      } catch (err) {
-        console.log("Unable to do the githubUsername lookup: " + err);
-        errorCode = "ghul";
-      }
+      console.log(
+        `Granting access for ${githubUsername} (member of the mozillians GHE group)`
+      );
+      return;
     }
-
-    // confirm the user has a githubUsername stored in mozillians, otherwise redirect
-    if (errorCode) {
-      // Set the search parameter error code
-      gheWikiUrl.searchParams.set("dbg", errorCode);
-      // Redirect the user
-      api.redirect.sendUserTo(gheWikiUrl.href);
-      return api.access.deny(`Access denied: See ${gheWikiUrl.href}`);
+    // Or, the member is a part of the security managers group.
+    if (event.user.app_metadata.groups?.includes(GHE_SECURITY_MANAGERS_GROUP)) {
+      console.log(
+        `Granting access for ${githubUsername} (member of the security managers group)`
+      );
+      return;
     }
-    return;
+    // Or, the member is a part of the admins group.
+    if (event.user.app_metadata.groups?.includes(GHE_ADMINS_GROUP)) {
+      console.log(
+        `Granting access for ${githubUsername} (member of the admins group)`
+      );
+      return;
+    }
+    console.log(
+      `Denying access to GHE, not a member; not in security; and not an admin`
+    );
+    return bail("ghgr");
   };
 
   // Main

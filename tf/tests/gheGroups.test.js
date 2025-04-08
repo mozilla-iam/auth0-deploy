@@ -388,3 +388,23 @@ test.each(applicationGroupEntries)(
     expect(api.access.deny).not.toHaveBeenCalled();
   }
 );
+
+test("Member should be allowed if a part of mozilliansorg_ghe_admins", async () => {
+  personResp = { usernames: { values: { "HACK#GITHUB": "jdoegithub" } } };
+  tokenResp = { access_token: "faketoken" };
+  _event.client.client_id = "9MR2UMAftbs6758Rmbs8yZ9Dj5AjeT0P";
+  _event.user.app_metadata.groups = ["mozilliansorg_ghe_admins"];
+  await onExecutePostLogin(_event, api);
+  expect(_event.transaction.redirect_uri).toBe(undefined);
+  expect(api.access.deny).not.toHaveBeenCalled();
+});
+
+test("Member should be allowed if a part of mozilliansorg_ghe_security-managers", async () => {
+  personResp = { usernames: { values: { "HACK#GITHUB": "jdoegithub" } } };
+  tokenResp = { access_token: "faketoken" };
+  _event.client.client_id = "9MR2UMAftbs6758Rmbs8yZ9Dj5AjeT0P";
+  _event.user.app_metadata.groups = ["mozilliansorg_ghe_security-managers"];
+  await onExecutePostLogin(_event, api);
+  expect(_event.transaction.redirect_uri).toBe(undefined);
+  expect(api.access.deny).not.toHaveBeenCalled();
+});
