@@ -197,7 +197,6 @@ exports.onExecutePostLogin = async (event, api) => {
     const gheWikiUrl = new URL("https://wiki.mozilla.org/GitHub/SAML_issues");
     gheWikiUrl.searchParams.set("auth", event.tenant.id);
     gheWikiUrl.searchParams.set("dbg", errorCode);
-    api.redirect.sendUserTo(gheWikiUrl.href);
     return api.access.deny(`Access denied: See ${gheWikiUrl.href}`);
   };
 
