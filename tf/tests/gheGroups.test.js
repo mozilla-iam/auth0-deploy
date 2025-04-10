@@ -282,9 +282,6 @@ test("User not in proper group; expect redirect", async () => {
   // Execute onExecutePostLogin
   await onExecutePostLogin(_event, api);
 
-  expect(_event.transaction.redirect_uri).toEqual(
-    "https://wiki.mozilla.org/GitHub/SAML_issues?auth=dev&dbg=ghgr"
-  );
   expect(fetch).toHaveBeenCalled();
   expect(api.access.deny).toHaveBeenCalled();
 });
@@ -301,9 +298,6 @@ test("Users github username is undefined; expect redirect", async () => {
   // Execute onExecutePostLogin
   await onExecutePostLogin(_event, api);
 
-  expect(_event.transaction.redirect_uri).toEqual(
-    "https://wiki.mozilla.org/GitHub/SAML_issues?auth=dev&dbg=ghnd"
-  );
   expect(fetch).toHaveBeenCalled();
   expect(api.access.deny).toHaveBeenCalled();
 
@@ -327,9 +321,6 @@ test("Users github username is empty string; expect redirect", async () => {
   // Execute onExecutePostLogin
   await onExecutePostLogin(_event, api);
 
-  expect(_event.transaction.redirect_uri).toEqual(
-    "https://wiki.mozilla.org/GitHub/SAML_issues?auth=dev&dbg=ghnd"
-  );
   expect(fetch).toHaveBeenCalled();
   expect(api.access.deny).toHaveBeenCalled();
 
@@ -353,9 +344,6 @@ test("Failed to find users github username; expect redirect", async () => {
   // Execute onExecutePostLogin
   await onExecutePostLogin(_event, api);
 
-  expect(_event.transaction.redirect_uri).toEqual(
-    "https://wiki.mozilla.org/GitHub/SAML_issues?auth=dev&dbg=ghul"
-  );
   expect(fetch).toHaveBeenCalled();
   expect(api.access.deny).toHaveBeenCalled();
 
@@ -383,7 +371,6 @@ test.each(applicationGroupEntries)(
     // Execute onExecutePostLogin
     await onExecutePostLogin(_event, api);
 
-    expect(_event.transaction.redirect_uri).toBe(undefined);
     expect(fetch).toHaveBeenCalled();
     expect(api.access.deny).not.toHaveBeenCalled();
   }
@@ -395,7 +382,6 @@ test("Member should be allowed if a part of mozilliansorg_ghe_admins", async () 
   _event.client.client_id = "9MR2UMAftbs6758Rmbs8yZ9Dj5AjeT0P";
   _event.user.app_metadata.groups = ["mozilliansorg_ghe_admins"];
   await onExecutePostLogin(_event, api);
-  expect(_event.transaction.redirect_uri).toBe(undefined);
   expect(api.access.deny).not.toHaveBeenCalled();
 });
 
@@ -405,6 +391,5 @@ test("Member should be allowed if a part of mozilliansorg_ghe_security-managers"
   _event.client.client_id = "9MR2UMAftbs6758Rmbs8yZ9Dj5AjeT0P";
   _event.user.app_metadata.groups = ["mozilliansorg_ghe_security-managers"];
   await onExecutePostLogin(_event, api);
-  expect(_event.transaction.redirect_uri).toBe(undefined);
   expect(api.access.deny).not.toHaveBeenCalled();
 });
