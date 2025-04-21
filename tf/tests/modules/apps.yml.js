@@ -55,6 +55,13 @@ apps:
     - everyone
     authorized_users: []
     client_id: client00000000000000000000000008
+- application:
+    # Tile-only
+    authorized_groups:
+    - everyone
+    - team_moco
+    - team_mofo
+    authorized_users: []
 `;
     return appsYaml;
   },

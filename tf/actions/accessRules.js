@@ -181,11 +181,25 @@ exports.onExecutePostLogin = async (event, api) => {
 
     // This is used for authorized user/groups
     let authorized = false;
+
     // Defaut app requested aal to MEDIUM for all apps which do not have this set in access file
     let required_aal = "MEDIUM";
 
-    for (let i = 0; i < access_rules.length; i++) {
-      let app = access_rules[i].application;
+    const apps = access_rules.filter(
+      (a) =>
+        (a.application.client_id ?? "").indexOf(event.client.client_id) >= 0
+    );
+
+    // Default deny for apps we don't define in
+    // https://github.com/mozilla-iam/sso-dashboard-configuration/blob/master/apps.yml
+    if (apps.length == 0) {
+        console.log(`No access rules defined for ${event.client.client_id}`);
+        return "notingroup";
+    }
+
+    // Check users and groups.
+    for (let i = 0; i < apps.length; i++) {
+      let app = apps[i].application;
 
       //Handy for quick testing in dev (overrides access rules)
       //var app = {'client_id': 'pCGEHXW0VQNrQKURDcGi0tghh7NwWGhW', // This is testrp social-ldap-pwless
