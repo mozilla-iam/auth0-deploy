@@ -190,14 +190,17 @@ exports.onExecutePostLogin = async (event, api) => {
     );
   };
 
+  const deny = (reason) => {
+    return {
+      granted: false,
+      denied: {
+        reason,
+      },
+    };
+  };
+
   // Process the access cache decision
-  const access_decision = (access_rules, access_file_conf) => {
-    const groups = groupsGather();
-
-    //// === Actions don't allow modifying the event.user
-    //// Update user.groups with new merged values
-    //user.groups = groups;
-
+  const access_decision = (groups, access_rules, access_file_conf) => {
     // This is used for authorized user/groups
     let authorized = false;
 
@@ -214,7 +217,7 @@ exports.onExecutePostLogin = async (event, api) => {
     // https://github.com/mozilla-iam/sso-dashboard-configuration/blob/master/apps.yml
     if (apps.length == 0) {
       console.log(`No access rules defined for ${event.client.client_id}`);
-      return "notingroup";
+      return deny("notingroup");
     }
 
     // Check users and groups.
@@ -254,7 +257,7 @@ exports.onExecutePostLogin = async (event, api) => {
             `Access denied to ${event.client.client_id} for user ${event.user.email} (${event.user.user_id})` +
             ` - this app denies ALL users and ALL groups")`;
           console.log(msg);
-          return "notingroup";
+          return deny("notingroup");
         }
 
         // Check if the user is authorized to access
@@ -279,7 +282,7 @@ exports.onExecutePostLogin = async (event, api) => {
             `Access denied to ${event.client.client_id} for user ${event.user.email} (${event.user.user_id})` +
             ` - not in authorized group or not an authorized user`;
           console.log(msg);
-          return "notingroup";
+          return deny("notingroup");
         }
       } // correct client id / we matched the current RP
     } // for loop / next rule in apps.yml
@@ -293,6 +296,7 @@ exports.onExecutePostLogin = async (event, api) => {
     // Ensure all users have some AAI and AAL attributes, even if its empty
     let aai = [];
     let aal = "UNKNOWN";
+    let enableDuo = false;
 
     // Allow certain LDAP service accounts to fake their MFA. For all other LDAPi accounts, enforce MFA
     if (event.connection.strategy === "ad") {
@@ -302,10 +306,7 @@ exports.onExecutePostLogin = async (event, api) => {
         );
         aai.push("2FA");
       } else {
-        api.multifactor.enable("duo", {
-          providerOptions: duoConfig,
-          allowRememberBrowser: true,
-        });
+        enableDuo = true;
         console.log(
           `duosecurity: ${event.user.email} is in LDAP and requires 2FA check`
         );
@@ -416,21 +417,21 @@ exports.onExecutePostLogin = async (event, api) => {
       }
     }
 
-    // Set AAI & AAL claims in idToken
-    api.idToken.setCustomClaim(`${namespace}/AAI`, aai);
-    api.idToken.setCustomClaim(`${namespace}/AAL`, aal);
-    groupsSetCustomClaims(groups);
-
     if (!aai_pass) {
       const msg =
         `Access denied to ${event.client.client_id} for user ${event.user.email} (${event.user.user_id}) - due to` +
         ` Identity Assurance Level being too low for this RP. Required AAL: ${required_aal} (${aai_pass})`;
       console.log(msg);
-      return "aai_failed";
+      return deny("aai_failed");
     }
 
     // We matched no rule, access is granted
-    return true;
+    return {
+      granted: true,
+      enableDuo,
+      aai,
+      aal,
+    };
   };
 
   const access_file_conf = {
@@ -459,15 +460,25 @@ exports.onExecutePostLogin = async (event, api) => {
   try {
     const cdnUrl = "https://cdn.sso.mozilla.com/apps.yml";
     const appsYaml = await getAppsYaml(cdnUrl);
-    const decision = access_decision(appsYaml, access_file_conf);
+    const groups = groupsGather();
+    const decision = access_decision(groups, appsYaml, access_file_conf);
 
-    if (decision === true) {
-      return; // Allow login to continue
-    } else {
-      // Go back to the shadow.  You shall not pass!
-      postError(decision);
+    if (decision.granted) {
+      if (decision.enableDuo) {
+        api.multifactor.enable("duo", {
+          providerOptions: duoConfig,
+          allowRememberBrowser: true,
+        });
+      }
+      // Set groups, AAI, and AAL claims in idToken
+      api.idToken.setCustomClaim(`${namespace}/AAI`, decision.aai);
+      api.idToken.setCustomClaim(`${namespace}/AAL`, decision.aal);
+      groupsSetCustomClaims(groups);
       return;
     }
+
+    // Go back to the shadow.  You shall not pass!
+    return postError(decision.denied.reason);
   } catch (err) {
     // All error should be caught here and we return the callback handler with the error
     console.log("AccessRules:", err);
