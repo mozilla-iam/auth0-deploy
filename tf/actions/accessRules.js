@@ -114,6 +114,18 @@ exports.onExecutePostLogin = async (event, api) => {
     return A.some((element) => B.includes(element));
   };
 
+  // Return a single identity by connection name, from the user structure
+  const getProfileData = (connection) => {
+    var i = 0;
+    for (i = 0; i < event.user.identities.length; i++) {
+      var cid = event.user.identities[i];
+      if (cid.connection === connection) {
+        return cid.profileData;
+      }
+    }
+    return undefined;
+  };
+
   // Process the access cache decision
   const access_decision = (access_rules, access_file_conf) => {
     // Ensure we have the correct group data
@@ -265,19 +277,6 @@ exports.onExecutePostLogin = async (event, api) => {
 
     // We go through each possible attribute as auth0 will translate these differently in the main profile
     // depending on the connection type
-
-    const getProfileData = (connection) => {
-      // Return a single identity by connection name, from the user structure
-      var i = 0;
-      for (i = 0; i < event.user.identities.length; i++) {
-        var cid = event.user.identities[i];
-        if (cid.connection === connection) {
-          return cid.profileData;
-        }
-      }
-
-      return undefined;
-    }; // getProfileData func
 
     // Ensure all users have some AAI and AAL attributes, even if its empty
     let aai = [];
