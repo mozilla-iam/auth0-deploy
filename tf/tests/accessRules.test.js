@@ -101,7 +101,7 @@ test("user in LDAP (ad) requires 2FA", async () => {
     metadata: {},
     name: "Mozilla-LDAP-Dev",
     strategy: "ad",
-  }
+  };
 
   // Execute onExecutePostLogin
   await onExecutePostLogin(_event, api);
@@ -145,6 +145,7 @@ test("email account not verified", async () => {
 
 describe("Test group merges", () => {
   test("Expect user.groups to be a merged list of multiple group lists", async () => {
+    _event.client.client_id = "client00000000000000000000000005";
     _event.transaction.requested_scopes = ["email", "profile"];
     _event.user.aai = ["2FA"];
     _event.user.groups = ["groups_1", "groups_2"];

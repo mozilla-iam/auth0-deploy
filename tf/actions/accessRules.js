@@ -126,45 +126,9 @@ exports.onExecutePostLogin = async (event, api) => {
     return undefined;
   };
 
-  // Process the access cache decision
-  const access_decision = (access_rules, access_file_conf) => {
-    // Ensure we have the correct group data
-    const app_metadata_groups = event.user.app_metadata.groups || [];
-    const ldap_groups = event.user.ldap_groups || [];
-    const user_groups = event.user.groups || [];
-
-    // With account linking its possible that LDAP is not the main account on contributor LDAP accounts
-    // Here we iterate over all possible user identities and build an array of all groups from them
-    let _identity;
-    let identityGroups = [];
-    // Iterate over each identity
-    for (let x = 0, len = event.user.identities.length; x < len; x++) {
-      // Get profile for the given identity
-      _identity = event.user.identities[x];
-      // If the identity contains profileData
-      if ("profileData" in _identity) {
-        // If profileData contains a groups array
-        if ("groups" in _identity.profileData) {
-          // Merge the group arry into identityGroups
-          identityGroups.push(..._identity.profileData.groups);
-        }
-      }
-    }
-
-    // Collect all variations of groups and merge them together for access evaluation
-    let groups = [
-      ...user_groups,
-      ...app_metadata_groups,
-      ...ldap_groups,
-      ...identityGroups,
-    ];
-
-    // Inject the everyone group and filter for duplicates
-    groups.push("everyone");
-    groups = groups.filter(
-      (value, index, array) => array.indexOf(value) === index
-    );
-
+  // Sometimes we need to add custom claims to the various tokens we hand
+  // out.
+  const groupsSetCustomClaims = (groups) => {
     // If the only scopes requested are neither profile nor any scope beginning with
     // https:// then do not overload with custom claims
     const scopes_requested = event.transaction.requested_scopes || [];
@@ -186,6 +150,49 @@ exports.onExecutePostLogin = async (event, api) => {
         "Please refer to https://github.com/mozilla-iam/person-api in order to query Mozilla IAM CIS user profile data";
       api.idToken.setCustomClaim(`${namespace}/README_FIRST`, claimMsg);
     }
+  };
+
+  // Collect all variations of groups and merge them together for access
+  // evaluation.
+  const groupsGather = () => {
+    // Ensure we have the correct group data
+    const app_metadata_groups = event.user.app_metadata.groups || [];
+    const ldap_groups = event.user.ldap_groups || [];
+    const user_groups = event.user.groups || [];
+    // With account linking its possible that LDAP is not the main account on contributor LDAP accounts
+    // Here we iterate over all possible user identities and build an array of all groups from them
+    let _identity;
+    let identityGroups = [];
+    // Iterate over each identity
+    for (let x = 0, len = event.user.identities.length; x < len; x++) {
+      // Get profile for the given identity
+      _identity = event.user.identities[x];
+      // If the identity contains profileData
+      if ("profileData" in _identity) {
+        // If profileData contains a groups array
+        if ("groups" in _identity.profileData) {
+          // Merge the group arry into identityGroups
+          identityGroups.push(..._identity.profileData.groups);
+        }
+      }
+    }
+    const all_groups = [
+      ...user_groups,
+      ...app_metadata_groups,
+      ...ldap_groups,
+      ...identityGroups,
+      // A default group, added to everyone.
+      "everyone",
+    ];
+    // Filter for duplicates
+    return all_groups.filter(
+      (value, index, array) => array.indexOf(value) === index
+    );
+  };
+
+  // Process the access cache decision
+  const access_decision = (access_rules, access_file_conf) => {
+    const groups = groupsGather();
 
     //// === Actions don't allow modifying the event.user
     //// Update user.groups with new merged values
@@ -194,7 +201,8 @@ exports.onExecutePostLogin = async (event, api) => {
     // This is used for authorized user/groups
     let authorized = false;
 
-    // Defaut app requested aal to MEDIUM for all apps which do not have this set in access file
+    // Defaut app requested aal to MEDIUM for all apps which do not have
+    // this set in access file
     let required_aal = "MEDIUM";
 
     const apps = access_rules.filter(
@@ -205,8 +213,8 @@ exports.onExecutePostLogin = async (event, api) => {
     // Default deny for apps we don't define in
     // https://github.com/mozilla-iam/sso-dashboard-configuration/blob/master/apps.yml
     if (apps.length == 0) {
-        console.log(`No access rules defined for ${event.client.client_id}`);
-        return "notingroup";
+      console.log(`No access rules defined for ${event.client.client_id}`);
+      return "notingroup";
     }
 
     // Check users and groups.
@@ -221,19 +229,23 @@ exports.onExecutePostLogin = async (event, api) => {
       //          };
 
       if (app.client_id && app.client_id.indexOf(event.client.client_id) >= 0) {
-        // If there are multiple applications in apps.yml with the same client_id
-        // then this expiration of access check will only run against the first
-        // one encountered. This matters if there are multiple applications, using
-        // the same client_id, and asserting different expire_access_when_unused_after
-        // values.
+        // If there are multiple applications in apps.yml with the same
+        // client_id then this expiration of access check will only run
+        // against the first one encountered. This matters if there are
+        // multiple applications, using the same client_id, and asserting
+        // different expire_access_when_unused_after values.
 
         // Set app AAL (AA level) if present
         required_aal = app.AAL || required_aal;
 
         // AUTHORIZED_{GROUPS,USERS}
-        // XXX this authorized_users SHOULD BE REMOVED as it's unsafe (too easy to make mistakes). USE GROUPS.
-        // XXX This needs to be fixed in the dashboard first
-        // Empty users or groups (length == 0) means no access in the dashboard apps.yml world
+        //
+        // XXX this authorized_users SHOULD BE REMOVED as it's unsafe (too
+        // easy to make mistakes). USE GROUPS.
+        //
+        // XXX This needs to be fixed in the dashboard first. Empty users
+        // or groups (length == 0) means no access in the dashboard
+        // apps.yml world.
         if (
           app.authorized_users.length === 0 &&
           app.authorized_groups.length === 0
@@ -407,6 +419,7 @@ exports.onExecutePostLogin = async (event, api) => {
     // Set AAI & AAL claims in idToken
     api.idToken.setCustomClaim(`${namespace}/AAI`, aai);
     api.idToken.setCustomClaim(`${namespace}/AAL`, aal);
+    groupsSetCustomClaims(groups);
 
     if (!aai_pass) {
       const msg =
