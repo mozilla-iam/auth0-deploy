@@ -95,14 +95,16 @@ test("Connection is not LDAP, do not call api.multifactor.enable", async () => {
 });
 
 test("user in LDAP (ad) requires 2FA", async () => {
-  (_event.connection = {
+  _event.client.client_id = "client00000000000000000000000005";
+  _event.connection = {
     id: "con_qVLhpUZQxluxX5kN",
     metadata: {},
     name: "Mozilla-LDAP-Dev",
     strategy: "ad",
-  }),
-    // Execute onExecutePostLogin
-    await onExecutePostLogin(_event, api);
+  };
+
+  // Execute onExecutePostLogin
+  await onExecutePostLogin(_event, api);
 
   // Expect api.multifactor.enable to have been called
   expect(api.multifactor.enable).toHaveBeenCalled();
@@ -143,6 +145,7 @@ test("email account not verified", async () => {
 
 describe("Test group merges", () => {
   test("Expect user.groups to be a merged list of multiple group lists", async () => {
+    _event.client.client_id = "client00000000000000000000000005";
     _event.transaction.requested_scopes = ["email", "profile"];
     _event.user.aai = ["2FA"];
     _event.user.groups = ["groups_1", "groups_2"];
@@ -179,12 +182,13 @@ describe("Test group merges", () => {
 });
 
 describe("Client does not exist in apps.yml", () => {
-  test("Client id does not exist and aai is 2FA; expect allowed", async () => {
+  test("Client id does not exist and aai is 2FA; expect not allowed", async () => {
     _event.user.multifactor = ["duo"];
     await onExecutePostLogin(_event, api);
-
-    // expect redirect.url to be undefined
-    expect(_event.transaction.redirect_uri).toEqual(undefined);
+    expect(_event.transaction.redirect_uri).toBeDefined();
+    expect(decodeRedirect(_event.transaction.redirect_uri)).toEqual(
+      "notingroup"
+    );
   });
 
   test("Client id does not exist and aai is empty; expect not allowed", async () => {
@@ -192,7 +196,7 @@ describe("Client does not exist in apps.yml", () => {
 
     expect(_event.transaction.redirect_uri).toBeDefined();
     expect(decodeRedirect(_event.transaction.redirect_uri)).toEqual(
-      "aai_failed"
+      "notingroup"
     );
   });
 });

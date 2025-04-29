@@ -114,45 +114,21 @@ exports.onExecutePostLogin = async (event, api) => {
     return A.some((element) => B.includes(element));
   };
 
-  // Process the access cache decision
-  const access_decision = (access_rules, access_file_conf) => {
-    // Ensure we have the correct group data
-    const app_metadata_groups = event.user.app_metadata.groups || [];
-    const ldap_groups = event.user.ldap_groups || [];
-    const user_groups = event.user.groups || [];
-
-    // With account linking its possible that LDAP is not the main account on contributor LDAP accounts
-    // Here we iterate over all possible user identities and build an array of all groups from them
-    let _identity;
-    let identityGroups = [];
-    // Iterate over each identity
-    for (let x = 0, len = event.user.identities.length; x < len; x++) {
-      // Get profile for the given identity
-      _identity = event.user.identities[x];
-      // If the identity contains profileData
-      if ("profileData" in _identity) {
-        // If profileData contains a groups array
-        if ("groups" in _identity.profileData) {
-          // Merge the group arry into identityGroups
-          identityGroups.push(..._identity.profileData.groups);
-        }
+  // Return a single identity by connection name, from the user structure
+  const getProfileData = (connection) => {
+    var i = 0;
+    for (i = 0; i < event.user.identities.length; i++) {
+      var cid = event.user.identities[i];
+      if (cid.connection === connection) {
+        return cid.profileData;
       }
     }
+    return undefined;
+  };
 
-    // Collect all variations of groups and merge them together for access evaluation
-    let groups = [
-      ...user_groups,
-      ...app_metadata_groups,
-      ...ldap_groups,
-      ...identityGroups,
-    ];
-
-    // Inject the everyone group and filter for duplicates
-    groups.push("everyone");
-    groups = groups.filter(
-      (value, index, array) => array.indexOf(value) === index
-    );
-
+  // Sometimes we need to add custom claims to the various tokens we hand
+  // out.
+  const groupsSetCustomClaims = (groups) => {
     // If the only scopes requested are neither profile nor any scope beginning with
     // https:// then do not overload with custom claims
     const scopes_requested = event.transaction.requested_scopes || [];
@@ -174,18 +150,79 @@ exports.onExecutePostLogin = async (event, api) => {
         "Please refer to https://github.com/mozilla-iam/person-api in order to query Mozilla IAM CIS user profile data";
       api.idToken.setCustomClaim(`${namespace}/README_FIRST`, claimMsg);
     }
+  };
 
-    //// === Actions don't allow modifying the event.user
-    //// Update user.groups with new merged values
-    //user.groups = groups;
+  // Collect all variations of groups and merge them together for access
+  // evaluation.
+  const groupsGather = () => {
+    // Ensure we have the correct group data
+    const app_metadata_groups = event.user.app_metadata.groups || [];
+    const ldap_groups = event.user.ldap_groups || [];
+    const user_groups = event.user.groups || [];
+    // With account linking its possible that LDAP is not the main account on contributor LDAP accounts
+    // Here we iterate over all possible user identities and build an array of all groups from them
+    let _identity;
+    let identityGroups = [];
+    // Iterate over each identity
+    for (let x = 0, len = event.user.identities.length; x < len; x++) {
+      // Get profile for the given identity
+      _identity = event.user.identities[x];
+      // If the identity contains profileData
+      if ("profileData" in _identity) {
+        // If profileData contains a groups array
+        if ("groups" in _identity.profileData) {
+          // Merge the group arry into identityGroups
+          identityGroups.push(..._identity.profileData.groups);
+        }
+      }
+    }
+    const all_groups = [
+      ...user_groups,
+      ...app_metadata_groups,
+      ...ldap_groups,
+      ...identityGroups,
+      // A default group, added to everyone.
+      "everyone",
+    ];
+    // Filter for duplicates
+    return all_groups.filter(
+      (value, index, array) => array.indexOf(value) === index
+    );
+  };
 
+  const deny = (reason) => {
+    return {
+      granted: false,
+      denied: {
+        reason,
+      },
+    };
+  };
+
+  // Process the access cache decision
+  const access_decision = (groups, access_rules, access_file_conf) => {
     // This is used for authorized user/groups
     let authorized = false;
-    // Defaut app requested aal to MEDIUM for all apps which do not have this set in access file
+
+    // Defaut app requested aal to MEDIUM for all apps which do not have
+    // this set in access file
     let required_aal = "MEDIUM";
 
-    for (let i = 0; i < access_rules.length; i++) {
-      let app = access_rules[i].application;
+    const apps = access_rules.filter(
+      (a) =>
+        (a.application.client_id ?? "").indexOf(event.client.client_id) >= 0
+    );
+
+    // Default deny for apps we don't define in
+    // https://github.com/mozilla-iam/sso-dashboard-configuration/blob/master/apps.yml
+    if (apps.length == 0) {
+      console.log(`No access rules defined for ${event.client.client_id}`);
+      return deny("notingroup");
+    }
+
+    // Check users and groups.
+    for (let i = 0; i < apps.length; i++) {
+      let app = apps[i].application;
 
       //Handy for quick testing in dev (overrides access rules)
       //var app = {'client_id': 'pCGEHXW0VQNrQKURDcGi0tghh7NwWGhW', // This is testrp social-ldap-pwless
@@ -195,19 +232,23 @@ exports.onExecutePostLogin = async (event, api) => {
       //          };
 
       if (app.client_id && app.client_id.indexOf(event.client.client_id) >= 0) {
-        // If there are multiple applications in apps.yml with the same client_id
-        // then this expiration of access check will only run against the first
-        // one encountered. This matters if there are multiple applications, using
-        // the same client_id, and asserting different expire_access_when_unused_after
-        // values.
+        // If there are multiple applications in apps.yml with the same
+        // client_id then this expiration of access check will only run
+        // against the first one encountered. This matters if there are
+        // multiple applications, using the same client_id, and asserting
+        // different expire_access_when_unused_after values.
 
         // Set app AAL (AA level) if present
         required_aal = app.AAL || required_aal;
 
         // AUTHORIZED_{GROUPS,USERS}
-        // XXX this authorized_users SHOULD BE REMOVED as it's unsafe (too easy to make mistakes). USE GROUPS.
-        // XXX This needs to be fixed in the dashboard first
-        // Empty users or groups (length == 0) means no access in the dashboard apps.yml world
+        //
+        // XXX this authorized_users SHOULD BE REMOVED as it's unsafe (too
+        // easy to make mistakes). USE GROUPS.
+        //
+        // XXX This needs to be fixed in the dashboard first. Empty users
+        // or groups (length == 0) means no access in the dashboard
+        // apps.yml world.
         if (
           app.authorized_users.length === 0 &&
           app.authorized_groups.length === 0
@@ -216,7 +257,7 @@ exports.onExecutePostLogin = async (event, api) => {
             `Access denied to ${event.client.client_id} for user ${event.user.email} (${event.user.user_id})` +
             ` - this app denies ALL users and ALL groups")`;
           console.log(msg);
-          return "notingroup";
+          return deny("notingroup");
         }
 
         // Check if the user is authorized to access
@@ -241,7 +282,7 @@ exports.onExecutePostLogin = async (event, api) => {
             `Access denied to ${event.client.client_id} for user ${event.user.email} (${event.user.user_id})` +
             ` - not in authorized group or not an authorized user`;
           console.log(msg);
-          return "notingroup";
+          return deny("notingroup");
         }
       } // correct client id / we matched the current RP
     } // for loop / next rule in apps.yml
@@ -252,22 +293,10 @@ exports.onExecutePostLogin = async (event, api) => {
     // We go through each possible attribute as auth0 will translate these differently in the main profile
     // depending on the connection type
 
-    const getProfileData = (connection) => {
-      // Return a single identity by connection name, from the user structure
-      var i = 0;
-      for (i = 0; i < event.user.identities.length; i++) {
-        var cid = event.user.identities[i];
-        if (cid.connection === connection) {
-          return cid.profileData;
-        }
-      }
-
-      return undefined;
-    }; // getProfileData func
-
     // Ensure all users have some AAI and AAL attributes, even if its empty
     let aai = [];
     let aal = "UNKNOWN";
+    let enableDuo = false;
 
     // Allow certain LDAP service accounts to fake their MFA. For all other LDAPi accounts, enforce MFA
     if (event.connection.strategy === "ad") {
@@ -277,10 +306,7 @@ exports.onExecutePostLogin = async (event, api) => {
         );
         aai.push("2FA");
       } else {
-        api.multifactor.enable("duo", {
-          providerOptions: duoConfig,
-          allowRememberBrowser: true,
-        });
+        enableDuo = true;
         console.log(
           `duosecurity: ${event.user.email} is in LDAP and requires 2FA check`
         );
@@ -391,20 +417,21 @@ exports.onExecutePostLogin = async (event, api) => {
       }
     }
 
-    // Set AAI & AAL claims in idToken
-    api.idToken.setCustomClaim(`${namespace}/AAI`, aai);
-    api.idToken.setCustomClaim(`${namespace}/AAL`, aal);
-
     if (!aai_pass) {
       const msg =
         `Access denied to ${event.client.client_id} for user ${event.user.email} (${event.user.user_id}) - due to` +
         ` Identity Assurance Level being too low for this RP. Required AAL: ${required_aal} (${aai_pass})`;
       console.log(msg);
-      return "aai_failed";
+      return deny("aai_failed");
     }
 
     // We matched no rule, access is granted
-    return true;
+    return {
+      granted: true,
+      enableDuo,
+      aai,
+      aal,
+    };
   };
 
   const access_file_conf = {
@@ -433,15 +460,25 @@ exports.onExecutePostLogin = async (event, api) => {
   try {
     const cdnUrl = "https://cdn.sso.mozilla.com/apps.yml";
     const appsYaml = await getAppsYaml(cdnUrl);
-    const decision = access_decision(appsYaml, access_file_conf);
+    const groups = groupsGather();
+    const decision = access_decision(groups, appsYaml, access_file_conf);
 
-    if (decision === true) {
-      return; // Allow login to continue
-    } else {
-      // Go back to the shadow.  You shall not pass!
-      postError(decision);
+    if (decision.granted) {
+      if (decision.enableDuo) {
+        api.multifactor.enable("duo", {
+          providerOptions: duoConfig,
+          allowRememberBrowser: true,
+        });
+      }
+      // Set groups, AAI, and AAL claims in idToken
+      api.idToken.setCustomClaim(`${namespace}/AAI`, decision.aai);
+      api.idToken.setCustomClaim(`${namespace}/AAL`, decision.aal);
+      groupsSetCustomClaims(groups);
       return;
     }
+
+    // Go back to the shadow.  You shall not pass!
+    return postError(decision.denied.reason);
   } catch (err) {
     // All error should be caught here and we return the callback handler with the error
     console.log("AccessRules:", err);
