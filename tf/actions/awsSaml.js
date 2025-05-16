@@ -33,6 +33,8 @@ exports.onExecutePostLogin = async (event, api) => {
         "mozilliansorg_iam-in-transition-admin",
         "mozilliansorg_iam-readonly",
         "mozilliansorg_meao-admins",
+        "mozilliansorg_monitor_nonprod_aws_devs",
+        "mozilliansorg_monitor_prod_aws_devs",
         "mozilliansorg_mozilla-moderator-devs",
         "mozilliansorg_partinfra-aws",
         "mozilliansorg_pdfjs-testers",
