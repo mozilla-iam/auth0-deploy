@@ -14,6 +14,7 @@ exports.onExecutePostLogin = async (event, api) => {
         "mozilliansorg_sec_tines-access",
         "team_moco",
         "team_mofo",
+        "team_mozorg",
         "team_mzla",
         "team_mzai",
         "team_mzvc",
