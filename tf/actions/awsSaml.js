@@ -101,6 +101,11 @@ exports.onExecutePostLogin = async (event, api) => {
         "mozilliansorg_mofo_aws_projects",
         "mozilliansorg_mofo_aws_sandbox",
         "mozilliansorg_mofo_aws_secure",
+        "mozilliansorg_mofo-mdc-developers",
+        "mozilliansorg_mofo-mdc-ops-readonly",
+        "mozilliansorg_mofo-mdc-ops-admin",
+        "mozilliansorg_mofo-mdc-production-readonly",
+        "mozilliansorg_mofo-mdc-production-admin",
         "mozilliansorg_infrasec",
       ];
       break;
