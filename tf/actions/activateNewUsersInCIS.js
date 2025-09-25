@@ -4,14 +4,7 @@ const AWS = require("aws-sdk");
 exports.onExecutePostLogin = async (event, api) => {
   console.log("Running action:", "activateNewUsersInCIS");
 
-  const WHITELISTED_CONNECTIONS = [
-    "email",
-    "firefoxaccounts",
-    "github",
-    "google-oauth2",
-    "Mozilla-LDAP",
-    "Mozilla-LDAP-Dev",
-  ];
+  const WHITELISTED_CONNECTIONS = ["Mozilla-LDAP", "Mozilla-LDAP-Dev"];
 
   // We can only provision users that have certain connection strategies
   if (!WHITELISTED_CONNECTIONS.includes(event.connection.name)) {

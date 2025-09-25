@@ -32,7 +32,7 @@ beforeEach(() => {
   _event.transaction.redirect_uri = undefined;
 
   // Set the default connection type
-  _event.connection.name = "email";
+  _event.connection.name = "Mozilla-LDAP";
 
   // Default fetch response status and code
   personResponseStatusOk = true;
@@ -132,14 +132,7 @@ afterEach(() => {
 });
 
 // Connections that are actually used in dev/prod Auth0 tenants
-const WHITELISTED_CONNECTIONS = [
-  "email",
-  "firefoxaccounts",
-  "github",
-  "google-oauth2",
-  "Mozilla-LDAP",
-  "Mozilla-LDAP-Dev",
-];
+const WHITELISTED_CONNECTIONS = ["Mozilla-LDAP", "Mozilla-LDAP-Dev"];
 
 test("Expect onExecutePostLogin to be defined", async () => {
   // Expect onExecutePostLogin to be defined
