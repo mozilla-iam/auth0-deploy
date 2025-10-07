@@ -9,7 +9,7 @@ exports.onExecutePostLogin = async (event, api) => {
   // We can only provision users that have certain connection strategies
   // Otherwise, if not whitelisted but manually flagged to ensure profile creation, continue
   const isWhitelisted = WHITELISTED_CONNECTIONS.includes(event.connection.name);
-  const shouldForceProfileCreation = event.user.app_metadata?.ensure_profile_creation;
+  const shouldForceProfileCreation = event.user.app_metadata?.forceProfileCreation;
 
   if (!isWhitelisted && !shouldForceProfileCreation) {
     console.log(`${event.connection.name} is not whitelisted. Skipping activateNewUsersInCIS.`);
