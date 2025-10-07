@@ -14,7 +14,7 @@ exports.onExecutePostLogin = async (event, api) => {
 
   if (!isWhitelisted && !shouldForceProfileCreation) {
     console.log(
-      `${event.connection.name} is not whitelisted. Skipping activateNewUsersInCIS.`
+      `${event.connection.name} is not whitelisted. Skip activateNewUsersInCIS.`
     );
     return;
   }
