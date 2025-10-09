@@ -21,6 +21,7 @@ exports.onExecutePostLogin = async (event, api) => {
       paramObj.secretAccessKey = event.secrets.AWS_IDENTITYSTORE_ACCESS_KEY_IT;
       paramObj.awsGroups = [
         "fuzzing_team",
+        "mozilliansorg_0din-devs",
         "mozilliansorg_aws_billing_access",
         "mozilliansorg_cia-aws",
         "mozilliansorg_consolidated-billing-aws",
