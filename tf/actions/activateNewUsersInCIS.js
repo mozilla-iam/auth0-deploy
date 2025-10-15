@@ -4,19 +4,17 @@ const AWS = require("aws-sdk");
 exports.onExecutePostLogin = async (event, api) => {
   console.log("Running action:", "activateNewUsersInCIS");
 
-  const WHITELISTED_CONNECTIONS = [
-    "email",
-    "firefoxaccounts",
-    "github",
-    "google-oauth2",
-    "Mozilla-LDAP",
-    "Mozilla-LDAP-Dev",
-  ];
+  const WHITELISTED_CONNECTIONS = ["Mozilla-LDAP", "Mozilla-LDAP-Dev"];
 
   // We can only provision users that have certain connection strategies
-  if (!WHITELISTED_CONNECTIONS.includes(event.connection.name)) {
+  // Otherwise, if not whitelisted but manually flagged to ensure profile creation, continue
+  const isWhitelisted = WHITELISTED_CONNECTIONS.includes(event.connection.name);
+  const shouldForceProfileCreation =
+    event.user.app_metadata?.forceProfileCreation;
+
+  if (!isWhitelisted && !shouldForceProfileCreation) {
     console.log(
-      `${event.connection.name} is not whitelisted. Skip activateNewUsersInCIS`
+      `${event.connection.name} is not whitelisted. Skip activateNewUsersInCIS.`
     );
     return;
   }
@@ -191,7 +189,7 @@ exports.onExecutePostLogin = async (event, api) => {
     for (let i = 0; i < event.user.identities.length; i++) {
       const identity = event.user.identities[i];
       // ignore a provider if it's not whitelisted
-      if (!WHITELISTED_CONNECTIONS.includes(identity.connection)) {
+      if (!isWhitelisted && !shouldForceProfileCreation) {
         continue;
       }
 
