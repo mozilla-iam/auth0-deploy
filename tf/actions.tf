@@ -175,7 +175,7 @@ resource "auth0_action" "accessRules" {
 
   dependencies {
     name    = "js-yaml"
-    version = "4.1.0"
+    version = "4.1.1"
   }
 
   dependencies {
