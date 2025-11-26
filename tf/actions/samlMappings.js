@@ -225,6 +225,19 @@ exports.onExecutePostLogin = async (event, api) => {
       api.samlResponse.setAttribute("grant_all_merchant_accounts", "true");
       api.samlResponse.setAttribute("roles", event.user.app_metadata.groups);
       break;
+
+    case "3c7lAT2sPywWjvgVP5ngCQysHtnNqQFj": // EQS Integrity Line
+      const cryptokey = event.secrets.samlMappings_eqs_integrity_line_cryptokey;
+      if (!cryptokey) {
+        console.log(
+          "Required secret cryptokey not set (for app EQS Integrity Line)"
+        );
+        return api.access.deny(
+          "No specified cryptokey (SAML misconfiguration)."
+        );
+      }
+      api.samlResponse.setAttribute("cryptokey", cryptokey);
+      break;
   }
 
   return;

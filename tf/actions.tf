@@ -86,6 +86,13 @@ resource "auth0_action" "samlMappings" {
     id      = "post-login"
     version = "v3"
   }
+
+  # EQS Integrity Line requires an additional parameter.
+  # https://mozilla-hub.atlassian.net/browse/IAM-1827
+  secrets {
+    name  = "samlMappings_eqs_integrity_line_cryptokey"
+    value = local.parsed_secrets["samlMappings_eqs_integrity_line_cryptokey"]
+  }
 }
 
 resource "auth0_action" "gheGroups" {
