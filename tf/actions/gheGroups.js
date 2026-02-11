@@ -103,6 +103,7 @@ exports.onExecutePostLogin = async (event, api) => {
     sZHTTA4iuHgmiQGzbkS7lcXE1bbMGces: "mozilliansorg_ghe_firefoxgraphics_users",
     JDiNCQVrXzw2ILureegz1T8c3OrUZCUb: "mozilliansorg_ghe_mozilla-firefox_users",
     "3hrj2F7ec00Y0nYMZivYzJh6FnqydBX5": "mozilliansorg_ghe_firefox-ai_users",
+    "AbtfcVLkkFuMR0A1fWUvDQrVZOhEyDMA": "mozilliansorg_ghe_mozillaonline_users",
   };
 
   // ClientID isn't mapped here, return callback() and proceed rules processing
