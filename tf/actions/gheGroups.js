@@ -104,6 +104,13 @@ exports.onExecutePostLogin = async (event, api) => {
     JDiNCQVrXzw2ILureegz1T8c3OrUZCUb: "mozilliansorg_ghe_mozilla-firefox_users",
     "3hrj2F7ec00Y0nYMZivYzJh6FnqydBX5": "mozilliansorg_ghe_firefox-ai_users",
     AbtfcVLkkFuMR0A1fWUvDQrVZOhEyDMA: "mozilliansorg_ghe_mozillaonline_users",
+    TzMKYmrhJY9XWX8f6xVHkhZHMC4BhPuj: "mozilliansorg_ghe_fxbox_users",
+    JT3G28PrEk9Or1bzHSu0TBsj2ETeRuXm: "mozilliansorg_ghe_mozilla-homeweb_users",
+    AOM1RgIbojnqYL0fvSg2Xtv6YDIBe7Xc:
+      "mozilliansorg_ghe_mozilla-sensorweb_users",
+    gIIYBLT64qngNFQOtOrfQBe29fCDw4mJ: "mozilliansorg_ghe_project-abigail_users",
+    RclZSiMw5J5dbYXGkPTQJ6K31WxaGd8E:
+      "mozilliansorg_ghe_project-lighthouse_users",
   };
 
   // ClientID isn't mapped here, return callback() and proceed rules processing
