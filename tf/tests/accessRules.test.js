@@ -110,6 +110,19 @@ test("user in LDAP (ad) requires 2FA", async () => {
   expect(api.multifactor.enable).toHaveBeenCalled();
 });
 
+test("Using a refresh token should not trigger MFA challenge", async () => {
+  _event.client.client_id = "client00000000000000000000000005";
+  _event.connection = {
+    id: "con_qVLhpUZQxluxX5kN",
+    metadata: {},
+    name: "Mozilla-LDAP-Dev",
+    strategy: "ad",
+  };
+  _event.transaction.protocol = "oauth2-refresh-token";
+  await onExecutePostLogin(_event, api);
+  expect(api.multifactor.enable).not.toHaveBeenCalled();
+});
+
 test("service account MFA bypass", async () => {
   (_event.connection = {
     id: "con_qVLhpUZQxluxX5kN",

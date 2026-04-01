@@ -462,9 +462,13 @@ exports.onExecutePostLogin = async (event, api) => {
     const appsYaml = await getAppsYaml(cdnUrl);
     const groups = groupsGather();
     const decision = access_decision(groups, appsYaml, access_file_conf);
+    // Refresh token exchanges are non-interactive, and are minted when a user
+    // has already completed the MFA challenge.
+    const isRefreshTokenFlow =
+      event.transaction?.protocol === "oauth2-refresh-token";
 
     if (decision.granted) {
-      if (decision.enableDuo) {
+      if (decision.enableDuo && !isRefreshTokenFlow) {
         api.multifactor.enable("duo", {
           providerOptions: duoConfig,
           allowRememberBrowser: true,
