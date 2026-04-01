@@ -69,8 +69,6 @@ afterEach(() => {
   fetchSpy.mockRestore();
 });
 
-// TODO: test whitelisted duo users
-
 describe("Basic tests", () => {
   it("should be defined", () => {
     expect(onExecutePostLogin).toBeDefined();
