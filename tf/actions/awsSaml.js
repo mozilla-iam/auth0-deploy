@@ -129,6 +129,7 @@ exports.onExecutePostLogin = async (event, api) => {
         "mozilliansorg_cloudservices_aws_fxa_developers",
         "mozilliansorg_cloudservices_aws_taskcluster_devs",
         "mozilliansorg_infrasec",
+        "mozilliansorg_meao-admins",
       ];
       break;
     default:
