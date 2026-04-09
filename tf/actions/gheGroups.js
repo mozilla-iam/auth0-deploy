@@ -89,8 +89,7 @@ exports.onExecutePostLogin = async (event, api) => {
     lJbj6OE9VFK05i2XjZEiAEljamPyOCkz:
       "mozilliansorg_ghe_mozilla-platform-ops_users",
     AgiLB9xCoW4beavY9z7UuvO36DLmdwJ1: "mozilliansorg_ghe_mozilla-rally_users",
-    QfJVAjXlaGzpCo5S48J9D38QvIfhlYzF:
-      "mozilliansorg_ghe_mozilla-data_users",
+    QfJVAjXlaGzpCo5S48J9D38QvIfhlYzF: "mozilliansorg_ghe_mozilla-data_users",
     UwUgLsXH6YtrWLATQpTuil2iNilYGGhF:
       "mozilliansorg_ghe_mozilla-services_users",
     RLPUxhCQsmmRHyOmDOGkLpu1mArNH3xn: "mozilliansorg_ghe_firefoxux_users",
