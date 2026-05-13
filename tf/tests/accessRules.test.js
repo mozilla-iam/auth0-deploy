@@ -627,27 +627,32 @@ describe("Client is defined in apps.yml as client00000000000000000000000008", ()
 });
 
 describe("Client is defined multiple times in apps.yml as client00000000000000000000000009", () => {
-  test("User in restricted_group_1; expect allowed", async () => {
+  test("User in restricted_group_1 without 2FA; expect allowed", async () => {
+    // This entry in apps.yml does not require MFA.
     _event.client.client_id = "client00000000000000000000000009";
     _event.connection.name = "google-oauth2";
     _event.user.groups = ["restricted_group_1"];
     _event.user.ldap_groups = [];
     _event.user.app_metadata.groups = [];
     await onExecutePostLogin(_event, api);
+    expect(api.multifactor.enable).not.toHaveBeenCalled();
     expect(_event.transaction.redirect_uri).toEqual(undefined);
   });
-  test("User in restricted_group_2; expect allowed", async () => {
+  test("User in restricted_group_2 with 2FA; expect allowed", async () => {
     _event.client.client_id = "client00000000000000000000000009";
-    _event.connection.name = "google-oauth2";
+    _event.connection.strategy = "ad";
+    _event.user.multifactor = ["duo"];
     _event.user.groups = ["restricted_group_2"];
     _event.user.ldap_groups = [];
     _event.user.app_metadata.groups = [];
     await onExecutePostLogin(_event, api);
+    expect(api.multifactor.enable).toHaveBeenCalled();
     expect(_event.transaction.redirect_uri).toEqual(undefined);
   });
-  test("User in restricted_group_3; expect denied", async () => {
+  test("User no allowed groups with 2FA; expect denied", async () => {
     _event.client.client_id = "client00000000000000000000000009";
-    _event.connection.name = "google-oauth2";
+    _event.connection.strategy = "ad";
+    _event.user.multifactor = ["duo"];
     _event.user.groups = ["restricted_group_3"];
     _event.user.ldap_groups = [];
     _event.user.app_metadata.groups = [];
