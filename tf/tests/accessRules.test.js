@@ -625,3 +625,36 @@ describe("Client is defined in apps.yml as client00000000000000000000000008", ()
     );
   });
 });
+
+describe("Client is defined multiple times in apps.yml as client00000000000000000000000009", () => {
+  test("User in restricted_group_1; expect allowed", async () => {
+    _event.client.client_id = "client00000000000000000000000009";
+    _event.connection.name = "google-oauth2";
+    _event.user.groups = ["restricted_group_1"];
+    _event.user.ldap_groups = [];
+    _event.user.app_metadata.groups = [];
+    await onExecutePostLogin(_event, api);
+    expect(_event.transaction.redirect_uri).toEqual(undefined);
+  });
+  test("User in restricted_group_2; expect allowed", async () => {
+    _event.client.client_id = "client00000000000000000000000009";
+    _event.connection.name = "google-oauth2";
+    _event.user.groups = ["restricted_group_2"];
+    _event.user.ldap_groups = [];
+    _event.user.app_metadata.groups = [];
+    await onExecutePostLogin(_event, api);
+    expect(_event.transaction.redirect_uri).toEqual(undefined);
+  });
+  test("User in restricted_group_3; expect denied", async () => {
+    _event.client.client_id = "client00000000000000000000000009";
+    _event.connection.name = "google-oauth2";
+    _event.user.groups = ["restricted_group_3"];
+    _event.user.ldap_groups = [];
+    _event.user.app_metadata.groups = [];
+    await onExecutePostLogin(_event, api);
+    expect(_event.transaction.redirect_uri).toBeDefined();
+    expect(decodeRedirect(_event.transaction.redirect_uri)).toEqual(
+      "notingroup"
+    );
+  });
+});

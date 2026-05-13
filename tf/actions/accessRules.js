@@ -267,26 +267,24 @@ exports.onExecutePostLogin = async (event, api) => {
           app.authorized_users.length > 0 &&
           app.authorized_users.indexOf(event.user.email) >= 0
         ) {
-          authorized = true;
+          authorized ||= true;
           // Same dance as above, but for groups
         } else if (
           app.authorized_groups.length > 0 &&
           hasCommonElements(app.authorized_groups, groups)
         ) {
-          authorized = true;
-        } else {
-          authorized = false;
-        }
-
-        if (!authorized) {
-          const msg =
-            `Access denied to ${event.client.client_id} for user ${event.user.email} (${event.user.user_id})` +
-            ` - not in authorized group or not an authorized user`;
-          console.log(msg);
-          return deny("notingroup");
+          authorized ||= true;
         }
       } // correct client id / we matched the current RP
     } // for loop / next rule in apps.yml
+
+    if (!authorized) {
+      const msg =
+        `Access denied to ${event.client.client_id} for user ${event.user.email} (${event.user.user_id})` +
+        ` - not in authorized group or not an authorized user`;
+      console.log(msg);
+      return deny("notingroup");
+    }
 
     // AAI (AUTHENTICATOR ASSURANCE INDICATOR)
     // Sets the AAI for the user. This is later used by the AccessRules.js rule which also sets the AAL.
