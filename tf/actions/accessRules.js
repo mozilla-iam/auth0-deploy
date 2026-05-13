@@ -207,7 +207,7 @@ exports.onExecutePostLogin = async (event, api) => {
   // groups can be subjected to different MFA requirements.
   //
   // The one exception is that: if any apps say _no_ users nor groups should
-  // have access, then we use bail other checks early.
+  // have access, then we bail early.
   const access_decision = (groups, access_rules, access_file_conf) => {
     // This is used for authorized user/groups
     let authorized = false;
