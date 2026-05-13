@@ -63,11 +63,13 @@ apps:
     - team_mofo
     authorized_users: []
 - application:
+    AAL: LOW
     authorized_groups:
     - restricted_group_1
     authorized_users: []
     client_id: client00000000000000000000000009
 - application:
+    AAL: MEDIUM
     authorized_groups:
     - restricted_group_2
     authorized_users: []
