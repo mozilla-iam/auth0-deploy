@@ -200,15 +200,26 @@ exports.onExecutePostLogin = async (event, api) => {
     };
   };
 
-  // Process the access cache decision
+  // Process the access cache decision.
+  // Note that applications may be defined multiple times in the access rules.
+  //
+  // When access is granted, the AAL from the rule is used, meaning different
+  // groups can be subjected to different MFA requirements.
+  //
+  // The one exception is that: if any apps say _no_ users nor groups should
+  // have access, then we use bail other checks early.
   const access_decision = (groups, access_rules, access_file_conf) => {
     // This is used for authorized user/groups
     let authorized = false;
 
     // Defaut app requested aal to MEDIUM for all apps which do not have
     // this set in access file
-    let required_aal = "MEDIUM";
+    const default_aal = "MEDIUM";
 
+    // The AAL from the matched authorization rule is used.
+    let required_aal;
+
+    // Only look at rules which match our client_id.
     const apps = access_rules.filter(
       (a) =>
         (a.application.client_id ?? "").indexOf(event.client.client_id) >= 0
@@ -233,15 +244,6 @@ exports.onExecutePostLogin = async (event, api) => {
       //          };
 
       if (app.client_id && app.client_id.indexOf(event.client.client_id) >= 0) {
-        // If there are multiple applications in apps.yml with the same
-        // client_id then this expiration of access check will only run
-        // against the first one encountered. This matters if there are
-        // multiple applications, using the same client_id, and asserting
-        // different expire_access_when_unused_after values.
-
-        // Set app AAL (AA level) if present
-        required_aal = app.AAL || required_aal;
-
         // AUTHORIZED_{GROUPS,USERS}
         //
         // XXX this authorized_users SHOULD BE REMOVED as it's unsafe (too
@@ -254,35 +256,44 @@ exports.onExecutePostLogin = async (event, api) => {
           app.authorized_users.length === 0 &&
           app.authorized_groups.length === 0
         ) {
-          const msg =
-            `Access denied to ${event.client.client_id} for user ${event.user.email} (${event.user.user_id})` +
-            ` - this app denies ALL users and ALL groups")`;
-          console.log(msg);
+          console.log(
+            `Access denied to ${event.client.client_id} for user ` +
+              `${event.user.email} (${event.user.user_id})` +
+              ` - this app denies ALL users and ALL groups")`
+          );
           return deny("notingroup");
         }
 
-        // Check if the user is authorized to access
-        // A user is authorized if they are a member of any authorized_groups or if they are one of the authorized_users
+        // Check if the user is authorized to access.
+        // A user is authorized if they are a member of any authorized_groups
+        // or if they are one of the authorized_users.
         if (
           app.authorized_users.length > 0 &&
           app.authorized_users.indexOf(event.user.email) >= 0
         ) {
-          authorized ||= true;
+          console.log(`${event.user.user_id} was in authorized_users`);
+          required_aal = app.AAL || default_aal;
+          authorized = true;
+          break;
           // Same dance as above, but for groups
         } else if (
           app.authorized_groups.length > 0 &&
           hasCommonElements(app.authorized_groups, groups)
         ) {
-          authorized ||= true;
+          console.log(`${event.user.user_id} was in authorized_groups`);
+          required_aal = app.AAL || default_aal;
+          authorized = true;
+          break;
         }
       } // correct client id / we matched the current RP
     } // for loop / next rule in apps.yml
 
     if (!authorized) {
-      const msg =
-        `Access denied to ${event.client.client_id} for user ${event.user.email} (${event.user.user_id})` +
-        ` - not in authorized group or not an authorized user`;
-      console.log(msg);
+      console.log(
+        `Access denied to ${event.client.client_id} for user ` +
+          `${event.user.email} (${event.user.user_id}) - not in ` +
+          "authorized group or not an authorized user"
+      );
       return deny("notingroup");
     }
 
