@@ -220,10 +220,12 @@ exports.onExecutePostLogin = async (event, api) => {
     let required_aal;
 
     // Only look at rules which match our client_id.
-    const apps = access_rules.filter(
-      (a) =>
-        (a.application.client_id ?? "").indexOf(event.client.client_id) >= 0
-    );
+    const apps = access_rules
+      .filter(
+        (a) =>
+          (a.application.client_id ?? "").indexOf(event.client.client_id) >= 0
+      )
+      .map((a) => a.application);
 
     // Default deny for apps we don't define in
     // https://github.com/mozilla-iam/sso-dashboard-configuration/blob/master/apps.yml
@@ -232,10 +234,25 @@ exports.onExecutePostLogin = async (event, api) => {
       return deny("notingroup");
     }
 
-    // Check users and groups.
-    for (let i = 0; i < apps.length; i++) {
-      let app = apps[i].application;
+    // XXX This needs to be fixed in the dashboard first. Empty users
+    // or groups (length == 0) means no access in the dashboard
+    // apps.yml world.
+    const deny_all =
+      apps.find(
+        (a) =>
+          a.authorized_users.length === 0 && a.authorized_groups.length === 0
+      ) !== undefined;
+    if (deny_all) {
+      console.log(
+        `Access denied to ${event.client.client_id} for user ` +
+          `${event.user.email} (${event.user.user_id})` +
+          ` - this app denies ALL users and ALL groups")`
+      );
+      return deny("notingroup");
+    }
 
+    // Check users and groups.
+    for (const app of apps) {
       //Handy for quick testing in dev (overrides access rules)
       //var app = {'client_id': 'pCGEHXW0VQNrQKURDcGi0tghh7NwWGhW', // This is testrp social-ldap-pwless
       //           'authorized_users': ['gdestuynder@mozilla.com'],
@@ -243,49 +260,32 @@ exports.onExecutePostLogin = async (event, api) => {
       //           'aal': 'LOW'
       //          };
 
-      if (app.client_id && app.client_id.indexOf(event.client.client_id) >= 0) {
-        // AUTHORIZED_{GROUPS,USERS}
-        //
-        // XXX this authorized_users SHOULD BE REMOVED as it's unsafe (too
-        // easy to make mistakes). USE GROUPS.
-        //
-        // XXX This needs to be fixed in the dashboard first. Empty users
-        // or groups (length == 0) means no access in the dashboard
-        // apps.yml world.
-        if (
-          app.authorized_users.length === 0 &&
-          app.authorized_groups.length === 0
-        ) {
-          console.log(
-            `Access denied to ${event.client.client_id} for user ` +
-              `${event.user.email} (${event.user.user_id})` +
-              ` - this app denies ALL users and ALL groups")`
-          );
-          return deny("notingroup");
-        }
+      // AUTHORIZED_{GROUPS,USERS}
+      //
+      // XXX this authorized_users SHOULD BE REMOVED as it's unsafe (too
+      // easy to make mistakes). USE GROUPS.
 
-        // Check if the user is authorized to access.
-        // A user is authorized if they are a member of any authorized_groups
-        // or if they are one of the authorized_users.
-        if (
-          app.authorized_users.length > 0 &&
-          app.authorized_users.indexOf(event.user.email) >= 0
-        ) {
-          console.log(`${event.user.user_id} was in authorized_users`);
-          required_aal = app.AAL || default_aal;
-          authorized = true;
-          break;
-          // Same dance as above, but for groups
-        } else if (
-          app.authorized_groups.length > 0 &&
-          hasCommonElements(app.authorized_groups, groups)
-        ) {
-          console.log(`${event.user.user_id} was in authorized_groups`);
-          required_aal = app.AAL || default_aal;
-          authorized = true;
-          break;
-        }
-      } // correct client id / we matched the current RP
+      // Check if the user is authorized to access.
+      // A user is authorized if they are a member of any authorized_groups
+      // or if they are one of the authorized_users.
+      if (
+        app.authorized_users.length > 0 &&
+        app.authorized_users.indexOf(event.user.email) >= 0
+      ) {
+        console.log(`${event.user.user_id} was in authorized_users`);
+        required_aal = app.AAL || default_aal;
+        authorized = true;
+        break;
+        // Same dance as above, but for groups
+      } else if (
+        app.authorized_groups.length > 0 &&
+        hasCommonElements(app.authorized_groups, groups)
+      ) {
+        console.log(`${event.user.user_id} was in authorized_groups`);
+        required_aal = app.AAL || default_aal;
+        authorized = true;
+        break;
+      }
     } // for loop / next rule in apps.yml
 
     if (!authorized) {
