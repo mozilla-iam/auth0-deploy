@@ -62,6 +62,16 @@ apps:
     - team_moco
     - team_mofo
     authorized_users: []
+- application:
+    authorized_groups:
+    - restricted_group_1
+    authorized_users: []
+    client_id: client00000000000000000000000009
+- application:
+    authorized_groups:
+    - restricted_group_2
+    authorized_users: []
+    client_id: client00000000000000000000000009
 `;
     return appsYaml;
   },
