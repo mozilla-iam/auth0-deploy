@@ -140,7 +140,10 @@ describe("Matrix idToken tests", () => {
 });
 
 describe("Tines SAML tests", () => {
-  const clientIDs = ["cPH0znP4n74JvPf9Efc1w6O8KQWwT634"];
+  const clientIDs = [
+    "cPH0znP4n74JvPf9Efc1w6O8KQWwT634",
+    "cDof40r4Uvde1xGs8i30HYnekOkIglN6",
+  ];
 
   test.each(clientIDs)(
     "Ensure SAML configuration mappings for client %s",

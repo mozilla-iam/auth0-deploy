@@ -8,6 +8,7 @@ exports.onExecutePostLogin = async (event, api) => {
       break;
 
     case "cPH0znP4n74JvPf9Efc1w6O8KQWwT634": // Tines
+    case "cDof40r4Uvde1xGs8i30HYnekOkIglN6": // Tines SOAR
       // Only pass relative groups. These should match the authorized apps in apps.yml
       const tineGroups = [
         "mozilliansorg_sec_tines-admin",
