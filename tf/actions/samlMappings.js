@@ -1,5 +1,6 @@
 exports.onExecutePostLogin = async (event, api) => {
   console.log("Running actions:", "samlMappings");
+  const userGroups = event.user.app_metadata?.groups || [];
 
   switch (event.client.client_id) {
     case "pFf6sBIfp4n3Wcs3F9Q7a9ry8MTrbi2F": // matrix-oidc
@@ -20,7 +21,6 @@ exports.onExecutePostLogin = async (event, api) => {
         "team_mzai",
         "team_mzvc",
       ];
-      const userGroups = event.user.app_metadata?.groups || [];
       const selectGroups = tineGroups.filter((group) =>
         userGroups.includes(group)
       );
@@ -238,6 +238,84 @@ exports.onExecutePostLogin = async (event, api) => {
         );
       }
       api.samlResponse.setAttribute("cryptokey", cryptokey);
+      break;
+    case "JmJAOmGbtZsojMpFQC5fcmqghWHbuKrf": // Workato Workspace SSO
+      // The `*Prefix` consts should be kept in sync with PeopleMo and
+      // apps.yml. Since PeopleMo only deals with groups, we have to split
+      // up, by some convention, the difference between Roles and Groups as
+      // Workato expects them.
+      //
+      // Roles: can be either an Admin, Manager, or Member of an environment.
+      // For now, Bhee picked the easy route and default to Admin
+      // privileges, which means the following PeopleMo groups are special:
+      // * `mozilliansorg_workato_workspace_role-dev`
+      // * `mozilliansorg_workato_workspace_role-test`
+      // * `mozilliansorg_workato_workspace_role-prod`
+      //
+      // Groups: grants access to projects. These aren't that special, but do start with
+      // `mozilliansorg_workato_workspace_group-`.
+
+      // First the groups.
+      const workspaceGroupPrefix = "mozilliansorg_workato_workspace_group-";
+      const workspaceGroups = userGroups
+        .filter((g) => g.startsWith(workspaceGroupPrefix))
+        .map((g) => g.slice(workspaceGroupPrefix.length));
+      api.samlResponse.setAttribute("workato_user_groups", workspaceGroups);
+      // Now the roles.
+      const workspaceRolePrefix = "mozilliansorg_workato_workspace_role-";
+      const workspaceRoles = userGroups.filter((g) =>
+        g.startsWith(workspaceRolePrefix)
+      );
+      const workspaceRoleValue = "Environment admin";
+      // These mappings come from the docs:
+      // https://docs.workato.com/en/user-accounts-and-teams/saml-role-sync.html#:~:text=roles%29%2E-,In,access
+      // There are many mappings we'd need to care about, but for now Bhee's keeping it simple with:
+      //
+      // * dev - Admin
+      // * test - Admin
+      // * prod - Admin
+      //
+      // When the Workato team asks for more, we'll give them more.
+      for (const role of workspaceRoles) {
+        switch (role.slice(workspaceRolePrefix.length)) {
+          case "prod":
+            api.samlResponse.setAttribute(
+              "workato_role_prod",
+              workspaceRoleValue
+            );
+            break;
+          case "test":
+            api.samlResponse.setAttribute(
+              "workato_role_test",
+              workspaceRoleValue
+            );
+            break;
+          case "dev":
+            api.samlResponse.setAttribute("workato_role", workspaceRoleValue);
+            break;
+          default:
+            console.warn(
+              `(workato workspace) Unrecognized role ${role}, skipping.`
+            );
+            break;
+        }
+      }
+      break;
+    case "qXfKerLoU8w8FN76OB9Yt7I6w2N8lD2Y": // Workato Identity
+      // And similarly to above (Workato Workspace), Workato expects custom
+      // attributes to be set. We do some extra work to strip our internal
+      // group prefix.
+      const identityGroupPrefix = "mozilliansorg_workato_user-";
+      const identityGroups = userGroups
+        .filter((g) => g.startsWith(identityGroupPrefix))
+        .map((g) => g.slice(identityGroupPrefix.length));
+      const name =
+        event.user.given_name ||
+        event.user.name ||
+        event.user.email ||
+        "Unknown";
+      api.samlResponse.setAttribute("workato_end_user_name", name);
+      api.samlResponse.setAttribute("workato_end_user_groups", identityGroups);
       break;
   }
 
