@@ -590,3 +590,52 @@ describe("Braintree SAML tests", () => {
     }
   );
 });
+
+describe("Workato Workspace", () => {
+  const clientIDs = ["JmJAOmGbtZsojMpFQC5fcmqghWHbuKrf"];
+  test.each(clientIDs)(
+    "Ensure SAML configuration mappings for client %s",
+    async (clientID) => {
+      _event.user.app_metadata = {
+        groups: [
+          "mozilliansorg_workato_workspace_role-dev",
+          "mozilliansorg_workato_workspace_role-test",
+          "mozilliansorg_workato_workspace_role-prod",
+          "mozilliansorg_workato_workspace_group-foobar",
+        ],
+      };
+      _event.client.client_id = clientID;
+      const expectedSamlAttributes = {
+        workato_user_groups: ["foobar"],
+        workato_role: "Environment admin",
+        workato_role_test: "Environment admin",
+        workato_role_prod: "Environment admin",
+      };
+      // Execute onExecutePostLogin
+      await onExecutePostLogin(_event, api);
+      expect(api.samlResponse.setAttribute).toHaveBeenCalled();
+      expect(_samlAttributes).toEqual(expectedSamlAttributes);
+    }
+  );
+});
+
+describe("Workato Identity", () => {
+  const clientIDs = ["qXfKerLoU8w8FN76OB9Yt7I6w2N8lD2Y"];
+  test.each(clientIDs)(
+    "Ensure SAML configuration mappings for client %s",
+    async (clientID) => {
+      _event.user.app_metadata = {
+        groups: ["mozilliansorg_workato_user-end_user"],
+      };
+      _event.client.client_id = clientID;
+      const expectedSamlAttributes = {
+        workato_end_user_name: "John",
+        workato_end_user_groups: ["end_user"],
+      };
+      // Execute onExecutePostLogin
+      await onExecutePostLogin(_event, api);
+      expect(api.samlResponse.setAttribute).toHaveBeenCalled();
+      expect(_samlAttributes).toEqual(expectedSamlAttributes);
+    }
+  );
+});
