@@ -260,6 +260,10 @@ exports.onExecutePostLogin = async (event, api) => {
       const workspaceGroups = userGroups
         .filter((g) => g.startsWith(workspaceGroupPrefix))
         .map((g) => g.slice(workspaceGroupPrefix.length));
+      // We need to have at least one group defined.
+      if (!workspaceGroups.includes("default")) {
+        workspaceGroups.push("default");
+      }
       api.samlResponse.setAttribute("workato_user_groups", workspaceGroups);
       // Now the roles.
       const workspaceRolePrefix = "mozilliansorg_workato_workspace_role-";
@@ -309,6 +313,9 @@ exports.onExecutePostLogin = async (event, api) => {
       const identityGroups = userGroups
         .filter((g) => g.startsWith(identityGroupPrefix))
         .map((g) => g.slice(identityGroupPrefix.length));
+      if (!identityGroups.includes("default")) {
+        identityGroups.push("default");
+      }
       const name =
         event.user.given_name ||
         event.user.name ||

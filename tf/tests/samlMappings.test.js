@@ -606,7 +606,7 @@ describe("Workato Workspace", () => {
       };
       _event.client.client_id = clientID;
       const expectedSamlAttributes = {
-        workato_user_groups: ["foobar"],
+        workato_user_groups: ["foobar", "default"],
         workato_role: "Environment admin",
         workato_role_test: "Environment admin",
         workato_role_prod: "Environment admin",
@@ -630,7 +630,7 @@ describe("Workato Identity", () => {
       _event.client.client_id = clientID;
       const expectedSamlAttributes = {
         workato_end_user_name: "John",
-        workato_end_user_groups: ["end_user"],
+        workato_end_user_groups: ["end_user", "default"],
       };
       // Execute onExecutePostLogin
       await onExecutePostLogin(_event, api);
