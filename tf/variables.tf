@@ -4,9 +4,9 @@ variable "action_flow_dev" {
     "continueEndPoint",
     "samlMappings",
     "gheGroups",
+    "linkUserByEmail",
     "ensureLdapUsersUseLdap",
     "accessRules",
-    "linkUserByEmail",
     "activateNewUsersInCIS",
     "OIDCConformanceWorkaround",
     "configurationDumper"
@@ -19,10 +19,10 @@ variable "action_flow_prod" {
     "continueEndPoint",
     "samlMappings",
     "gheGroups",
+    "linkUserByEmail",
     "ensureLdapUsersUseLdap",
     "accessRules",
     "awsSaml",
-    "linkUserByEmail",
     "activateNewUsersInCIS",
     "OIDCConformanceWorkaround"
   ]
