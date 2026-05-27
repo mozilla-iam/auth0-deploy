@@ -41,10 +41,12 @@ exports.onExecutePostLogin = async (event, api) => {
   // is case sensitive, we need to search for both situations.  In the first search we search by "this" users email
   // which might be mixed case (or not).  Our second search is for the lowercase equivalent but only if two searches
   // would be different.
+  //
+  // This code only ever cares about accounts with verified email addresses.
   const searchMultipleEmailCases = async () => {
-    let userAccountsFound = [];
+    const userAccountsFound = [];
 
-    // Push the
+    // Push the results for the email as specified.
     userAccountsFound.push(
       mgmtClient.usersByEmail.getByEmail({ email: event.user.email })
     );
@@ -66,7 +68,7 @@ exports.onExecutePostLogin = async (event, api) => {
       return acc.concat(response.data);
     }, []);
 
-    return mergedDataProfiles;
+    return mergedDataProfiles.filter((u) => u.email_verified === true);
   };
 
   const linkAccount = async (primaryUser, secondaryUser) => {
@@ -98,10 +100,7 @@ exports.onExecutePostLogin = async (event, api) => {
   // Main
   try {
     // Search for multiple accounts of the same user to link
-    let userAccountList = await searchMultipleEmailCases();
-
-    // Ignore non-verified users
-    userAccountList = userAccountList.filter((u) => u.email_verified);
+    const userAccountList = await searchMultipleEmailCases();
 
     if (userAccountList.length <= 1) {
       // The user logged in with an identity which is the only one Auth0 knows about
