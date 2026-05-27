@@ -135,7 +135,7 @@ test("If one usersByEmail is found, expect no account linking", async () => {
   expect(api.authentication.setPrimaryUser).not.toHaveBeenCalled();
 });
 
-test("If two usersByEmail is found, expect account linking", async () => {
+test("If two usersByEmail are found, expect account linking when one is LDAP", async () => {
   // Define user profiles to return with usersByEmail.getByEmail
   users = [_ldapUser, _emailUser];
   _event.user = _ldapUser;
@@ -146,7 +146,30 @@ test("If two usersByEmail is found, expect account linking", async () => {
   // Execute onExecutePostLogin
   await onExecutePostLogin(_event, api);
 
-  // Expect linking not to have been called
+  // Expect linking to have been called
+  expect(mockManagementClient.users.link).toHaveBeenCalled();
+  expect(api.authentication.setPrimaryUser).toHaveBeenCalled();
+
+  // Collect console logs and expect searchString to exist in logs
+  const combinedLogs = combineLog(consoleLogSpy.mock.calls);
+  const searchString = `Linking secondary identity ${_emailUser.user_id} into primary identity ${_event.user.user_id}`;
+  expect(combinedLogs.some((element) => element.includes(searchString))).toBe(
+    true
+  );
+});
+
+test("If two usersByEmail are found, expect account linking even when neither are LDAP", async () => {
+  // Define user profiles to return with usersByEmail.getByEmail
+  users = [_emailUser, _firefoxaccountUser];
+  _event.user = _emailUser;
+
+  // Mock implementation of ManagementClient.usersByEmail.getByEmail()
+  mockManagementClient.usersByEmail.getByEmail.mockImplementation(getByEmail);
+
+  // Execute onExecutePostLogin
+  await onExecutePostLogin(_event, api);
+
+  // Expect linking to have been called
   expect(mockManagementClient.users.link).toHaveBeenCalled();
   expect(api.authentication.setPrimaryUser).toHaveBeenCalled();
 
