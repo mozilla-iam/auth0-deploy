@@ -70,8 +70,10 @@ exports.onExecutePostLogin = async (event, api) => {
   };
 
   const linkAccount = async (otherProfile) => {
-    // sanity check if both accounts have LDAP as primary
-    // we should NOT link these accounts and simply allow the user to continue logging in.
+    // sanity check if the logging-in account and the found account are both LDAP.
+    // We should never link two LDAP accounts.
+    // Also, this should never happen.  Like, why do we have two LDAPs and a collision?
+    // Log the event, and simply allow the user to continue logging in.
     if (
       event.user.user_id.startsWith("ad|Mozilla-LDAP") &&
       otherProfile.user_id.startsWith("ad|Mozilla-LDAP")
@@ -101,11 +103,12 @@ exports.onExecutePostLogin = async (event, api) => {
       `Linking secondary identity ${secondaryUser.user_id} into primary identity ${primaryUser.user_id}`
     );
 
-    // We no longer keep the user_metadata nor app_metadata from the secondary account
+    // CAUTION / DEBT?
+    // We do not keep the user_metadata or app_metadata from the secondary account
     // that is being linked.  If the primary account is LDAP, then its existing
-    // metadata should prevail.  And in the case of both, primary and secondary being
-    // non-ldap, account priority does not matter and neither does the metadata of
-    // the secondary account.
+    // metadata should prevail.  However, the merge of two non-LDAPs could be a
+    // long-lurking bug: if both accounts have groups on PMO, that completely desyncs
+    // from PMO and then nothing good will happen.
 
     // Link the accounts
     try {
