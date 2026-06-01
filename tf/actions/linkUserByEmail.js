@@ -110,12 +110,12 @@ exports.onExecutePostLogin = async (event, api) => {
     }
 
     // We found multiple user accounts.  Let's break it down:
-    var userAccountListLdapList = userAccountList.filter((u) => u.user_id.startsWith("ad|Mozilla-LDAP"))
+    const userAccountListLdapList = userAccountList.filter((u) => u.user_id.startsWith("ad|Mozilla-LDAP"))
 
     // There should never be more than one LDAP account found with the same name.
     // If there is, we wouldn't know what to do in automation, so log it.
     if (userAccountListLdapList.length > 1) {
-      var userstring = userAccountListLdapList.map(u => u.user_id).join(' ');
+      const userstring = userAccountListLdapList.map(u => u.user_id).join(' ');
       console.error(
         `Error: ${userstring} are LDAP Primary accounts. Linking will not occur.`
       );
@@ -156,16 +156,13 @@ exports.onExecutePostLogin = async (event, api) => {
 
     } else {
       // This is unnecessary but wards off any mistaken fallthroughs.
-      var error_message = "Impossible Default Case reached"
+      const error_message = "Impossible Default Case reached"
       console.error(error_message);
       throw new Error(error_message);
     }
 
-    for (var mergeProfile of mergeList) {
-      await linkAccount(
-        mainProfile,
-        mergeProfile,
-      );
+    for (const mergeProfile of mergeList) {
+      await linkAccount(mainProfile, mergeProfile);
     }
   } catch (err) {
     console.error("An error occurred while linking accounts:", err);

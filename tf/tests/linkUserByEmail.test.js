@@ -14,7 +14,7 @@ jest.mock("auth0");
 
 // Take all log enteries and combine them into a single array
 const combineLog = (consoleLogs) => {
-  let combinedLog = [];
+  const combinedLog = [];
   for (let i = 0; i < consoleLogs.length; i++) {
     singleStr = consoleLogs[i].join(" ");
     combinedLog.push(singleStr);
@@ -61,7 +61,7 @@ beforeEach(() => {
 
   // Mock sendUserTo
   api.redirect.sendUserTo.mockImplementation((uri) => {
-    _event.transaction["redirect_uri"] = uri;
+    _event.transaction.redirect_uri = uri;
   });
 
   // Mock implementation of ManagementClient
