@@ -66,7 +66,7 @@ resource "auth0_trigger_actions" "login_flow" {
 
 resource "auth0_action" "continueEndPoint" {
   name    = format("continueEndPoint")
-  runtime = "node18"
+  runtime = "node22"
   deploy  = true
   code    = file("${path.module}/actions/continueEndPoint.js")
 
@@ -78,7 +78,7 @@ resource "auth0_action" "continueEndPoint" {
 
 resource "auth0_action" "samlMappings" {
   name    = format("samlMappings")
-  runtime = "node18"
+  runtime = "node22"
   deploy  = true
   code    = file("${path.module}/actions/samlMappings.js")
 
@@ -97,7 +97,7 @@ resource "auth0_action" "samlMappings" {
 
 resource "auth0_action" "gheGroups" {
   name    = format("gheGroups")
-  runtime = "node18"
+  runtime = "node22"
   deploy  = true
   code    = file("${path.module}/actions/gheGroups.js")
 
@@ -134,7 +134,7 @@ resource "auth0_action" "gheGroups" {
 
 resource "auth0_action" "ensureLdapUsersUseLdap" {
   name    = format("ensureLdapUsersUseLdap")
-  runtime = "node18"
+  runtime = "node22"
   deploy  = true
   code    = file("${path.module}/actions/ensureLdapUsersUseLdap.js")
 
@@ -166,7 +166,7 @@ resource "auth0_action" "ensureLdapUsersUseLdap" {
 
 resource "auth0_action" "accessRules" {
   name    = format("accessRules")
-  runtime = "node18"
+  runtime = "node22"
   deploy  = true
   code    = file("${path.module}/actions/accessRules.js")
 
@@ -218,7 +218,7 @@ resource "auth0_action" "accessRules" {
 
 resource "auth0_action" "awsSaml" {
   name    = format("awsSaml")
-  runtime = "node18"
+  runtime = "node22"
   deploy  = true
   code    = file("${path.module}/actions/awsSaml.js")
 
@@ -287,7 +287,7 @@ resource "auth0_action" "awsSaml" {
 
 resource "auth0_action" "linkUserByEmail" {
   name    = format("linkUserByEmail")
-  runtime = "node18"
+  runtime = "node22"
   deploy  = true
   code    = file("${path.module}/actions/linkUserByEmail.js")
 
@@ -314,7 +314,7 @@ resource "auth0_action" "linkUserByEmail" {
 
 resource "auth0_action" "activateNewUsersInCIS" {
   name    = format("activateNewUsersInCIS")
-  runtime = "node18"
+  runtime = "node22"
   deploy  = true
   code    = file("${path.module}/actions/activateNewUsersInCIS.js")
 
@@ -376,7 +376,7 @@ resource "auth0_action" "activateNewUsersInCIS" {
 
 resource "auth0_action" "OIDCConformanceWorkaround" {
   name    = format("OIDCConformanceWorkaround")
-  runtime = "node18"
+  runtime = "node22"
   deploy  = true
   code    = file("${path.module}/actions/OIDCConformanceWorkaround.js")
 
@@ -388,7 +388,7 @@ resource "auth0_action" "OIDCConformanceWorkaround" {
 
 resource "auth0_action" "configurationDumper" {
   name    = format("configurationDumper")
-  runtime = "node18"
+  runtime = "node22"
   deploy  = true
   code    = file("${path.module}/actions/configurationDumper.js")
 
