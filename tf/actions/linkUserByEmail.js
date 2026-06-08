@@ -110,12 +110,16 @@ exports.onExecutePostLogin = async (event, api) => {
     }
 
     // We found multiple user accounts.  Let's break it down:
-    const userAccountListLdapList = userAccountList.filter((u) => u.user_id.startsWith("ad|Mozilla-LDAP"))
+    const userAccountListLdapList = userAccountList.filter((u) =>
+      u.user_id.startsWith("ad|Mozilla-LDAP")
+    );
 
     // There should never be more than one LDAP account found with the same name.
     // If there is, we wouldn't know what to do in automation, so log it.
     if (userAccountListLdapList.length > 1) {
-      const userstring = userAccountListLdapList.map(u => u.user_id).join(' ');
+      const userstring = userAccountListLdapList
+        .map((u) => u.user_id)
+        .join(" ");
       console.error(
         `Error: ${userstring} are LDAP Primary accounts. Linking will not occur.`
       );
@@ -128,16 +132,15 @@ exports.onExecutePostLogin = async (event, api) => {
     let mainProfile;
     let mergeList;
     if (userAccountListLdapList.length === 1) {
-
       // There is only one LDAP profile, so merge the non-LDAP users into the LDAP user.
       // This should be an obvious decision.
       // We do not keep the user_metadata or app_metadata from the secondary account(s).
       // The LDAP account's metadata should prevail.
-      mainProfile = userAccountListLdapList[0]
-      mergeList = userAccountList.filter((u) => !u.user_id.startsWith("ad|Mozilla-LDAP"))
-
+      mainProfile = userAccountListLdapList[0];
+      mergeList = userAccountList.filter(
+        (u) => !u.user_id.startsWith("ad|Mozilla-LDAP")
+      );
     } else if (userAccountListLdapList.length === 0) {
-
       // There is no LDAP profile, so merge into the other users into the current event's user.
       // Think about this one a bit.  Clearly if there was an LDAP user, we'd prefer that.
       //
@@ -151,12 +154,13 @@ exports.onExecutePostLogin = async (event, api) => {
       // CAUTION / DEBT?
       // The merge of two non-LDAPs could be a long-lurking bug: if both accounts have groups
       // on PMO, that completely desyncs from PMO and then nothing good will happen.
-      mainProfile = event.user
-      mergeList = userAccountList.filter((u) => u.user_id !== event.user.user_id)
-
+      mainProfile = event.user;
+      mergeList = userAccountList.filter(
+        (u) => u.user_id !== event.user.user_id
+      );
     } else {
       // This is unnecessary but wards off any mistaken fallthroughs.
-      const error_message = "Impossible Default Case reached"
+      const error_message = "Impossible Default Case reached";
       console.error(error_message);
       throw new Error(error_message);
     }
