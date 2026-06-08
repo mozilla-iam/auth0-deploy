@@ -37,5 +37,6 @@
   },
   "jest": {
     "automock": false
-  }
+  },
+  "packageManager": "pnpm@11.5.2"
 }
