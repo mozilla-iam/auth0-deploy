@@ -130,7 +130,7 @@ test("If two usersByEmail are found, expect account linking when one is LDAP", a
 
   // Expect linking to have been called
   expect(mockManagementClient.users.link).toHaveBeenCalled();
-  expect(api.authentication.setPrimaryUser).toHaveBeenCalled();
+  expect(api.authentication.setPrimaryUser).toHaveBeenCalledTimes(1);
   expect(_event.user.user_id).toEqual(_ldapUser.user_id);
 });
 
@@ -147,7 +147,7 @@ test("If two usersByEmail are found, expect account linking even when neither ar
 
   // Expect linking to have been called
   expect(mockManagementClient.users.link).toHaveBeenCalled();
-  expect(api.authentication.setPrimaryUser).toHaveBeenCalled();
+  expect(api.authentication.setPrimaryUser).toHaveBeenCalledTimes(1);
   expect(_event.user.user_id).toEqual(_emailUser.user_id);
 });
 
@@ -164,7 +164,7 @@ test("If more than 2 usersByEmail is found, expect account linking", async () =>
 
   // Expect linking to have been called
   expect(mockManagementClient.users.link).toHaveBeenCalledTimes(2);
-  expect(api.authentication.setPrimaryUser).toHaveBeenCalledTimes(2);
+  expect(api.authentication.setPrimaryUser).toHaveBeenCalledTimes(1);
   // The user_id should be the LDAP account.
   expect(_event.user.user_id).toEqual(_ldapUser.user_id);
 });
@@ -183,7 +183,7 @@ test("Test for email of different case, expect account linking", async () => {
 
   // Expect linking not to have been called
   expect(mockManagementClient.users.link).toHaveBeenCalled();
-  expect(api.authentication.setPrimaryUser).toHaveBeenCalled();
+  expect(api.authentication.setPrimaryUser).toHaveBeenCalledTimes(1);
 });
 
 test("Test for email of different case and where primary is swapped, expect account linking", async () => {
@@ -200,7 +200,7 @@ test("Test for email of different case and where primary is swapped, expect acco
 
   // Expect linking not to have been called
   expect(mockManagementClient.users.link).toHaveBeenCalled();
-  expect(api.authentication.setPrimaryUser).toHaveBeenCalled();
+  expect(api.authentication.setPrimaryUser).toHaveBeenCalledTimes(1);
 
   // Expect Primary user to be set to LDAP user
   expect(_event.user.user_id).toEqual(_ldapUser.user_id);

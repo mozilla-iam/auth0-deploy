@@ -85,10 +85,6 @@ exports.onExecutePostLogin = async (event, api) => {
           user_id: secondaryUser.identities[0].user_id,
         }
       );
-
-      // Auth0 Action api object provides a method for updating the current
-      // authenticated user to the new user_id after account linking has taken place
-      api.authentication.setPrimaryUser(primaryUser.user_id);
     } catch (err) {
       console.error("An unknown error occurred while linking accounts:", err);
       throw err;
@@ -168,6 +164,12 @@ exports.onExecutePostLogin = async (event, api) => {
     for (const mergeProfile of mergeList) {
       await linkAccount(mainProfile, mergeProfile);
     }
+
+    // Auth0 Action api object provides a method for updating the current
+    // authenticated user to the new user_id after account linking has taken place.
+    // This can only be called once per transaction, so we call it at the end
+    // once we've merged all profiles.
+    api.authentication.setPrimaryUser(mainProfile.user_id);
   } catch (err) {
     console.error("An error occurred while linking accounts:", err);
     return api.access.deny(err.message || String(err));
