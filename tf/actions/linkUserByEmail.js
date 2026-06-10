@@ -41,10 +41,12 @@ exports.onExecutePostLogin = async (event, api) => {
   // is case sensitive, we need to search for both situations.  In the first search we search by "this" users email
   // which might be mixed case (or not).  Our second search is for the lowercase equivalent but only if two searches
   // would be different.
+  //
+  // This code only ever cares about accounts with verified email addresses.
   const searchMultipleEmailCases = async () => {
-    let userAccountsFound = [];
+    const userAccountsFound = [];
 
-    // Push the
+    // Push the results for the email as specified.
     userAccountsFound.push(
       mgmtClient.usersByEmail.getByEmail({ email: event.user.email })
     );
@@ -66,48 +68,15 @@ exports.onExecutePostLogin = async (event, api) => {
       return acc.concat(response.data);
     }, []);
 
-    return mergedDataProfiles;
+    return mergedDataProfiles.filter((u) => u.email_verified === true);
   };
 
-  const linkAccount = async (otherProfile) => {
-    // sanity check if both accounts have LDAP as primary
-    // we should NOT link these accounts and simply allow the user to continue logging in.
-    if (
-      event.user.user_id.startsWith("ad|Mozilla-LDAP") &&
-      otherProfile.user_id.startsWith("ad|Mozilla-LDAP")
-    ) {
-      console.error(
-        `Error: both ${event.user.user_id} and ${otherProfile.user_id} are LDAP Primary accounts. Linking will not occur.`
-      );
-      return; // Continue with user login without account linking
-    }
-
-    // LDAP takes priority being the primary identity
-    // So we need to determine if one or neither are LDAP
-    // If both are non-primary, linking order doesn't matter
-    let primaryUser;
-    let secondaryUser;
-
-    if (event.user.user_id.startsWith("ad|Mozilla-LDAP")) {
-      primaryUser = event.user;
-      secondaryUser = otherProfile;
-    } else {
-      primaryUser = otherProfile;
-      secondaryUser = event.user;
-    }
-
+  const linkAccount = async (primaryUser, secondaryUser) => {
     // Link the secondary account into the primary account
     console.log(
       `Linking secondary identity ${secondaryUser.user_id} into primary identity ${primaryUser.user_id}`
     );
 
-    // We no longer keep the user_metadata nor app_metadata from the secondary account
-    // that is being linked.  If the primary account is LDAP, then its existing
-    // metadata should prevail.  And in the case of both, primary and secondary being
-    // non-ldap, account priority does not matter and neither does the metadata of
-    // the secondary account.
-
-    // Link the accounts
     try {
       await mgmtClient.users.link(
         { id: String(primaryUser.user_id) },
@@ -116,10 +85,6 @@ exports.onExecutePostLogin = async (event, api) => {
           user_id: secondaryUser.identities[0].user_id,
         }
       );
-
-      // Auth0 Action api object provides a method for updating the current
-      // authenticated user to the new user_id after account linking has taken place
-      api.authentication.setPrimaryUser(primaryUser.user_id);
     } catch (err) {
       console.error("An unknown error occurred while linking accounts:", err);
       throw err;
@@ -131,10 +96,7 @@ exports.onExecutePostLogin = async (event, api) => {
   // Main
   try {
     // Search for multiple accounts of the same user to link
-    let userAccountList = await searchMultipleEmailCases();
-
-    // Ignore non-verified users
-    userAccountList = userAccountList.filter((u) => u.email_verified);
+    const userAccountList = await searchMultipleEmailCases();
 
     if (userAccountList.length <= 1) {
       // The user logged in with an identity which is the only one Auth0 knows about
@@ -143,25 +105,71 @@ exports.onExecutePostLogin = async (event, api) => {
       return;
     }
 
-    if (userAccountList.length === 2) {
-      // Auth0 is aware of 2 identities with the same email address which means
-      // that the user just logged in with a new identity that hasn't been linked
-      // into the other existing identity.  Here we pass the other account to the
-      // linking function
+    // We found multiple user accounts.  Let's break it down:
+    const userAccountListLdapList = userAccountList.filter((u) =>
+      u.user_id.startsWith("ad|Mozilla-LDAP")
+    );
 
-      await linkAccount(
-        userAccountList.filter((u) => u.user_id !== event.user.user_id)[0]
+    // There should never be more than one LDAP account found with the same name.
+    // If there is, we wouldn't know what to do in automation, so log it.
+    if (userAccountListLdapList.length > 1) {
+      const userstring = userAccountListLdapList
+        .map((u) => u.user_id)
+        .join(" ");
+      console.error(
+        `Error: ${userstring} are LDAP Primary accounts. Linking will not occur.`
+      );
+      return; // Continue with user login without account linking
+    }
+
+    // While it's unlikely we'll ever need to merge many accounts in one go, 2024-2026 proved
+    // we can absolutely get ourselves into such a situation, so let's fix that.  Allow
+    // multiple merges into one main profile.
+    let mainProfile;
+    let mergeList;
+    if (userAccountListLdapList.length === 1) {
+      // There is only one LDAP profile, so merge the non-LDAP users into the LDAP user.
+      // This should be an obvious decision.
+      // We do not keep the user_metadata or app_metadata from the secondary account(s).
+      // The LDAP account's metadata should prevail.
+      mainProfile = userAccountListLdapList[0];
+      mergeList = userAccountList.filter(
+        (u) => !u.user_id.startsWith("ad|Mozilla-LDAP")
+      );
+    } else if (userAccountListLdapList.length === 0) {
+      // There is no LDAP profile, so merge into the other users into the current event's user.
+      // Think about this one a bit.  Clearly if there was an LDAP user, we'd prefer that.
+      //
+      // But here, you have a kind of 'now what?' path.   Do you:
+      // * merge an older user into the current-event user?  You risk losing any metadata
+      // from an older user.
+      // * merge the current user into an older user?  You basically prefer the first user
+      // identity that was ever found, and never move off of it.
+      //
+      // Honestly, there's no good choice here.  Each has pitfalls.
+      // CAUTION / DEBT?
+      // The merge of two non-LDAPs could be a long-lurking bug: if both accounts have groups
+      // on PMO, that completely desyncs from PMO and then nothing good will happen.
+      mainProfile = event.user;
+      mergeList = userAccountList.filter(
+        (u) => u.user_id !== event.user.user_id
       );
     } else {
-      // data.length is > 2 which, post November 2020 when all identities were
-      // force linked manually, shouldn't be possible
-      var error_message =
-        `Error linking account ${event.user.user_id} as there are ` +
-        `over 2 identities with the email address ${event.user.email} ` +
-        userAccountList.map((x) => x.user_id).join();
+      // This is unnecessary but wards off any mistaken fallthroughs.
+      const error_message = "Impossible Default Case reached";
       console.error(error_message);
       throw new Error(error_message);
     }
+
+    for (const mergeProfile of mergeList) {
+      await linkAccount(mainProfile, mergeProfile);
+    }
+
+    // Auth0 Action api object provides a method for updating the current
+    // authenticated user to the new user_id after account linking has taken place.
+    // This can only be called once per transaction, so we call it at the end
+    // once we've merged all profiles.
+    api.authentication.setPrimaryUser(mainProfile.user_id);
   } catch (err) {
     console.error("An error occurred while linking accounts:", err);
     return api.access.deny(err.message || String(err));
