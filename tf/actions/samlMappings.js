@@ -1,38 +1,10 @@
 exports.onExecutePostLogin = async (event, api) => {
   console.log("Running actions:", "samlMappings");
   const userGroups = event.user.app_metadata?.groups || [];
-
   switch (event.client.client_id) {
     case "pFf6sBIfp4n3Wcs3F9Q7a9ry8MTrbi2F": // matrix-oidc
       const preferred_username = event.user.email.split("@")[0];
       api.idToken.setCustomClaim("preferred_username", preferred_username);
-      break;
-
-    case "cPH0znP4n74JvPf9Efc1w6O8KQWwT634": // Tines
-    case "cDof40r4Uvde1xGs8i30HYnekOkIglN6": // Tines SOAR
-      // Only pass relative groups. These should match the authorized apps in apps.yml
-      const tineGroups = [
-        "mozilliansorg_sec_tines-admin",
-        "mozilliansorg_sec_tines-access",
-        "team_moco",
-        "team_mofo",
-        "team_mozorg",
-        "team_mzla",
-        "team_mzai",
-        "team_mzvc",
-      ];
-      const selectGroups = tineGroups.filter((group) =>
-        userGroups.includes(group)
-      );
-      api.samlResponse.setAttribute(
-        "http://sso.mozilla.com/claim/groups",
-        selectGroups
-      );
-      // DELETE the standard group claim
-      api.samlResponse.setAttribute(
-        "http://schemas.xmlsoap.org/claims/Group",
-        null
-      );
       break;
 
     case "wgh8S9GaE7sJ4i0QrAzeMxFXgWZYtB0l": // sage-intacct
