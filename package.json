@@ -33,9 +33,10 @@
     "jsonwebtoken": "^9.0.2"
   },
   "engines": {
-    "node": ">=18.0.0 <23.0.0"
+    "node": ">=22.0.0 <23.0.0"
   },
   "jest": {
     "automock": false
-  }
+  },
+  "packageManager": "pnpm@11.5.2"
 }
