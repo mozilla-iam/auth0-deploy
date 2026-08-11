@@ -191,18 +191,33 @@ resource "auth0_action" "accessRules" {
   }
 
   secrets {
-    name  = "duo_apihost_mozilla"
-    value = local.parsed_secrets["duoSecurity_duo_apihost"]
+    name  = "duo_apihost_mozilla_medium"
+    value = local.parsed_secrets["duoSecurity_duo_apihost_medium"]
   }
 
   secrets {
-    name  = "duo_ikey_mozilla"
-    value = local.parsed_secrets["duoSecurity_duo_ikey"]
+    name  = "duo_ikey_mozilla_medium"
+    value = local.parsed_secrets["duoSecurity_duo_ikey_medium"]
   }
 
   secrets {
-    name  = "duo_skey_mozilla"
-    value = local.parsed_secrets["duoSecurity_duo_skey"]
+    name  = "duo_skey_mozilla_medium"
+    value = local.parsed_secrets["duoSecurity_duo_skey_medium"]
+  }
+
+  secrets {
+    name  = "duo_apihost_mozilla_high"
+    value = local.parsed_secrets["duoSecurity_duo_apihost_high"]
+  }
+
+  secrets {
+    name  = "duo_ikey_mozilla_high"
+    value = local.parsed_secrets["duoSecurity_duo_ikey_high"]
+  }
+
+  secrets {
+    name  = "duo_skey_mozilla_high"
+    value = local.parsed_secrets["duoSecurity_duo_skey_high"]
   }
 
   secrets {
