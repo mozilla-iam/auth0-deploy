@@ -656,3 +656,90 @@ describe("Client is defined multiple times in apps.yml as client0000000000000000
     );
   });
 });
+
+describe("Clients declaring step_up", () => {
+  const ldap = {
+    id: "con_qVLhpUZQxluxX5kN",
+    metadata: {},
+    name: "Mozilla-LDAP-Dev",
+    strategy: "ad",
+  };
+  const duoCalledWithIkey = (ikey) =>
+    expect(api.multifactor.enable).toHaveBeenCalledWith(
+      "duo",
+      expect.objectContaining({
+        providerOptions: expect.objectContaining({ ikey }),
+      })
+    );
+
+  beforeEach(() => {
+    _event.connection = ldap;
+    _event.user.multifactor = ["duo"];
+    _event.secrets.duo_ikey_mozilla = "ikey-default";
+    _event.secrets.duo_ikey_mozilla_webauthn = "ikey-webauthn";
+    _event.secrets.duo_ikey_mozilla_roam = "ikey-roam";
+    _event.user.ldap_groups = [];
+    _event.user.app_metadata.groups = [];
+    _event.transaction.redirect_uri = undefined;
+  });
+
+  test("Member of matching_groups; Duo uses WEBAUTHN provider options", async () => {
+    _event.client.client_id = "client00000000000000000000000010";
+    _event.user.groups = ["fakegroup2"];
+    await onExecutePostLogin(_event, api);
+    expect(_event.transaction.redirect_uri).toBeUndefined();
+    duoCalledWithIkey("ikey-webauthn");
+  });
+
+  test("Authorized but not in matching_groups; Duo uses default options", async () => {
+    _event.client.client_id = "client00000000000000000000000010";
+    _event.user.groups = ["fakegroup1"];
+    await onExecutePostLogin(_event, api);
+    expect(_event.transaction.redirect_uri).toBeUndefined();
+    duoCalledWithIkey("ikey-default");
+  });
+
+  test("Listed in matching_users; Duo uses ROAMAUTH provider options", async () => {
+    _event.client.client_id = "client00000000000000000000000011";
+    _event.user.email = "joe@mozilla.com";
+    _event.user.groups = [];
+    await onExecutePostLogin(_event, api);
+    expect(_event.transaction.redirect_uri).toBeUndefined();
+    duoCalledWithIkey("ikey-roam");
+  });
+
+  test("Not in matching_users; Duo uses default options", async () => {
+    _event.client.client_id = "client00000000000000000000000011";
+    _event.user.email = "jane@mozilla.com";
+    _event.user.groups = [];
+    await onExecutePostLogin(_event, api);
+    expect(_event.transaction.redirect_uri).toBeUndefined();
+    duoCalledWithIkey("ikey-default");
+  });
+
+  test("Matching user on refresh token flow; no MFA challenge", async () => {
+    _event.client.client_id = "client00000000000000000000000011";
+    _event.user.email = "joe@mozilla.com";
+    _event.user.groups = [];
+    _event.transaction.protocol = "oauth2-refresh-token";
+    await onExecutePostLogin(_event, api);
+    expect(api.multifactor.enable).not.toHaveBeenCalled();
+  });
+
+  // This test is supposed to capture that we're unable to apply step-up to
+  // non-LDAP identities.
+  //
+  // Non-LDAP folks _don't_ have `multifactor: ["duo"]` in their profile, etc,
+  // and we rely in the upstream IdP to tell us if they MFA'd or not.
+  //
+  // Service accounts which _don't_ use LDAP will likely fall into this case.
+  test("Matching user on non-LDAP connection; no Duo, access granted", async () => {
+    _event.connection = _.cloneDeep(eventObj).connection;
+    _event.client.client_id = "client00000000000000000000000011";
+    _event.user.email = "joe@mozilla.com";
+    _event.user.groups = [];
+    await onExecutePostLogin(_event, api);
+    expect(_event.transaction.redirect_uri).toBeUndefined();
+    expect(api.multifactor.enable).not.toHaveBeenCalled();
+  });
+});

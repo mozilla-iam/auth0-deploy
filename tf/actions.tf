@@ -206,6 +206,26 @@ resource "auth0_action" "accessRules" {
   }
 
   secrets {
+    name  = "duo_ikey_mozilla_roam"
+    value = local.parsed_secrets["duoSecurity_duo_ikey_roam"]
+  }
+
+  secrets {
+    name  = "duo_skey_mozilla_roam"
+    value = local.parsed_secrets["duoSecurity_duo_skey_roam"]
+  }
+
+  secrets {
+    name  = "duo_ikey_mozilla_webauthn"
+    value = local.parsed_secrets["duoSecurity_duo_ikey_webauthn"]
+  }
+
+  secrets {
+    name  = "duo_skey_mozilla_webauthn"
+    value = local.parsed_secrets["duoSecurity_duo_skey_webauthn"]
+  }
+
+  secrets {
     name  = "accessKeyId"
     value = local.parsed_secrets["accessRules_accessKeyId"]
   }
