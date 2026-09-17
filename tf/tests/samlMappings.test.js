@@ -374,7 +374,7 @@ describe("Acoustic SAML tests", () => {
     async (clientID) => {
       _event.client.client_id = clientID;
 
-      expectedSamlAttributes = {
+      const expectedSamlAttributes = {
         Nameid: _event.user.email,
         email: _event.user.email,
         firstName: _event.user.given_name,
