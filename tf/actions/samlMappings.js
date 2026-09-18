@@ -99,6 +99,9 @@ exports.onExecutePostLogin = async (event, api) => {
           roles: [{ role: "view_only", account: "acct_1EJOaaJNcmPzuWtR" }],
         },
       ];
+      // Each user may have multiple roles assigned to them per account.
+      // We gather each of their assigned roles, and then assert it afterwards.
+      const accountRoles = {};
       for (const rule of groupToRoles) {
         const usersAllowed = rule.users ?? [];
         const isAllowedByEmail = usersAllowed.includes(event.user.email);
@@ -106,12 +109,18 @@ exports.onExecutePostLogin = async (event, api) => {
         if (!(isAllowedByEmail || isAllowedByGroup)) {
           continue;
         }
+        // Gather the user's roles in each account.
         for (const role of rule.roles) {
-          api.samlResponse.setAttribute(
-            `Stripe-Role-${role.account}`,
-            role.role
-          );
+          const account = `Stripe-Role-${role.account}`;
+          if (account in accountRoles) {
+            accountRoles[account].push(role.role);
+          } else {
+            accountRoles[account] = [role.role];
+          }
         }
+      }
+      for (const account in accountRoles) {
+        api.samlResponse.setAttribute(account, accountRoles[account]);
       }
       break;
     }

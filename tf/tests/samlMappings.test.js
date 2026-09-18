@@ -332,7 +332,7 @@ describe("Stripe-Subplat SAML tests", () => {
         _event.user.app_metadata.groups = _event.user.app_metadata.groups || [];
         _event.user.app_metadata.groups.push(group);
         expectedSamlAttributes = {
-          "Stripe-Role-acct_1EJOaaJNcmPzuWtR": role,
+          "Stripe-Role-acct_1EJOaaJNcmPzuWtR": [role],
         };
       } else {
         delete _event.user.groups;
@@ -355,7 +355,21 @@ describe("Stripe-Subplat SAML tests", () => {
     _event.client.client_id = "cEfnJekrSStxxxBascTjNEDAZVUPAIU2";
     _event.user.email = "araccounting@mozilla.com";
     const expectedSamlAttributes = {
-      "Stripe-Role-acct_1EJOaaJNcmPzuWtR": "admin",
+      "Stripe-Role-acct_1EJOaaJNcmPzuWtR": ["admin"],
+    };
+    await onExecutePostLogin(_event, api);
+    expect(api.samlResponse.setAttribute).toHaveBeenCalled();
+    expect(_samlAttributes).toEqual(expectedSamlAttributes);
+  });
+
+  test("User with multiple roles", async () => {
+    _event.client.client_id = "cEfnJekrSStxxxBascTjNEDAZVUPAIU2";
+    _event.user.app_metadata.groups = [
+      "mozilliansorg_stripe_subplat_analyst",
+      "mozilliansorg_stripe_subplat_viewonly",
+    ];
+    const expectedSamlAttributes = {
+      "Stripe-Role-acct_1EJOaaJNcmPzuWtR": ["analyst", "view_only"],
     };
     await onExecutePostLogin(_event, api);
     expect(api.samlResponse.setAttribute).toHaveBeenCalled();
@@ -374,7 +388,7 @@ describe("Acoustic SAML tests", () => {
     async (clientID) => {
       _event.client.client_id = clientID;
 
-      expectedSamlAttributes = {
+      const expectedSamlAttributes = {
         Nameid: _event.user.email,
         email: _event.user.email,
         firstName: _event.user.given_name,
