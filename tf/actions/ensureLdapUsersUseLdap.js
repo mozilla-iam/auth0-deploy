@@ -89,6 +89,18 @@ exports.onExecutePostLogin = async (event, api) => {
     "jijaIzcZmFCDRtV74scMb9lI87MtYNTA", // mozillians.org Verification Client
   ];
 
+  // Service (bot) identities exempt from LDAP enforcement
+  // https://bugzilla.mozilla.org/show_bug.cgi?id=2072995
+  const SERVICE_ACCOUNT_EXEMPTIONS = {
+    // See also denyRegistrationByEmail.js
+    // Matrix, IAM-1617
+    pFf6sBIfp4n3Wcs3F9Q7a9ry8MTrbi2F: [
+      "taskcluster-accounts+community@mozilla.com",
+      "taskcluster-accounts+firefoxci@mozilla.com",
+      "taskcluster-accounts+staging@mozilla.com",
+    ],
+  };
+
   // The domain strings in this array should always be declared here in lowercase
   const MOZILLA_STAFF_DOMAINS = [
     "mozilla.com", // Main corp domain
@@ -120,6 +132,15 @@ exports.onExecutePostLogin = async (event, api) => {
 
   // 'ad' is LDAP - Force LDAP users to log with LDAP here
   if (event.connection.strategy !== "ad") {
+    const email = event.user.email.toLowerCase();
+    const exemptEmails =
+      SERVICE_ACCOUNT_EXEMPTIONS[event.client.client_id] || [];
+    if (event.user.email_verified && exemptEmails.includes(email)) {
+      console.log(
+        `Service account ${email} is exempt from LDAP enforcement for client ${event.client.client_id}`
+      );
+      return;
+    }
     for (let domain of MOZILLA_STAFF_DOMAINS) {
       // we need to sanitize the email address to lowercase before matching so we can catch users with upper/mixed case email addresses
       if (event.user.email.toLowerCase().endsWith(domain)) {
