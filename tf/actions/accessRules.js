@@ -38,6 +38,46 @@ const RISK_LEVELS = {
   MAXIMUM: ["MAXIMUM_NOT_IMPLEMENTED"],
 };
 
+// Each `requiredAal` is a separate Duo application whose policy guarantees
+// that indicator. There are only three supported indicator apps defined:
+//
+// * WEBAUTHN: platform authenticators, roaming authenticators;
+// * ROAMAUTH: only roaming authenticators;
+// * the default, which allows a variety.
+//
+// Only the default indicator will remember the user, because authorizing with
+// a stricter policy is fine.
+const duoProviderOptions = (email, secrets, requiredAal) => {
+  if (requiredAal === "WEBAUTHN") {
+    return {
+      providerOptions: {
+        host: secrets.duo_apihost_mozilla,
+        ikey: secrets.duo_ikey_mozilla_webauthn,
+        skey: secrets.duo_skey_mozilla_webauthn,
+      },
+      allowRememberBrowser: false,
+    };
+  } else if (requiredAal === "ROAMAUTH") {
+    return {
+      providerOptions: {
+        host: secrets.duo_apihost_mozilla,
+        ikey: secrets.duo_ikey_mozilla_roam,
+        skey: secrets.duo_skey_mozilla_roam,
+      },
+      allowRememberBrowser: false,
+    };
+  }
+  return {
+    providerOptions: {
+      host: secrets.duo_apihost_mozilla,
+      ikey: secrets.duo_ikey_mozilla,
+      skey: secrets.duo_skey_mozilla,
+      username: email,
+    },
+    allowRememberBrowser: true,
+  };
+};
+
 exports.onExecutePostLogin = async (event, api) => {
   console.log("Running actions:", "accessRules");
 
@@ -137,13 +177,6 @@ exports.onExecutePostLogin = async (event, api) => {
     "moc-sso-monitoring@mozilla.com", // MOC see: https://bugzilla.mozilla.org/show_bug.cgi?id=1423903
     "shared-deng-playstore@mozilla.com", // See: https://mozilla-hub.atlassian.net/browse/IAM-1938
   ];
-
-  const duoConfig = {
-    host: event.secrets.duo_apihost_mozilla,
-    ikey: event.secrets.duo_ikey_mozilla,
-    skey: event.secrets.duo_skey_mozilla,
-    username: event.user.email,
-  };
 
   // Check if array A has any occurrence from array B
   const hasCommonElements = (A, B) => {
@@ -255,6 +288,9 @@ exports.onExecutePostLogin = async (event, api) => {
     // be trusted with at least this risk level.
     let risk;
 
+    // The apps.yml entry which authorized the user.
+    let matched_app;
+
     // Only look at rules which match our client_id.
     const apps = access_rules
       .filter(
@@ -311,6 +347,7 @@ exports.onExecutePostLogin = async (event, api) => {
         console.log(`${event.user.user_id} was in authorized_users`);
         risk = app.AAL || risk_default;
         authorized = true;
+        matched_app = app;
         break;
         // Same dance as above, but for groups
       } else if (
@@ -320,6 +357,7 @@ exports.onExecutePostLogin = async (event, api) => {
         console.log(`${event.user.user_id} was in authorized_groups`);
         risk = app.AAL || risk_default;
         authorized = true;
+        matched_app = app;
         break;
       }
     } // for loop / next rule in apps.yml
@@ -331,6 +369,36 @@ exports.onExecutePostLogin = async (event, api) => {
           "authorized group or not an authorized user"
       );
       return deny("notingroup");
+    }
+
+    // STEP-UP
+    //
+    // An app may declare that some authorized users or groups need a stronger
+    // second factor. When the user matches, the required indicator selects
+    // which Duo application they're sent to.
+    //
+    // These values are somewhat trusted, because we have tests in
+    // sso-dashboard-configuration.
+    const stepUpIndicator = (step_up) => {
+      if (step_up === undefined) {
+        return undefined;
+      }
+      const userMatches = (step_up.matching_users ?? []).includes(
+        event.user.email
+      );
+      const groupMatches = hasCommonElements(
+        step_up.matching_groups ?? [],
+        groups
+      );
+      const matches = userMatches || groupMatches;
+      return matches ? step_up.required_indicator : undefined;
+    };
+
+    const requiredIndicator = stepUpIndicator(matched_app.step_up);
+    if (requiredIndicator !== undefined) {
+      console.log(
+        `step-up: ${event.user.email} requires ${requiredIndicator} for ${event.client.client_id}`
+      );
     }
 
     // AAI (AUTHENTICATOR ASSURANCE INDICATOR)
@@ -467,6 +535,7 @@ exports.onExecutePostLogin = async (event, api) => {
       enableDuo,
       aai,
       trust,
+      requiredIndicator,
     };
   };
 
@@ -496,10 +565,14 @@ exports.onExecutePostLogin = async (event, api) => {
 
     if (decision.granted) {
       if (decision.enableDuo && !isRefreshTokenFlow) {
-        api.multifactor.enable("duo", {
-          providerOptions: duoConfig,
-          allowRememberBrowser: true,
-        });
+        api.multifactor.enable(
+          "duo",
+          duoProviderOptions(
+            event.user.email,
+            event.secrets,
+            decision.requiredIndicator
+          )
+        );
       }
       // Set groups, AAI, and AAL claims in idToken
       api.idToken.setCustomClaim(`${namespace}/AAI`, decision.aai);

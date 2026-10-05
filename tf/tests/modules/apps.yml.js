@@ -74,6 +74,29 @@ apps:
     - restricted_group_2
     authorized_users: []
     client_id: client00000000000000000000000009
+- application:
+    # step_up by group
+    authorized_groups:
+    - fakegroup1
+    - fakegroup2
+    authorized_users: []
+    client_id: client00000000000000000000000010
+    step_up:
+      matching_users: []
+      matching_groups:
+      - fakegroup2
+      required_indicator: WEBAUTHN
+- application:
+    # step_up by user
+    authorized_groups:
+    - everyone
+    authorized_users: []
+    client_id: client00000000000000000000000011
+    step_up:
+      matching_users:
+      - joe@mozilla.com
+      matching_groups: []
+      required_indicator: ROAMAUTH
 `;
     return appsYaml;
   },
