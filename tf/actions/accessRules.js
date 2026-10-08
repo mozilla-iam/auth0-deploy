@@ -133,7 +133,6 @@ exports.onExecutePostLogin = async (event, api) => {
 
   // MFA bypass for special service accounts
   const mfaBypassAccounts = [
-    "moc+servicenow@mozilla.com", // MOC see: https://bugzilla.mozilla.org/show_bug.cgi?id=1423903
     "moc-sso-monitoring@mozilla.com", // MOC see: https://bugzilla.mozilla.org/show_bug.cgi?id=1423903
     "shared-deng-playstore@mozilla.com", // See: https://mozilla-hub.atlassian.net/browse/IAM-1938
   ];
