@@ -310,7 +310,9 @@ exports.onExecutePostLogin = async (event, api) => {
   };
 
   const bail = (errorCode) => {
-    const gheWikiUrl = new URL("https://wiki.mozilla.org/GitHub/SAML_issues");
+    const gheWikiUrl = new URL(
+      "https://mozilla-hub.atlassian.net/wiki/x/QoDLuw"
+    );
     gheWikiUrl.searchParams.set("auth", event.tenant.id);
     gheWikiUrl.searchParams.set("dbg", errorCode);
     return api.access.deny(`Access denied: See ${gheWikiUrl.href}`);
