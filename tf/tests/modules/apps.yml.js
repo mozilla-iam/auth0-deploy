@@ -74,6 +74,19 @@ apps:
     - restricted_group_2
     authorized_users: []
     client_id: client00000000000000000000000009
+- application:
+    AAL: MEDIUM
+    authorized_groups:
+    - team_moco
+    authorized_users: []
+    client_id: client00000000000000000000000010
+- application:
+    AAL: MEDIUM
+    AAI: HWK
+    authorized_groups:
+    - restricted_group_1
+    authorized_users: []
+    client_id: client00000000000000000000000010
 `;
     return appsYaml;
   },
