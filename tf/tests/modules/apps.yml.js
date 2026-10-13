@@ -97,6 +97,17 @@ apps:
       - joe@mozilla.com
       matching_groups: []
       required_indicator: ROAMAUTH
+- application:
+    # disjoint step-up by group
+    authorized_groups:
+    - fakegroup1
+    authorized_users: []
+    client_id: client00000000000000000000000012
+    step_up:
+      matching_users: []
+      matching_groups:
+      - fakegroup2
+      required_indicator: ROAMAUTH
 `;
     return appsYaml;
   },

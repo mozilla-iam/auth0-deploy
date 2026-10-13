@@ -742,4 +742,15 @@ describe("Clients declaring step_up", () => {
     expect(_event.transaction.redirect_uri).toBeUndefined();
     expect(api.multifactor.enable).not.toHaveBeenCalled();
   });
+
+  test("User not in app and in step-up; access denied", async () => {
+    _event.client.client_id = "client00000000000000000000000012";
+    _event.user.email = "joe@mozilla.com";
+    _event.user.groups = ["fakegroup2"];
+    await onExecutePostLogin(_event, api);
+    expect(_event.transaction.redirect_uri).toBeDefined();
+    expect(decodeRedirect(_event.transaction.redirect_uri)).toEqual(
+      "notingroup"
+    );
+  });
 });
