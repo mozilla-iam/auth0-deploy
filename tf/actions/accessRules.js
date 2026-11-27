@@ -38,6 +38,10 @@ const RISK_LEVELS = {
   MAXIMUM: ["MAXIMUM_NOT_IMPLEMENTED"],
 };
 
+// Namespaces are how we ensure there are no conflicts between the base
+// claims and our custom claims.
+const NAMESPACE = "https://sso.mozilla.com/claim";
+
 // Each `requiredAal` is a separate Duo application whose policy guarantees
 // that indicator. There are only three supported indicator apps defined:
 //
@@ -78,6 +82,27 @@ const duoProviderOptions = (email, secrets, requiredAal) => {
     },
     allowRememberBrowser: true,
   };
+};
+
+const fixup_needed = (scope) => {
+  return scope === "profile" || scope.startsWith("https://");
+};
+
+// Sometimes we need to add custom claims to the various tokens we hand
+// out.
+const groupsSetCustomClaims = (api, client_id, scopes, groups) => {
+  // If the only scopes requested are neither profile nor any scope beginning with
+  // https:// then do not overload with custom claims
+  if (!scopes.some(fixup_needed)) {
+    return;
+  }
+  console.log(
+    `Client ${client_id} requested ${scopes}, therefore adding custom claims`
+  );
+  api.idToken.setCustomClaim("email_aliases", undefined);
+  api.idToken.setCustomClaim("dn", undefined);
+  api.idToken.setCustomClaim("organizationUnits", undefined);
+  api.idToken.setCustomClaim(`${NAMESPACE}/groups`, groups);
 };
 
 exports.onExecutePostLogin = async (event, api) => {
@@ -171,8 +196,6 @@ exports.onExecutePostLogin = async (event, api) => {
     return;
   }
 
-  const namespace = "https://sso.mozilla.com/claim";
-
   // MFA bypass for special service accounts
   const mfaBypassAccounts = [
     "moc-sso-monitoring@mozilla.com", // MOC see: https://bugzilla.mozilla.org/show_bug.cgi?id=1423903
@@ -194,32 +217,6 @@ exports.onExecutePostLogin = async (event, api) => {
       }
     }
     return undefined;
-  };
-
-  // Sometimes we need to add custom claims to the various tokens we hand
-  // out.
-  const groupsSetCustomClaims = (groups) => {
-    // If the only scopes requested are neither profile nor any scope beginning with
-    // https:// then do not overload with custom claims
-    const scopes_requested = event.transaction.requested_scopes || [];
-
-    const fixup_needed = (scope) => {
-      return scope === "profile" || scope.startsWith("https://");
-    };
-
-    if (scopes_requested.some(fixup_needed)) {
-      console.log(
-        `Client ${event.client.client_id} requested ${scopes_requested}, therefore adding custom claims`
-      );
-      api.idToken.setCustomClaim("email_aliases", undefined);
-      api.idToken.setCustomClaim("dn", undefined);
-      api.idToken.setCustomClaim("organizationUnits", undefined);
-      api.idToken.setCustomClaim(`${namespace}/groups`, groups);
-
-      const claimMsg =
-        "Please refer to https://github.com/mozilla-iam/person-api in order to query Mozilla IAM CIS user profile data";
-      api.idToken.setCustomClaim(`${namespace}/README_FIRST`, claimMsg);
-    }
   };
 
   // Collect all variations of groups and merge them together for access
@@ -564,6 +561,18 @@ exports.onExecutePostLogin = async (event, api) => {
     const isRefreshTokenFlow =
       event.transaction?.protocol === "oauth2-refresh-token";
 
+    // Scopes come from a different place if we're refreshing a token.
+    const scopes = [];
+
+    if (isRefreshTokenFlow) {
+      const scopes_previous = event.refresh_token.resource_servers
+        .filter((rs) => rs.audience === event.resource_server.identifier)
+        .flatMap((rs) => rs.scopes.split(" "));
+      scopes.push(...scopes_previous);
+    } else {
+      scopes.push(...event.transaction.requested_scopes);
+    }
+
     if (decision.granted) {
       if (decision.enableDuo && !isRefreshTokenFlow) {
         api.multifactor.enable(
@@ -575,10 +584,11 @@ exports.onExecutePostLogin = async (event, api) => {
           )
         );
       }
+
       // Set groups, AAI, and AAL claims in idToken
-      api.idToken.setCustomClaim(`${namespace}/AAI`, decision.aai);
-      api.idToken.setCustomClaim(`${namespace}/AAL`, decision.trust);
-      groupsSetCustomClaims(groups);
+      api.idToken.setCustomClaim(`${NAMESPACE}/AAI`, decision.aai);
+      api.idToken.setCustomClaim(`${NAMESPACE}/AAL`, decision.trust);
+      groupsSetCustomClaims(api, event.client.client_id, scopes, groups);
       return;
     }
 
