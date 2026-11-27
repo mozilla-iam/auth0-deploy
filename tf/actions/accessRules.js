@@ -103,10 +103,6 @@ const groupsSetCustomClaims = (api, client_id, scopes, groups) => {
   api.idToken.setCustomClaim("dn", undefined);
   api.idToken.setCustomClaim("organizationUnits", undefined);
   api.idToken.setCustomClaim(`${NAMESPACE}/groups`, groups);
-
-  const claimMsg =
-    "Please refer to https://github.com/mozilla-iam/person-api in order to query Mozilla IAM CIS user profile data";
-  api.idToken.setCustomClaim(`${NAMESPACE}/README_FIRST`, claimMsg);
 };
 
 exports.onExecutePostLogin = async (event, api) => {
