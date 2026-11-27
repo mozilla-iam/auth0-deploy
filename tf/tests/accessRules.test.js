@@ -101,17 +101,51 @@ test("user in LDAP (ad) requires 2FA", async () => {
   expect(api.multifactor.enable).toHaveBeenCalled();
 });
 
-test("Using a refresh token should not trigger MFA challenge", async () => {
-  _event.client.client_id = "client00000000000000000000000005";
-  _event.connection = {
-    id: "con_qVLhpUZQxluxX5kN",
-    metadata: {},
-    name: "Mozilla-LDAP-Dev",
-    strategy: "ad",
-  };
-  _event.transaction.protocol = "oauth2-refresh-token";
-  await onExecutePostLogin(_event, api);
-  expect(api.multifactor.enable).not.toHaveBeenCalled();
+describe("Refreshing tokens", () => {
+  beforeEach(() => {
+    _event.client.client_id = "client00000000000000000000000005";
+    _event.connection = {
+      id: "con_qVLhpUZQxluxX5kN",
+      metadata: {},
+      name: "Mozilla-LDAP-Dev",
+      strategy: "ad",
+    };
+    _event.transaction.protocol = "oauth2-refresh-token";
+    _event.resource_server.identifier = "https://example.tld/userinfo";
+    _event.refresh_token.resource_servers = [
+      {
+        audience: _event.resource_server.identifier,
+        scopes: "openid profile",
+      },
+    ];
+  });
+
+  it("does not trigger MFA challenge", async () => {
+    await onExecutePostLogin(_event, api);
+    expect(api.multifactor.enable).not.toHaveBeenCalled();
+  });
+
+  it("adds groups using the previous scopes", async () => {
+    await onExecutePostLogin(_event, api);
+    expect(_idToken["https://sso.mozilla.com/claim/groups"]).toBeDefined();
+    expect(
+      Array.isArray(_idToken["https://sso.mozilla.com/claim/groups"])
+    ).toBe(true);
+    expect(_idToken["https://sso.mozilla.com/claim/groups"]).not.toHaveLength(
+      0
+    );
+  });
+
+  it("doesn't claim groups if not requested", async () => {
+    _event.refresh_token.resource_servers = [
+      {
+        audience: _event.resource_server.identifier,
+        scopes: "openid",
+      },
+    ];
+    await onExecutePostLogin(_event, api);
+    expect(_idToken["https://sso.mozilla.com/claim/groups"]).not.toBeDefined();
+  });
 });
 
 test("service account MFA bypass", async () => {
@@ -715,15 +749,6 @@ describe("Clients declaring step_up", () => {
     await onExecutePostLogin(_event, api);
     expect(_event.transaction.redirect_uri).toBeUndefined();
     duoCalledWithIkey("ikey-default");
-  });
-
-  test("Matching user on refresh token flow; no MFA challenge", async () => {
-    _event.client.client_id = "client00000000000000000000000011";
-    _event.user.email = "joe@mozilla.com";
-    _event.user.groups = [];
-    _event.transaction.protocol = "oauth2-refresh-token";
-    await onExecutePostLogin(_event, api);
-    expect(api.multifactor.enable).not.toHaveBeenCalled();
   });
 
   // This test is supposed to capture that we're unable to apply step-up to
